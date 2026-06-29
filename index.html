@@ -321,9 +321,9 @@
       </div>
 
       <!-- AI Recognition -->
-      <div id="ai-spinner">🔍 Claude erkennt Pflanze …</div>
+      <div id="ai-spinner">🔍 PlantNet erkennt Pflanze …</div>
       <div id="ai-result">
-        <div class="ai-label">🤖 KI-Vorschlag</div>
+        <div class="ai-label">🌿 PlantNet-Vorschlag</div>
         <div class="ai-name" id="ai-name-text"></div>
         <div class="ai-info" id="ai-info-text"></div>
         <a id="lens-link" href="https://lens.google.com" target="_blank" style="display:none;margin-top:8px;font-size:.8rem;color:var(--muted);text-decoration:none;">🔍 Mit Google Lens prüfen ↗</a>
@@ -418,7 +418,7 @@
     <!-- SETTINGS -->
     <div class="screen" id="settings-screen">
       <h2>⚙️ Einstellungen</h2>
-      <p style="color:var(--muted);font-size:.8rem;margin-bottom:12px;">Version 3.17 — Claude Vision + PlantNet</p>
+      <p style="color:var(--muted);font-size:.8rem;margin-bottom:12px;">Version 3.18 — Claude Vision + PlantNet</p>
 
       <div class="card" style="margin-bottom:16px;">
         <div style="font-weight:600;color:var(--accent2);margin-bottom:8px;">🌿 Infos für alle Pflanzen laden</div>
@@ -428,8 +428,7 @@
         <div id="load-all-status" style="margin-top:10px;font-size:.85rem;color:var(--muted);"></div>
       </div>
       <p class="settings-note">
-        Für die Pflanzenerkennung wird ein Anthropic API-Key benötigt.<br>
-        Er wird nur lokal auf deinem Gerät gespeichert.
+        Für Fun Facts und Bestimmungsmerkmale (Claude Vision).<br>Wird nur lokal gespeichert.
       </p>
 
       <div class="form-group">
@@ -441,15 +440,7 @@
         <div id="key-status" class="key-none">Kein API-Key gespeichert</div>
       </div>
 
-      <div class="card" style="font-size:.85rem;color:var(--muted);line-height:1.6">
-        <strong style="color:var(--accent2)">So erhältst du deinen kostenlosen Key:</strong><br>
-        1. Gehe zu <span style="color:var(--accent)">console.anthropic.com</span><br>
-        2. Konto erstellen (kostenlos)<br>
-        3. Oben rechts auf deinen Namen → „Profile"<br>
-        4. API-Key kopieren und hier einfügen<br><br>
-        <strong style="color:var(--accent2)">Kosten:</strong> Ca. 0,6 Cent pro Erkennung<br>
-        <strong style="color:var(--accent2)">Genauigkeit:</strong> Claude Vision KI, sehr zuverlässig
-      </div>
+
 
       <button class="btn btn-danger" style="margin-top:12px" onclick="deleteApiKey()">API-Key löschen</button>
 
