@@ -152,6 +152,13 @@
     display: none;
   }
   #ai-result .ai-label { font-size: .75rem; color: #7ab0e0; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; margin-bottom: 6px; }
+
+  /* Bestimmungsmerkmale Tabelle */
+  .merkmale-table { width:100%; border-collapse:collapse; margin:8px 0 16px; font-size:.85rem; }
+  .merkmale-table tr { border-bottom:1px solid var(--border); }
+  .merkmale-table tr:last-child { border-bottom:none; }
+  .merkmal-key { padding:6px 10px 6px 0; color:var(--muted); font-weight:500; white-space:nowrap; width:1%; vertical-align:top; }
+  .merkmal-val { padding:6px 0; color:var(--text); }
   #ai-result .ai-name { font-family: var(--ff-head); font-size: 1.3rem; color: #a8d5f0; margin-bottom: 4px; }
   #ai-result .ai-info { font-size: .88rem; color: #8ab0c8; line-height: 1.5; }
   #ai-spinner { text-align: center; padding: 12px; color: #7ab0e0; font-size: .9rem; display: none; }
@@ -418,13 +425,12 @@
     <!-- SETTINGS -->
     <div class="screen" id="settings-screen">
       <h2>⚙️ Einstellungen</h2>
-      <p style="color:var(--muted);font-size:.8rem;margin-bottom:12px;">Version 3.18 — Claude Vision + PlantNet</p>
+      <p style="color:var(--muted);font-size:.8rem;margin-bottom:12px;">Version 3.26 — Claude Vision + PlantNet + Groq</p>
 
       <div class="card" style="margin-bottom:16px;">
-        <div style="font-weight:600;color:var(--accent2);margin-bottom:8px;">🌿 Infos für alle Pflanzen laden</div>
-        <p style="font-size:.85rem;color:var(--muted);margin-bottom:12px;">Lädt Bestimmungsmerkmale und Fun Facts für alle Pflanzen ohne Info. Danach sofort abrufbar.</p>
-        <button class="btn btn-primary" onclick="loadAllInfos(false)" id="btn-load-all">Alle Infos laden</button>
-        <button class="btn btn-secondary" onclick="confirmRegenAll()" style="margin-top:8px;">🔄 Alle Infos neu generieren</button>
+        <div style="font-weight:600;color:var(--accent2);margin-bottom:8px;">🌿 Pflanzeninfos</div>
+        <p style="font-size:.85rem;color:var(--muted);margin-bottom:12px;">Neue Pflanzen erhalten ihre Infos automatisch im Hintergrund. Mit diesem Button werden alle Infos für die gesamte Sammlung neu generiert.</p>
+        <button class="btn btn-secondary" onclick="confirmRegenAll()" id="btn-load-all">🔄 Alle Infos neu generieren</button>
         <div id="load-all-status" style="margin-top:10px;font-size:.85rem;color:var(--muted);"></div>
       </div>
       <p class="settings-note">
@@ -434,7 +440,7 @@
       <div class="form-group">
         <label>Anthropic API-Key</label>
         <div class="api-key-row">
-          <input type="password" id="api-key-input" placeholder="2b…" autocomplete="off" autocorrect="off" spellcheck="false">
+          <input type="text" id="api-key-input" placeholder="2b…" autocomplete="new-password" autocorrect="off" autocapitalize="off" spellcheck="false" name="anthropic-key-field" style="-webkit-text-security:disc">
           <button class="btn btn-primary btn-sm" onclick="saveApiKey()">Speichern</button>
         </div>
         <div id="key-status" class="key-none">Kein API-Key gespeichert</div>
@@ -453,11 +459,26 @@
       </p>
       <label>PlantNet API-Key</label>
       <div class="api-key-row">
-        <input type="password" id="plantnet-key-input" placeholder="2b10…" autocomplete="off" spellcheck="false">
+        <input type="text" id="plantnet-key-input" placeholder="2b10…" autocomplete="new-password" autocorrect="off" autocapitalize="off" spellcheck="false" name="plantnet-key-field" style="-webkit-text-security:disc">
         <button class="btn btn-primary btn-sm" onclick="savePlantNetKey()">Speichern</button>
       </div>
       <div id="plantnet-key-status" class="key-none">Kein PlantNet API-Key gespeichert</div>
       <button class="btn btn-danger" style="margin-top:12px" onclick="deletePlantNetKey()">PlantNet Key löschen</button>
+
+      <hr style="border:none;border-top:1px solid var(--border);margin:24px 0">
+
+      <h2 style="margin-bottom:6px">💬 Groq API-Key</h2>
+      <p class="settings-note" style="margin-bottom:12px">
+        Für die "Frage zur Pflanze"-Funktion (kostenlos, Llama 3.3 70B).<br>
+        Key unter <span style="color:var(--accent)">console.groq.com</span> registrieren — kein Kreditkarte nötig.
+      </p>
+      <label>Groq API-Key</label>
+      <div class="api-key-row">
+        <input type="text" id="groq-key-input" placeholder="gsk_…" autocomplete="new-password" autocorrect="off" autocapitalize="off" spellcheck="false" name="groq-key-field" style="-webkit-text-security:disc">
+        <button class="btn btn-primary btn-sm" onclick="saveGroqKey()">Speichern</button>
+      </div>
+      <div id="groq-key-status" class="key-none">Kein Groq API-Key gespeichert</div>
+      <button class="btn btn-danger" style="margin-top:12px" onclick="deleteGroqKey()">Groq Key löschen</button>
 
       <hr style="border:none;border-top:1px solid var(--border);margin:24px 0">
 
@@ -576,6 +597,31 @@ function computeNextReview(level) { return Date.now() + INTERVALS[Math.min(level
 // ── API Key (localStorage) ───────────────────────────────────
 function getApiKey() { return localStorage.getItem('ant_key') || ''; }
 function getPlantNetKey() { return localStorage.getItem('plantnet_key') || ''; }
+function getGroqKey() { return localStorage.getItem('groq_key') || ''; }
+function saveGroqKey() {
+  const val = document.getElementById('groq-key-input').value.trim();
+  if (!val) { alert('Bitte einen Groq API-Key eingeben.'); return; }
+  localStorage.setItem('groq_key', val);
+  document.getElementById('groq-key-input').value = '';
+  updateGroqKeyStatus();
+  alert('Groq API-Key gespeichert!');
+}
+function deleteGroqKey() {
+  if (!confirm('Groq API-Key wirklich löschen?')) return;
+  localStorage.removeItem('groq_key');
+  updateGroqKeyStatus();
+}
+function updateGroqKeyStatus() {
+  const el = document.getElementById('groq-key-status');
+  if (!el) return;
+  if (getGroqKey()) {
+    el.textContent = '✓ Groq API-Key gespeichert';
+    el.className = 'key-ok';
+  } else {
+    el.textContent = 'Kein Groq API-Key gespeichert';
+    el.className = 'key-none';
+  }
+}
 function savePlantNetKey() {
   const val = document.getElementById('plantnet-key-input').value.trim();
   if (!val) { alert('Bitte einen PlantNet API-Key eingeben.'); return; }
@@ -607,6 +653,7 @@ function saveApiKey() {
   document.getElementById('api-key-input').value = '';
   updateKeyStatus();
   updatePlantNetKeyStatus();
+  updateGroqKeyStatus();
   alert('Anthropic API-Key gespeichert!');
 }
 function deleteApiKey() {
@@ -614,6 +661,7 @@ function deleteApiKey() {
   localStorage.removeItem('ant_key');
   updateKeyStatus();
   updatePlantNetKeyStatus();
+  updateGroqKeyStatus();
 }
 function updateKeyStatus() {
   const el = document.getElementById('key-status');
@@ -643,6 +691,7 @@ function switchTab(tab) {
   if (tab === 'learn')   initLearn();
   if (tab === 'settings') updateKeyStatus();
   updatePlantNetKeyStatus();
+  updateGroqKeyStatus();
 }
 
 // ── Image Resize ─────────────────────────────────────────────
@@ -797,7 +846,7 @@ async function getGPSAuto() {
 async function savePlant() {
   const name = document.getElementById('add-name').value.trim();
   if (!name) { alert('Bitte einen Pflanzennamen eingeben.'); return; }
-  await dbPut({
+  const newId = await dbPut({
     name,
     latin: lastAiLatin || '',
     notes: document.getElementById('add-notes').value.trim(),
@@ -820,6 +869,11 @@ async function savePlant() {
   msg.style.display = 'block';
   setTimeout(() => msg.style.display = 'none', 2000);
   updateDueBadge();
+
+  // ── Infos im Hintergrund laden (nicht blockierend) ──
+  if (getApiKey()) {
+    generatePlantInfo(newId).catch(() => {});
+  }
 }
 
 // ── Archive ───────────────────────────────────────────────────
@@ -856,10 +910,14 @@ async function openDetail(id) {
   document.getElementById('modal-notes').textContent = p.notes || '—';
   // GPS
   const locEl = document.getElementById('modal-location');
+  const dateStr = p.created ? new Date(p.created).toLocaleString('de-DE', {day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '';
   if (p.gps?.lat) {
     const url = `https://www.google.com/maps?q=${p.gps.lat},${p.gps.lon}`;
     const lbl = p.gps.label || `${p.gps.lat}, ${p.gps.lon}`;
-    locEl.innerHTML = `📍 <a href="${url}" target="_blank" style="color:var(--accent);text-decoration:none">${lbl}</a>`;
+    locEl.innerHTML = `📍 <a href="${url}" target="_blank" style="color:var(--accent);text-decoration:none">${lbl}</a>` + (dateStr ? ` · 🕓 ${dateStr}` : '');
+    locEl.style.display = 'block';
+  } else if (dateStr) {
+    locEl.innerHTML = `🕓 ${dateStr}`;
     locEl.style.display = 'block';
   } else { locEl.style.display = 'none'; }
   // Reset info
@@ -878,48 +936,139 @@ function closeModal(e) {
     document.getElementById('modal-overlay').classList.remove('open');
 }
 
-async function loadModalInfo() {
-  const p = await dbGet(currentDetailId); if (!p) return;
-  const btn = document.getElementById('modal-info-btn');
-  const box = document.getElementById('modal-info-content');
-  btn.style.display = 'none';
-  box.style.display = 'block';
-  // Aus Cache
-  if (p.infoHtml) { box.innerHTML = p.infoHtml; return; }
-  box.innerHTML = '<div style="color:var(--muted);padding:12px 0">🔍 Lade Informationen …</div>';
+
+// ── Pflanzeninfo generieren (Bestimmungsmerkmale + Fun Facts) ──
+async function generatePlantInfo(plantId) {
+  const p = await dbGet(plantId); if (!p) return null;
+  const key = getApiKey();
+  if (!key) return null;
+
   try {
     const res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-api-key': getApiKey(),
+        'x-api-key': key,
         'anthropic-version': '2023-06-01',
         'anthropic-dangerous-direct-browser-access': 'true'
       },
       body: JSON.stringify({
         model: 'claude-sonnet-4-6', max_tokens: 1024,
-        messages: [{ role: 'user', content: `Gib mir Informationen zur Pflanze "${p.name}" auf Deutsch.
-
-**Bestimmungsmerkmale:**
-Beschreibe 4-5 typische Erkennungsmerkmale (Blätter, Blüten, Stängel, Wuchsform). Fließtext, ca. 3-4 Sätze.
-
-**Fun Facts:**
-3-4 kurze Fun Facts auf Deutsch. Schreibe: modern, lebendig, seriös und historisch korrekt. Keine trockenen Kunstgeschichte-Vorlesungen, sondern überraschende Details die im Gedächtnis bleiben. Kurz und prägnant.
-
-Kein Markdown außer den zwei Überschriften mit **.` }]
+        messages: [{ role: 'user', content: 'Gib mir Informationen zur Pflanze "' + p.name + '"' + (p.latin ? ' (' + p.latin + ')' : '') + ' auf Deutsch.\n\n**Bestimmungsmerkmale:**\nListe NUR die zutreffenden Merkmale tabellarisch im Format "Punkt: Wert" auf — eine Zeile pro Merkmal. Prüfe folgende Punkte und nenne nur die, die für diese Pflanze relevant sind (z.B. Milchsaft nur wenn vorhanden, sonst weglassen):\nBlütenfarbe, Blütenform, Anzahl der Kronblätter, Blattstellung, Blattform, Blattrand, Behaarung, Geruch/Geschmack, Milchsaft, Standort.\nKurz und stichwortartig, kein Fließtext.\n\n**Fun Facts:**\n3-4 kurze Fun Facts auf Deutsch. Schreibe: modern, lebendig, seriös und historisch korrekt. Keine trockenen Kunstgeschichte-Vorlesungen, sondern überraschende Details die im Gedächtnis bleiben. Kurz und prägnant.\n\nKein Markdown außer den zwei Überschriften mit **.' }]
       })
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error?.message);
     const text = data.content[0].text;
-    const html = text.replace(/\*\*(.+?)\*\*/g, '<h3>$1</h3>')
-      .split('\n').filter(l => l.trim()).map(l => l.startsWith('<h3>') ? l : '<p>' + l + '</p>').join('');
-    box.innerHTML = html;
-    // In DB cachen
-    p.infoHtml = html; await dbPut(p);
+
+    // Bestimmungsmerkmale als Tabelle, Fun Facts als Fließtext
+    const sections = text.split(/\*\*(.+?)\*\*/g).filter(s => s.trim());
+    let html = '';
+    for (let i = 0; i < sections.length; i += 2) {
+      const heading = sections[i]?.trim();
+      const body = sections[i+1]?.trim();
+      if (!heading || !body) continue;
+      html += '<h3>' + heading + '</h3>';
+      if (heading.toLowerCase().includes('bestimmung')) {
+        const rows = body.split('\n').filter(l => l.trim() && l.includes(':'));
+        html += '<table class="merkmale-table">';
+        rows.forEach(row => {
+          const [k, ...rest] = row.split(':');
+          html += '<tr><td class="merkmal-key">' + k.trim().replace(/^[-•*]\s*/, '') + '</td><td class="merkmal-val">' + rest.join(':').trim() + '</td></tr>';
+        });
+        html += '</table>';
+      } else {
+        body.split('\n').filter(l => l.trim()).forEach(l => { html += '<p>' + l + '</p>'; });
+      }
+    }
+
+    const full = await dbGet(plantId);
+    if (full) { full.infoHtml = html; await dbPut(full); infoCache[plantId] = html; }
+    return html;
   } catch(err) {
-    box.innerHTML = `<p style="color:var(--danger)">Fehler: ${err.message}</p>`;
-    btn.style.display = 'block';
+    console.warn('Fehler bei Infogenerierung:', err.message);
+    return null;
+  }
+}
+
+async function loadModalInfo(forceReload = false) {
+  const p = await dbGet(currentDetailId); if (!p) return;
+  const btn = document.getElementById('modal-info-btn');
+  const box = document.getElementById('modal-info-content');
+  btn.style.display = 'none';
+  box.style.display = 'block';
+
+  if (p.infoHtml && !forceReload) {
+    box.innerHTML = p.infoHtml + infoReloadBtnHtml();
+    return;
+  }
+
+  box.innerHTML = '<div style="color:var(--muted);padding:12px 0">🔍 Lade Informationen …</div>';
+  const html = await generatePlantInfo(currentDetailId);
+  if (html) {
+    box.innerHTML = html + infoReloadBtnHtml();
+  } else {
+    box.innerHTML = '<p style="color:var(--danger)">Fehler beim Laden der Informationen.</p>' + infoReloadBtnHtml();
+  }
+}
+
+function infoReloadBtnHtml() {
+  return '<button class="btn btn-secondary" style="margin-top:14px;width:100%;font-size:.85rem" onclick="loadModalInfo(true)">🔄 Infos neu laden</button>'
+    + askQuestionBlockHtml('modal', currentDetailId);
+}
+
+// ── "Frage zur Pflanze" via Groq ──────────────────────────────
+function askQuestionBlockHtml(context, plantId) {
+  const boxId = context + '-ask-box';
+  return `
+    <div style="margin-top:18px;border-top:1px solid var(--border);padding-top:14px">
+      <div style="font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:8px">💬 Frage zur Pflanze</div>
+      <div style="display:flex;gap:8px">
+        <input type="text" id="${context}-ask-input" placeholder="z.B. Ist sie giftig für Hunde?" style="flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:9px 12px;border-radius:6px;font-size:.85rem;outline:none">
+        <button class="btn btn-primary btn-sm" onclick="askPlantQuestion('${context}', ${plantId})">Fragen</button>
+      </div>
+      <div id="${boxId}" style="margin-top:10px;font-size:.85rem;min-height:0"></div>
+    </div>`;
+}
+
+async function askPlantQuestion(context, plantId) {
+  const groqKey = getGroqKey();
+  if (!groqKey) { alert('Bitte zuerst einen Groq API-Key in den Einstellungen eintragen.'); return; }
+
+  const input = document.getElementById(context + '-ask-input');
+  const question = input.value.trim();
+  if (!question) return;
+
+  const p = await dbGet(plantId);
+  if (!p) return;
+
+  const box = document.getElementById(context + '-ask-box');
+  box.innerHTML = '<div style="color:var(--muted)">🔍 Frage wird beantwortet …</div>';
+
+  try {
+    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + groqKey
+      },
+      body: JSON.stringify({
+        model: 'llama-3.3-70b-versatile',
+        max_tokens: 400,
+        messages: [{
+          role: 'user',
+          content: 'Du bist ein botanischer Experte. Beantworte folgende Frage zur Pflanze "' + p.name + '"' + (p.latin ? ' (' + p.latin + ')' : '') + ' auf Deutsch, kurz und präzise (max. 4-5 Sätze):\n\n' + question
+        }]
+      })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error?.message || 'Groq Fehler ' + res.status);
+    const answer = data.choices?.[0]?.message?.content || 'Keine Antwort erhalten.';
+    box.innerHTML = '<div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;line-height:1.5;margin-bottom:10px">' + answer.replace(/\n/g, '<br>') + '</div>'
+      + '<div style="display:flex;gap:8px"><input type="text" id="' + context + '-ask-input" placeholder="Noch eine Frage …" style="flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:9px 12px;border-radius:6px;font-size:.85rem;outline:none"><button class="btn btn-primary btn-sm" onclick="askPlantQuestion(\'' + context + '\', ' + plantId + ')">Fragen</button></div>';
+  } catch(err) {
+    box.innerHTML = '<p style="color:var(--danger)">Fehler: ' + err.message + '</p>'
+      + '<div style="display:flex;gap:8px"><input type="text" id="' + context + '-ask-input" placeholder="z.B. Ist sie giftig für Hunde?" style="flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:9px 12px;border-radius:6px;font-size:.85rem;outline:none"><button class="btn btn-primary btn-sm" onclick="askPlantQuestion(\'' + context + '\', ' + plantId + ')">Fragen</button></div>';
   }
 }
 async function deletePlant(id) {
@@ -1046,10 +1195,14 @@ async function showInfoModal() {
   // GPS/Ort anzeigen
   const fullP = await dbGet(p.id);
   const locEl = document.getElementById('info-modal-location');
+  const dateStr2 = fullP?.created ? new Date(fullP.created).toLocaleString('de-DE', {day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '';
   if (fullP?.gps?.lat) {
     const url = `https://www.google.com/maps?q=${fullP.gps.lat},${fullP.gps.lon}`;
     const lbl = fullP.gps.label || `${fullP.gps.lat}, ${fullP.gps.lon}`;
-    locEl.innerHTML = `📍 <a href="${url}" target="_blank" style="color:var(--accent);text-decoration:none">${lbl}</a>`;
+    locEl.innerHTML = `📍 <a href="${url}" target="_blank" style="color:var(--accent);text-decoration:none">${lbl}</a>` + (dateStr2 ? ` · 🕓 ${dateStr2}` : '');
+    locEl.style.display = 'block';
+  } else if (dateStr2) {
+    locEl.innerHTML = `🕓 ${dateStr2}`;
     locEl.style.display = 'block';
   } else {
     locEl.style.display = 'none';
@@ -1057,50 +1210,42 @@ async function showInfoModal() {
 
   // Aus Memory-Cache
   if (infoCache[p.id]) {
-    document.getElementById('info-modal-content').innerHTML = infoCache[p.id];
+    document.getElementById('info-modal-content').innerHTML = infoCache[p.id] + infoReloadBtnHtml2(p.id);
     return;
   }
   // Aus DB-Cache
   const cached = await dbGet(p.id);
   if (cached?.infoHtml) {
     infoCache[p.id] = cached.infoHtml;
-    document.getElementById('info-modal-content').innerHTML = cached.infoHtml;
+    document.getElementById('info-modal-content').innerHTML = cached.infoHtml + infoReloadBtnHtml2(p.id);
     return;
   }
 
   document.getElementById('info-modal-content').innerHTML = '<div id="info-loading">🔍 Lade Informationen …</div>';
-
-  try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': getApiKey(),
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true'
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
-        max_tokens: 1024,
-        messages: [{
-          role: 'user',
-          content: 'Gib mir Informationen zur Pflanze "' + p.name + '"' + (p.latin ? ' (' + p.latin + ')' : '') + ' auf Deutsch.\n\n**Bestimmungsmerkmale:**\nBeschreibe 4-5 typische Erkennungsmerkmale (Blätter, Blüten, Stängel, Wuchsform). Fließtext, ca. 3-4 Sätze.\n\n**Fun Facts:**\n3 überraschende Fakten – historisch, kulinarisch, medizinisch oder ökologisch. Fließtext, ca. 3-4 Sätze.\n\nKein Markdown außer den zwei Überschriften mit **.'
-        }]
-      })
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error?.message || 'Fehler');
-    const text = data.content[0].text;
-    const html = text
-      .replace(/\*\*(.+?)\*\*/g, '<h3>$1</h3>')
-      .split('\n').filter(l => l.trim()).map(l => l.startsWith('<h3>') ? l : '<p>' + l + '</p>').join('');
+  const html = await generatePlantInfo(p.id);
+  if (html) {
     infoCache[p.id] = html;
-    document.getElementById('info-modal-content').innerHTML = html;
-    // Auch in DB speichern für nächste Session
-    const full = await dbGet(p.id);
-    if (full) { full.infoHtml = html; await dbPut(full); }
-  } catch(err) {
-    document.getElementById('info-modal-content').innerHTML = `<p style="color:var(--danger)">Fehler: ${err.message}</p>`;
+    document.getElementById('info-modal-content').innerHTML = html + infoReloadBtnHtml2(p.id);
+  } else {
+    document.getElementById('info-modal-content').innerHTML = '<p style="color:var(--danger)">Fehler beim Laden der Informationen.</p>' + infoReloadBtnHtml2(p.id);
+  }
+}
+
+function infoReloadBtnHtml2(plantId) {
+  return '<button class="btn btn-secondary" style="margin-top:14px;width:100%;font-size:.85rem" onclick="reloadInfoModal(&quot;' + plantId + '&quot;)">🔄 Infos neu laden</button>'
+    + askQuestionBlockHtml('info', Number(plantId));
+}
+
+async function reloadInfoModal(plantId) {
+  plantId = Number(plantId);
+  delete infoCache[plantId];
+  document.getElementById('info-modal-content').innerHTML = '<div id="info-loading">🔍 Lade Informationen …</div>';
+  const html = await generatePlantInfo(plantId);
+  if (html) {
+    infoCache[plantId] = html;
+    document.getElementById('info-modal-content').innerHTML = html + infoReloadBtnHtml2(plantId);
+  } else {
+    document.getElementById('info-modal-content').innerHTML = '<p style="color:var(--danger)">Fehler beim Laden der Informationen.</p>' + infoReloadBtnHtml2(plantId);
   }
 }
 
@@ -1278,7 +1423,7 @@ function showIllusImage(context, url, label) {
   img.src = url;
   img.alt = 'Botanische Illustration';
   img.style.cursor = 'zoom-in';
-  img.onclick = () => openZoom(url);
+  img.onclick = () => openZoom(url, context);
   img.onerror = () => { boxEl.innerHTML = '<div class="illus-loading">Bild konnte nicht geladen werden</div>'; };
   boxEl.innerHTML = '';
   boxEl.appendChild(img);
@@ -1339,18 +1484,22 @@ async function illusDelete(context) {
 }
 
 // ── Zoom ──────────────────────────────────────────────────────
-// ── Zoom mit Pinch-to-Zoom ───────────────────────────────────
+// ── Zoom mit Pinch-to-Zoom + Vor/Zurück ──────────────────────
 let zoomScale = 1, zoomX = 0, zoomY = 0;
 let lastDist = 0, lastTouchX = 0, lastTouchY = 0, isDragging = false;
+let zoomDidPinchOrDrag = false;
+let zoomContext = null; // 'modal' oder 'info' — welcher Illustration-State gerade gezeigt wird
 
-function openZoom(url) {
+function openZoom(url, context) {
   const img = document.getElementById('zoom-img');
   const overlay = document.getElementById('zoom-overlay');
   img.src = url;
   zoomScale = 1; zoomX = 0; zoomY = 0;
+  zoomContext = context || null;
   applyZoomTransform();
   overlay.classList.add('open');
   document.body.style.overflow = 'hidden';
+  updateZoomNavVisibility();
 }
 
 function closeZoom() {
@@ -1358,6 +1507,7 @@ function closeZoom() {
   document.getElementById('zoom-img').src = '';
   document.body.style.overflow = '';
   zoomScale = 1; zoomX = 0; zoomY = 0;
+  zoomContext = null;
 }
 
 function applyZoomTransform() {
@@ -1365,7 +1515,40 @@ function applyZoomTransform() {
   img.style.transform = `scale(${zoomScale}) translate(${zoomX}px, ${zoomY}px)`;
 }
 
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeZoom(); });
+function updateZoomNavVisibility() {
+  const nav = document.getElementById('zoom-nav');
+  if (!nav) return;
+  const hasMultiple = zoomContext && illusState[zoomContext] && illusState[zoomContext].files && illusState[zoomContext].files.length > 1 && !illusState[zoomContext].customUrl;
+  nav.style.display = hasMultiple ? 'flex' : 'none';
+}
+
+async function zoomNavNext() {
+  if (!zoomContext) return;
+  await illusNext(zoomContext);
+  // Neues Bild ins Zoom-Overlay übernehmen
+  const boxImg = document.querySelector('#' + zoomContext + '-illus-box img');
+  if (boxImg) {
+    zoomScale = 1; zoomX = 0; zoomY = 0;
+    applyZoomTransform();
+    document.getElementById('zoom-img').src = boxImg.src;
+  }
+}
+async function zoomNavPrev() {
+  if (!zoomContext) return;
+  await illusPrev(zoomContext);
+  const boxImg = document.querySelector('#' + zoomContext + '-illus-box img');
+  if (boxImg) {
+    zoomScale = 1; zoomX = 0; zoomY = 0;
+    applyZoomTransform();
+    document.getElementById('zoom-img').src = boxImg.src;
+  }
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeZoom();
+  if (e.key === 'ArrowRight') zoomNavNext();
+  if (e.key === 'ArrowLeft') zoomNavPrev();
+});
 
 // Zoom Touch/Click Events — nach DOM-Laden
 document.addEventListener('DOMContentLoaded', () => {
@@ -1380,6 +1563,7 @@ const zoomImg = document.getElementById('zoom-img');
 
 zoomImg.addEventListener('touchstart', e => {
   e.preventDefault();
+  zoomDidPinchOrDrag = false;
   if (e.touches.length === 2) {
     lastDist = Math.hypot(
       e.touches[0].clientX - e.touches[1].clientX,
@@ -1394,6 +1578,7 @@ zoomImg.addEventListener('touchstart', e => {
 
 zoomImg.addEventListener('touchmove', e => {
   e.preventDefault();
+  zoomDidPinchOrDrag = true;
   if (e.touches.length === 2) {
     const dist = Math.hypot(
       e.touches[0].clientX - e.touches[1].clientX,
@@ -1415,8 +1600,14 @@ zoomImg.addEventListener('touchmove', e => {
 
 zoomImg.addEventListener('touchend', e => {
   isDragging = false;
-  // Doppeltippen: reset
-  if (e.changedTouches.length === 1 && zoomScale === 1) closeZoom();
+  // Einzeltipp ohne Pinch/Drag → schließen, egal welcher Zoomlevel
+  if (!zoomDidPinchOrDrag && e.changedTouches.length === 1) closeZoom();
+});
+
+// Einzelklick (Desktop/Maus) auf Bild → schließen
+zoomImg.addEventListener('click', e => {
+  e.stopPropagation();
+  closeZoom();
 });
 
 // Maus-Scroll zum Zoomen (Desktop)
@@ -1488,6 +1679,7 @@ openDB().then(() => {
   updateDueBadge();
   updateKeyStatus();
   updatePlantNetKeyStatus();
+  updateGroqKeyStatus();
 }).catch(err => alert('IndexedDB Fehler: ' + err));
 function confirmRegenAll() {
   if (!confirm('⚠️ Alle Infos neu generieren?\n\nDies überschreibt alle bereits generierten Bestimmungsmerkmale und Fun Facts für alle Pflanzen in deiner Sammlung. Dieser Vorgang kann mehrere Minuten dauern und kann nicht rückgängig gemacht werden.')) return;
@@ -1567,21 +1759,8 @@ async function loadAllInfos(forceReload=false) {
         } catch {}
       }
 
-      // ── Fun Facts + Bestimmungsmerkmale via Claude ──
-      const res = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
-        body: JSON.stringify({
-          model: 'claude-sonnet-4-6', max_tokens: 1024,
-          messages: [{ role: 'user', content: 'Gib mir Informationen zur Pflanze "' + p.name + '"' + (p.latin ? ' (' + p.latin + ')' : '') + ' auf Deutsch.\n\n**Bestimmungsmerkmale:**\nBeschreibe 4-5 typische Erkennungsmerkmale (Blätter, Blüten, Stängel, Wuchsform). Fließtext, ca. 3-4 Sätze.\n\n**Fun Facts:**\n3 überraschende Fakten – historisch, kulinarisch, medizinisch oder ökologisch. Fließtext, ca. 3-4 Sätze.\n\nKein Markdown außer den zwei Überschriften mit **.' }]
-        })
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error?.message);
-      const text = data.content[0].text;
-      const html = text.replace(/\*\*(.+?)\*\*/g, '<h3>$1</h3>').split('\n').filter(l => l.trim()).map(l => l.startsWith('<h3>') ? l : '<p>' + l + '</p>').join('');
-      const full = await dbGet(p.id);
-      if (full) { full.infoHtml = html; await dbPut(full); infoCache[p.id] = html; }
+      // ── Fun Facts + Bestimmungsmerkmale via zentrale Funktion ──
+      await generatePlantInfo(p.id);
     } catch(err) {
       console.warn('Fehler bei', p.name, err.message);
     }
@@ -1593,11 +1772,31 @@ async function loadAllInfos(forceReload=false) {
   btn.disabled = false;
 }
 
+
+// ── Beim Start: fehlende Infos still im Hintergrund nachladen ──
+document.addEventListener('DOMContentLoaded', () => {
+  setTimeout(async () => {
+    if (!getApiKey()) return;
+    try {
+      const all = await dbGetAll();
+      const missing = all.filter(p => !p.infoHtml && p.name);
+      for (const p of missing) {
+        await generatePlantInfo(p.id);
+        await new Promise(r => setTimeout(r, 800));
+      }
+    } catch {}
+  }, 2000); // kurze Verzögerung, App soll erst geladen sein
+});
+
 if ('serviceWorker' in navigator) { navigator.serviceWorker.getRegistrations().then(r => r.forEach(s => s.unregister())); }
 </script>
 <!-- Zoom Overlay -->
 <div id="zoom-overlay">
   <button class="close-btn" onclick="closeZoom()">✕</button>
+  <div id="zoom-nav" style="display:none;position:absolute;inset:0;align-items:center;justify-content:space-between;padding:0 8px;pointer-events:none;z-index:1;">
+    <button onclick="event.stopPropagation();zoomNavPrev()" style="pointer-events:auto;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:1.4rem;width:42px;height:42px;border-radius:50%;cursor:pointer;">‹</button>
+    <button onclick="event.stopPropagation();zoomNavNext()" style="pointer-events:auto;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:1.4rem;width:42px;height:42px;border-radius:50%;cursor:pointer;">›</button>
+  </div>
   <div id="zoom-img-wrap" style="overflow:hidden;display:flex;align-items:center;justify-content:center;width:100%;height:100%;">
     <img id="zoom-img" src="" alt="">
   </div>
