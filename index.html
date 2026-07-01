@@ -425,7 +425,7 @@
     <!-- SETTINGS -->
     <div class="screen" id="settings-screen">
       <h2>⚙️ Einstellungen</h2>
-      <p style="color:var(--muted);font-size:.8rem;margin-bottom:12px;">Version 3.26 — Claude Vision + PlantNet + Groq</p>
+      <p style="color:var(--muted);font-size:.8rem;margin-bottom:12px;">Version 3.27 — Claude Vision + PlantNet + Groq</p>
 
       <div class="card" style="margin-bottom:16px;">
         <div style="font-weight:600;color:var(--accent2);margin-bottom:8px;">🌿 Pflanzeninfos</div>
@@ -1036,14 +1036,37 @@ async function askPlantQuestion(context, plantId) {
   if (!groqKey) { alert('Bitte zuerst einen Groq API-Key in den Einstellungen eintragen.'); return; }
 
   const input = document.getElementById(context + '-ask-input');
-  const question = input.value.trim();
+  const question = input ? input.value.trim() : '';
   if (!question) return;
 
-  const p = await dbGet(plantId);
+  const p = await dbGet(Number(plantId));
   if (!p) return;
 
   const box = document.getElementById(context + '-ask-box');
-  box.innerHTML = '<div style="color:var(--muted)">🔍 Frage wird beantwortet …</div>';
+
+  // Antwort-Block + neues Eingabefeld aufbauen
+  const answerDiv = document.createElement('div');
+  answerDiv.style.cssText = 'background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;line-height:1.5;margin-bottom:10px';
+  answerDiv.textContent = '🔍 Frage wird beantwortet …';
+  answerDiv.style.color = 'var(--muted)';
+
+  const inputRow = document.createElement('div');
+  inputRow.style.cssText = 'display:flex;gap:8px;margin-top:8px';
+  const newInput = document.createElement('input');
+  newInput.type = 'text';
+  newInput.id = context + '-ask-input';
+  newInput.placeholder = 'Noch eine Frage …';
+  newInput.style.cssText = 'flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:9px 12px;border-radius:6px;font-size:.85rem;outline:none';
+  const newBtn = document.createElement('button');
+  newBtn.className = 'btn btn-primary btn-sm';
+  newBtn.textContent = 'Fragen';
+  newBtn.onclick = () => askPlantQuestion(context, plantId);
+  inputRow.appendChild(newInput);
+  inputRow.appendChild(newBtn);
+
+  box.innerHTML = '';
+  box.appendChild(answerDiv);
+  box.appendChild(inputRow);
 
   try {
     const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
@@ -1064,11 +1087,11 @@ async function askPlantQuestion(context, plantId) {
     const data = await res.json();
     if (!res.ok) throw new Error(data.error?.message || 'Groq Fehler ' + res.status);
     const answer = data.choices?.[0]?.message?.content || 'Keine Antwort erhalten.';
-    box.innerHTML = '<div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;line-height:1.5;margin-bottom:10px">' + answer.replace(/\n/g, '<br>') + '</div>'
-      + '<div style="display:flex;gap:8px"><input type="text" id="' + context + '-ask-input" placeholder="Noch eine Frage …" style="flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:9px 12px;border-radius:6px;font-size:.85rem;outline:none"><button class="btn btn-primary btn-sm" onclick="askPlantQuestion(\'' + context + '\', ' + plantId + ')">Fragen</button></div>';
+    answerDiv.style.color = '';
+    answerDiv.innerHTML = answer.replace(/\n/g, '<br>');
   } catch(err) {
-    box.innerHTML = '<p style="color:var(--danger)">Fehler: ' + err.message + '</p>'
-      + '<div style="display:flex;gap:8px"><input type="text" id="' + context + '-ask-input" placeholder="z.B. Ist sie giftig für Hunde?" style="flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:9px 12px;border-radius:6px;font-size:.85rem;outline:none"><button class="btn btn-primary btn-sm" onclick="askPlantQuestion(\'' + context + '\', ' + plantId + ')">Fragen</button></div>';
+    answerDiv.style.color = 'var(--danger)';
+    answerDiv.textContent = 'Fehler: ' + err.message;
   }
 }
 async function deletePlant(id) {
