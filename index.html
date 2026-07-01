@@ -425,7 +425,7 @@
     <!-- SETTINGS -->
     <div class="screen" id="settings-screen">
       <h2>⚙️ Einstellungen</h2>
-      <p style="color:var(--muted);font-size:.8rem;margin-bottom:12px;">Version 3.28 — Claude Vision + PlantNet + Groq</p>
+      <p style="color:var(--muted);font-size:.8rem;margin-bottom:12px;">Version 3.29 — Claude Vision + PlantNet + Groq</p>
 
       <div class="card" style="margin-bottom:16px;">
         <div style="font-weight:600;color:var(--accent2);margin-bottom:8px;">🌿 Pflanzeninfos</div>
@@ -1019,15 +1019,14 @@ function infoReloadBtnHtml() {
 
 // ── "Frage zur Pflanze" via Groq ──────────────────────────────
 function askQuestionBlockHtml(context, plantId) {
-  const boxId = context + '-ask-box';
   return `
     <div style="margin-top:18px;border-top:1px solid var(--border);padding-top:14px">
       <div style="font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:8px">💬 Frage zur Pflanze</div>
+      <div id="${context}-ask-chat" style="font-size:.85rem;margin-bottom:8px"></div>
       <div style="display:flex;gap:8px">
         <input type="text" id="${context}-ask-input" placeholder="z.B. Ist sie giftig für Hunde?" style="flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:9px 12px;border-radius:6px;font-size:.85rem;outline:none">
-        <button class="btn btn-primary btn-sm" onclick="askPlantQuestion('${context}', ${plantId})">Fragen</button>
+        <button class="btn btn-primary btn-sm" id="${context}-ask-btn" onclick="askPlantQuestion('${context}', ${plantId})">Fragen</button>
       </div>
-      <div id="${boxId}" style="margin-top:10px;font-size:.85rem;min-height:0"></div>
     </div>`;
 }
 
@@ -1036,29 +1035,29 @@ async function askPlantQuestion(context, plantId) {
   if (!groqKey) { alert('Bitte zuerst einen Groq API-Key in den Einstellungen eintragen.'); return; }
 
   const input = document.getElementById(context + '-ask-input');
-  const question = input ? input.value.trim() : '';
+  const btn = document.getElementById(context + '-ask-btn');
+  const chat = document.getElementById(context + '-ask-chat');
+
+  if (!input || !chat) return;
+  const question = input.value.trim();
   if (!question) return;
+
   input.value = '';
-  input.disabled = true;
+  if (btn) btn.disabled = true;
 
   const p = await dbGet(Number(plantId));
-  if (!p) { input.disabled = false; return; }
+  if (!p) { if (btn) btn.disabled = false; return; }
 
-  const box = document.getElementById(context + '-ask-box');
-  // Eingabe-Zeile ist immer das letzte Kind — davor einfügen
-  const inputRow = input.closest('div');
-
-  // Frage anzeigen
+  // Frage + Antwort-Platzhalter anhängen
   const questionEl = document.createElement('div');
   questionEl.style.cssText = 'font-size:.82rem;color:var(--muted);margin:8px 0 4px;font-style:italic';
   questionEl.textContent = '❓ ' + question;
-  box.insertBefore(questionEl, inputRow);
+  chat.appendChild(questionEl);
 
-  // Antwort-Platzhalter
   const answerEl = document.createElement('div');
   answerEl.style.cssText = 'background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;line-height:1.5;margin-bottom:8px;color:var(--muted)';
   answerEl.textContent = '🔍 Wird beantwortet …';
-  box.insertBefore(answerEl, inputRow);
+  chat.appendChild(answerEl);
 
   try {
     const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
@@ -1082,7 +1081,7 @@ async function askPlantQuestion(context, plantId) {
     answerEl.style.color = 'var(--danger)';
     answerEl.textContent = 'Fehler: ' + err.message;
   } finally {
-    input.disabled = false;
+    if (btn) btn.disabled = false;
     input.focus();
   }
 }
