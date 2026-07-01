@@ -425,7 +425,7 @@
     <!-- SETTINGS -->
     <div class="screen" id="settings-screen">
       <h2>⚙️ Einstellungen</h2>
-      <p style="color:var(--muted);font-size:.8rem;margin-bottom:12px;">Version 3.27 — Claude Vision + PlantNet + Groq</p>
+      <p style="color:var(--muted);font-size:.8rem;margin-bottom:12px;">Version 3.28 — Claude Vision + PlantNet + Groq</p>
 
       <div class="card" style="margin-bottom:16px;">
         <div style="font-weight:600;color:var(--accent2);margin-bottom:8px;">🌿 Pflanzeninfos</div>
@@ -1038,43 +1038,32 @@ async function askPlantQuestion(context, plantId) {
   const input = document.getElementById(context + '-ask-input');
   const question = input ? input.value.trim() : '';
   if (!question) return;
+  input.value = '';
+  input.disabled = true;
 
   const p = await dbGet(Number(plantId));
-  if (!p) return;
+  if (!p) { input.disabled = false; return; }
 
   const box = document.getElementById(context + '-ask-box');
+  // Eingabe-Zeile ist immer das letzte Kind — davor einfügen
+  const inputRow = input.closest('div');
 
-  // Antwort-Block + neues Eingabefeld aufbauen
-  const answerDiv = document.createElement('div');
-  answerDiv.style.cssText = 'background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;line-height:1.5;margin-bottom:10px';
-  answerDiv.textContent = '🔍 Frage wird beantwortet …';
-  answerDiv.style.color = 'var(--muted)';
+  // Frage anzeigen
+  const questionEl = document.createElement('div');
+  questionEl.style.cssText = 'font-size:.82rem;color:var(--muted);margin:8px 0 4px;font-style:italic';
+  questionEl.textContent = '❓ ' + question;
+  box.insertBefore(questionEl, inputRow);
 
-  const inputRow = document.createElement('div');
-  inputRow.style.cssText = 'display:flex;gap:8px;margin-top:8px';
-  const newInput = document.createElement('input');
-  newInput.type = 'text';
-  newInput.id = context + '-ask-input';
-  newInput.placeholder = 'Noch eine Frage …';
-  newInput.style.cssText = 'flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:9px 12px;border-radius:6px;font-size:.85rem;outline:none';
-  const newBtn = document.createElement('button');
-  newBtn.className = 'btn btn-primary btn-sm';
-  newBtn.textContent = 'Fragen';
-  newBtn.onclick = () => askPlantQuestion(context, plantId);
-  inputRow.appendChild(newInput);
-  inputRow.appendChild(newBtn);
-
-  box.innerHTML = '';
-  box.appendChild(answerDiv);
-  box.appendChild(inputRow);
+  // Antwort-Platzhalter
+  const answerEl = document.createElement('div');
+  answerEl.style.cssText = 'background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;line-height:1.5;margin-bottom:8px;color:var(--muted)';
+  answerEl.textContent = '🔍 Wird beantwortet …';
+  box.insertBefore(answerEl, inputRow);
 
   try {
     const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + groqKey
-      },
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + groqKey },
       body: JSON.stringify({
         model: 'llama-3.3-70b-versatile',
         max_tokens: 400,
@@ -1087,11 +1076,14 @@ async function askPlantQuestion(context, plantId) {
     const data = await res.json();
     if (!res.ok) throw new Error(data.error?.message || 'Groq Fehler ' + res.status);
     const answer = data.choices?.[0]?.message?.content || 'Keine Antwort erhalten.';
-    answerDiv.style.color = '';
-    answerDiv.innerHTML = answer.replace(/\n/g, '<br>');
+    answerEl.style.color = '';
+    answerEl.innerHTML = answer.replace(/\n/g, '<br>');
   } catch(err) {
-    answerDiv.style.color = 'var(--danger)';
-    answerDiv.textContent = 'Fehler: ' + err.message;
+    answerEl.style.color = 'var(--danger)';
+    answerEl.textContent = 'Fehler: ' + err.message;
+  } finally {
+    input.disabled = false;
+    input.focus();
   }
 }
 async function deletePlant(id) {
