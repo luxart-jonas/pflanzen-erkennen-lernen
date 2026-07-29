@@ -425,7 +425,7 @@
     <!-- SETTINGS -->
     <div class="screen" id="settings-screen">
       <h2>⚙️ Einstellungen</h2>
-      <p style="color:var(--muted);font-size:.8rem;margin-bottom:12px;">Version 3.29 — Claude Vision + PlantNet + Groq</p>
+      <p style="color:var(--muted);font-size:.8rem;margin-bottom:12px;">Version 3.30 — PlantNet + Groq</p>
 
       <div class="card" style="margin-bottom:16px;">
         <div style="font-weight:600;color:var(--accent2);margin-bottom:8px;">🌿 Pflanzeninfos</div>
@@ -434,21 +434,8 @@
         <div id="load-all-status" style="margin-top:10px;font-size:.85rem;color:var(--muted);"></div>
       </div>
       <p class="settings-note">
-        Für Fun Facts und Bestimmungsmerkmale (Claude Vision).<br>Wird nur lokal gespeichert.
+        Für Fun Facts und Bestimmungsmerkmale (Groq).<br>Wird nur lokal gespeichert.
       </p>
-
-      <div class="form-group">
-        <label>Anthropic API-Key</label>
-        <div class="api-key-row">
-          <input type="text" id="api-key-input" placeholder="2b…" autocomplete="new-password" autocorrect="off" autocapitalize="off" spellcheck="false" name="anthropic-key-field" style="-webkit-text-security:disc">
-          <button class="btn btn-primary btn-sm" onclick="saveApiKey()">Speichern</button>
-        </div>
-        <div id="key-status" class="key-none">Kein API-Key gespeichert</div>
-      </div>
-
-
-
-      <button class="btn btn-danger" style="margin-top:12px" onclick="deleteApiKey()">API-Key löschen</button>
 
       <hr style="border:none;border-top:1px solid var(--border);margin:24px 0">
 
@@ -469,7 +456,7 @@
 
       <h2 style="margin-bottom:6px">💬 Groq API-Key</h2>
       <p class="settings-note" style="margin-bottom:12px">
-        Für die "Frage zur Pflanze"-Funktion (kostenlos, Llama 3.3 70B).<br>
+        Für Pflanzeninfos (Fun Facts, Bestimmungsmerkmale) und die "Frage zur Pflanze"-Funktion (kostenlos, Llama 3.3 70B).<br>
         Key unter <span style="color:var(--accent)">console.groq.com</span> registrieren — kein Kreditkarte nötig.
       </p>
       <label>Groq API-Key</label>
@@ -595,7 +582,6 @@ function isDue(p) { return !p.nextReview || Date.now() >= p.nextReview; }
 function computeNextReview(level) { return Date.now() + INTERVALS[Math.min(level, INTERVALS.length-1)] * 86400000; }
 
 // ── API Key (localStorage) ───────────────────────────────────
-function getApiKey() { return localStorage.getItem('ant_key') || ''; }
 function getPlantNetKey() { return localStorage.getItem('plantnet_key') || ''; }
 function getGroqKey() { return localStorage.getItem('groq_key') || ''; }
 function saveGroqKey() {
@@ -646,34 +632,6 @@ function updatePlantNetKeyStatus() {
     el.className = 'key-none';
   }
 }
-function saveApiKey() {
-  const val = document.getElementById('api-key-input').value.trim();
-  if (!val) { alert('Bitte einen API-Key eingeben.'); return; }
-  localStorage.setItem('ant_key', val);
-  document.getElementById('api-key-input').value = '';
-  updateKeyStatus();
-  updatePlantNetKeyStatus();
-  updateGroqKeyStatus();
-  alert('Anthropic API-Key gespeichert!');
-}
-function deleteApiKey() {
-  if (!confirm('API-Key wirklich löschen?')) return;
-  localStorage.removeItem('ant_key');
-  updateKeyStatus();
-  updatePlantNetKeyStatus();
-  updateGroqKeyStatus();
-}
-function updateKeyStatus() {
-  const el = document.getElementById('key-status');
-  if (getApiKey()) {
-    el.textContent = '✓ Anthropic API-Key gespeichert';
-    el.className = 'key-ok';
-  } else {
-    el.textContent = 'Kein API-Key gespeichert';
-    el.className = 'key-none';
-  }
-}
-
 // ── State ────────────────────────────────────────────────────
 let addPhotoData = null, editPhotoData = null, editId = null, addGpsData = null;
 let currentDetailId = null;
@@ -689,7 +647,6 @@ function switchTab(tab) {
   if (nb) nb.classList.add('active');
   if (tab === 'archive') renderArchive();
   if (tab === 'learn')   initLearn();
-  if (tab === 'settings') updateKeyStatus();
   updatePlantNetKeyStatus();
   updateGroqKeyStatus();
 }
@@ -728,7 +685,7 @@ document.getElementById('photo-input').addEventListener('change', async e => {
   e.target.value = '';
   // GPS + Erkennung automatisch
   getGPSAuto();
-  if (getApiKey()) recognizePlant();
+  if (getPlantNetKey()) recognizePlant();
 });
 
 document.getElementById('edit-photo-input').addEventListener('change', async e => {
@@ -871,7 +828,7 @@ async function savePlant() {
   updateDueBadge();
 
   // ── Infos im Hintergrund laden (nicht blockierend) ──
-  if (getApiKey()) {
+  if (getGroqKey()) {
     generatePlantInfo(newId).catch(() => {});
   }
 }
@@ -940,26 +897,24 @@ function closeModal(e) {
 // ── Pflanzeninfo generieren (Bestimmungsmerkmale + Fun Facts) ──
 async function generatePlantInfo(plantId) {
   const p = await dbGet(plantId); if (!p) return null;
-  const key = getApiKey();
+  const key = getGroqKey();
   if (!key) return null;
 
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
+    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-api-key': key,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true'
+        'Authorization': 'Bearer ' + key
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-6', max_tokens: 1024,
+        model: 'llama-3.3-70b-versatile', max_tokens: 1024,
         messages: [{ role: 'user', content: 'Gib mir Informationen zur Pflanze "' + p.name + '"' + (p.latin ? ' (' + p.latin + ')' : '') + ' auf Deutsch.\n\n**Bestimmungsmerkmale:**\nListe NUR die zutreffenden Merkmale tabellarisch im Format "Punkt: Wert" auf — eine Zeile pro Merkmal. Prüfe folgende Punkte und nenne nur die, die für diese Pflanze relevant sind (z.B. Milchsaft nur wenn vorhanden, sonst weglassen):\nBlütenfarbe, Blütenform, Anzahl der Kronblätter, Blattstellung, Blattform, Blattrand, Behaarung, Geruch/Geschmack, Milchsaft, Standort.\nKurz und stichwortartig, kein Fließtext.\n\n**Fun Facts:**\n3-4 kurze Fun Facts auf Deutsch. Schreibe: modern, lebendig, seriös und historisch korrekt. Keine trockenen Kunstgeschichte-Vorlesungen, sondern überraschende Details die im Gedächtnis bleiben. Kurz und prägnant.\n\nKein Markdown außer den zwei Überschriften mit **.' }]
       })
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error?.message);
-    const text = data.content[0].text;
+    const text = data.choices[0].message.content;
 
     // Bestimmungsmerkmale als Tabelle, Fun Facts als Fließtext
     const sections = text.split(/\*\*(.+?)\*\*/g).filter(s => s.trim());
@@ -1691,7 +1646,6 @@ document.addEventListener('DOMContentLoaded', () => {
 // ── Init ──────────────────────────────────────────────────────
 openDB().then(() => {
   updateDueBadge();
-  updateKeyStatus();
   updatePlantNetKeyStatus();
   updateGroqKeyStatus();
 }).catch(err => alert('IndexedDB Fehler: ' + err));
@@ -1702,8 +1656,8 @@ function confirmRegenAll() {
 }
 
 async function loadAllInfos(forceReload=false) {
-  const key = getApiKey();
-  if (!key) { alert('Bitte zuerst Anthropic API Key eintragen!'); return; }
+  const key = getGroqKey();
+  if (!key) { alert('Bitte zuerst einen Groq API-Key eintragen!'); return; }
   const plantnetKey = getPlantNetKey();
 
   const btn = document.getElementById('btn-load-all');
@@ -1732,19 +1686,19 @@ async function loadAllInfos(forceReload=false) {
           const searchRes = await fetch(`https://ormpszktwwiahjooukjk.supabase.co/functions/v1/plantnet-proxy?api-key=${encodeURIComponent(plantnetKey)}&nb-results=1&lang=de&q=${encodeURIComponent(p.name)}`, { method: 'GET' });
           // PlantNet hat keine Textsuche — wir überspringen falls kein Foto
         } catch {}
-        // Fallback: Claude nach lateinischem Namen fragen
+        // Fallback: Groq nach lateinischem Namen fragen
         try {
-          const latinRes = await fetch('https://api.anthropic.com/v1/messages', {
+          const latinRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key },
             body: JSON.stringify({
-              model: 'claude-sonnet-4-6', max_tokens: 50,
+              model: 'llama-3.3-70b-versatile', max_tokens: 50,
               messages: [{ role: 'user', content: `Was ist der lateinische Name der Pflanze "${p.name}"? Antworte NUR mit dem lateinischen Namen, sonst nichts.` }]
             })
           });
           const latinData = await latinRes.json();
           if (latinRes.ok) {
-            const latin = latinData.content[0].text.trim().replace(/[^a-zA-Z ]/g, '').trim();
+            const latin = latinData.choices[0].message.content.trim().replace(/[^a-zA-Z ]/g, '').trim();
             if (latin) {
               const full = await dbGet(p.id);
               if (full && !full.latin) { full.latin = latin; await dbPut(full); p.latin = latin; }
@@ -1790,7 +1744,7 @@ async function loadAllInfos(forceReload=false) {
 // ── Beim Start: fehlende Infos still im Hintergrund nachladen ──
 document.addEventListener('DOMContentLoaded', () => {
   setTimeout(async () => {
-    if (!getApiKey()) return;
+    if (!getGroqKey()) return;
     try {
       const all = await dbGetAll();
       const missing = all.filter(p => !p.infoHtml && p.name);
