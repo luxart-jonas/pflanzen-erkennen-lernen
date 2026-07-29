@@ -425,7 +425,7 @@
     <!-- SETTINGS -->
     <div class="screen" id="settings-screen">
       <h2>⚙️ Einstellungen</h2>
-      <p style="color:var(--muted);font-size:.8rem;margin-bottom:12px;">Version 3.30 — PlantNet + Groq</p>
+      <p style="color:var(--muted);font-size:.8rem;margin-bottom:12px;">Version 3.31 — PlantNet + Groq</p>
 
       <div class="card" style="margin-bottom:16px;">
         <div style="font-weight:600;color:var(--accent2);margin-bottom:8px;">🌿 Pflanzeninfos</div>
@@ -895,10 +895,11 @@ function closeModal(e) {
 
 
 // ── Pflanzeninfo generieren (Bestimmungsmerkmale + Fun Facts) ──
+let lastInfoError = '';
 async function generatePlantInfo(plantId) {
   const p = await dbGet(plantId); if (!p) return null;
   const key = getGroqKey();
-  if (!key) return null;
+  if (!key) { lastInfoError = 'Kein Groq API-Key hinterlegt. Bitte in den Einstellungen eintragen.'; return null; }
 
   try {
     const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
@@ -939,8 +940,10 @@ async function generatePlantInfo(plantId) {
 
     const full = await dbGet(plantId);
     if (full) { full.infoHtml = html; await dbPut(full); infoCache[plantId] = html; }
+    lastInfoError = '';
     return html;
   } catch(err) {
+    lastInfoError = err.message || 'Unbekannter Fehler';
     console.warn('Fehler bei Infogenerierung:', err.message);
     return null;
   }
@@ -963,7 +966,7 @@ async function loadModalInfo(forceReload = false) {
   if (html) {
     box.innerHTML = html + infoReloadBtnHtml();
   } else {
-    box.innerHTML = '<p style="color:var(--danger)">Fehler beim Laden der Informationen.</p>' + infoReloadBtnHtml();
+    box.innerHTML = '<p style="color:var(--danger)">Fehler beim Laden der Informationen' + (lastInfoError ? ': ' + esc(lastInfoError) : '.') + '</p>' + infoReloadBtnHtml();
   }
 }
 
@@ -1196,7 +1199,7 @@ async function showInfoModal() {
     infoCache[p.id] = html;
     document.getElementById('info-modal-content').innerHTML = html + infoReloadBtnHtml2(p.id);
   } else {
-    document.getElementById('info-modal-content').innerHTML = '<p style="color:var(--danger)">Fehler beim Laden der Informationen.</p>' + infoReloadBtnHtml2(p.id);
+    document.getElementById('info-modal-content').innerHTML = '<p style="color:var(--danger)">Fehler beim Laden der Informationen' + (lastInfoError ? ': ' + esc(lastInfoError) : '.') + '</p>' + infoReloadBtnHtml2(p.id);
   }
 }
 
@@ -1214,7 +1217,7 @@ async function reloadInfoModal(plantId) {
     infoCache[plantId] = html;
     document.getElementById('info-modal-content').innerHTML = html + infoReloadBtnHtml2(plantId);
   } else {
-    document.getElementById('info-modal-content').innerHTML = '<p style="color:var(--danger)">Fehler beim Laden der Informationen.</p>' + infoReloadBtnHtml2(plantId);
+    document.getElementById('info-modal-content').innerHTML = '<p style="color:var(--danger)">Fehler beim Laden der Informationen' + (lastInfoError ? ': ' + esc(lastInfoError) : '.') + '</p>' + infoReloadBtnHtml2(plantId);
   }
 }
 
