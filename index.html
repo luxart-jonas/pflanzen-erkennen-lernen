@@ -292,6 +292,16 @@
 <body>
 <div id="app">
 
+  <!-- iOS-Installationshinweis: erscheint nur in Safari, solange die App noch nicht zum Home-Bildschirm hinzugefügt wurde -->
+  <div id="ios-install-hint" style="display:none;position:fixed;left:12px;right:12px;bottom:14px;z-index:9999;background:#1a2e1a;color:#eafbea;border:1px solid #345b34;border-radius:14px;padding:14px 16px;box-shadow:0 6px 24px rgba(0,0,0,.4);align-items:center;gap:12px;">
+    <div style="font-size:1.6rem;line-height:1;animation:iosHintBounce 1.4s ease-in-out infinite">📲</div>
+    <div style="flex:1;font-size:.85rem;line-height:1.45">
+      <strong>App installieren:</strong> Unten auf <strong>Teilen</strong> ⬆️ tippen, dann <strong>„Zum Home-Bildschirm"</strong> auswählen.
+    </div>
+    <button onclick="dismissInstallHint()" aria-label="Schließen" style="background:none;border:none;color:#9ab89a;font-size:1.2rem;cursor:pointer;padding:4px;line-height:1">✕</button>
+  </div>
+  <style>@keyframes iosHintBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}</style>
+
   <div id="header">
     <span class="leaf">🌿</span>
     <h1>PflanzenLern</h1>
@@ -909,33 +919,55 @@ async function generatePlantInfo(plantId) {
         'Authorization': 'Bearer ' + key
       },
       body: JSON.stringify({
-        model: 'llama-3.3-70b-versatile', max_tokens: 1024,
-        messages: [{ role: 'user', content: 'Gib mir Informationen zur Pflanze "' + p.name + '"' + (p.latin ? ' (' + p.latin + ')' : '') + ' auf Deutsch.\n\n**Bestimmungsmerkmale:**\nListe NUR die zutreffenden Merkmale tabellarisch im Format "Punkt: Wert" auf — eine Zeile pro Merkmal. Prüfe folgende Punkte und nenne nur die, die für diese Pflanze relevant sind (z.B. Milchsaft nur wenn vorhanden, sonst weglassen):\nBlütenfarbe, Blütenform, Anzahl der Kronblätter, Blattstellung, Blattform, Blattrand, Behaarung, Geruch/Geschmack, Milchsaft, Standort.\nKurz und stichwortartig, kein Fließtext.\n\n**Fun Facts:**\n3-4 kurze Fun Facts auf Deutsch. Schreibe: modern, lebendig, seriös und historisch korrekt. Keine trockenen Kunstgeschichte-Vorlesungen, sondern überraschende Details die im Gedächtnis bleiben. Kurz und prägnant.\n\nKein Markdown außer den zwei Überschriften mit **.' }]
+        model: 'llama-3.3-70b-versatile', max_tokens: 1536,
+        messages: [{ role: 'user', content: 'Gib mir Informationen zur Pflanze "' + p.name + '"' + (p.latin ? ' (' + p.latin + ')' : '') + ' auf Deutsch.\n\n**Bestimmungsmerkmale:**\nListe NUR die zutreffenden Merkmale tabellarisch im Format "Punkt: Wert" auf — eine Zeile pro Merkmal. Prüfe folgende Punkte und nenne nur die, die für diese Pflanze relevant sind (z.B. Milchsaft nur wenn vorhanden, sonst weglassen):\nBlütenfarbe, Blütenform, Anzahl der Kronblätter, Blattstellung, Blattform, Blattrand, Behaarung, Geruch/Geschmack, Milchsaft, Standort.\nKurz und stichwortartig, kein Fließtext.\n\n**Fun Facts:**\n3-4 kurze Fun Facts auf Deutsch. Schreibe: modern, lebendig, seriös und historisch korrekt. Keine trockenen Kunstgeschichte-Vorlesungen, sondern überraschende Details die im Gedächtnis bleiben. Kurz und prägnant.\n\nWICHTIG: Verwende **ausschließlich** für die beiden Überschriften "**Bestimmungsmerkmale:**" und "**Fun Facts:**". Markiere innerhalb der Inhalte KEIN einziges Wort, keine Jahreszahl und keinen Begriff fett — auch nicht zur Betonung.' }]
       })
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error?.message);
-    const text = data.choices[0].message.content;
+    const choice = data.choices?.[0];
+    const text = choice?.message?.content || '';
+    if (!text.trim()) throw new Error('Leere Antwort von Groq erhalten.');
 
-    // Bestimmungsmerkmale als Tabelle, Fun Facts als Fließtext
-    const sections = text.split(/\*\*(.+?)\*\*/g).filter(s => s.trim());
+    // Bestimmungsmerkmale als Tabelle, Fun Facts als Fließtext.
+    // Wichtig: Die Abschnitte werden anhand der BEKANNTEN Überschriften
+    // ("Bestimmungsmerkmale" / "Fun Facts") herausgeschnitten, statt naiv an
+    // JEDEM "**...**"-Paar zu splitten. Die alte Logik brach regelmäßig,
+    // sobald die KI innerhalb der Fun Facts trotz Anweisung mal ein Wort
+    // oder eine Jahreszahl fett markierte — dadurch verschob sich die
+    // Zuordnung und die Fun Facts fielen unter den Tisch. Zusätzlich wird
+    // übrig gebliebenes "**" aus dem Fließtext entfernt, statt daran zu zerbrechen.
+    const stripBold = s => (s || '').replace(/\*\*/g, '').trim();
+    const merkmaleMatch = text.match(/\*\*\s*Bestimmungsmerkmale\s*:?\s*\*\*([\s\S]*?)(?=\*\*\s*Fun\s*Facts|$)/i);
+    const funfactsMatch = text.match(/\*\*\s*Fun\s*Facts\s*:?\s*\*\*([\s\S]*)/i);
+
     let html = '';
-    for (let i = 0; i < sections.length; i += 2) {
-      const heading = sections[i]?.trim();
-      const body = sections[i+1]?.trim();
-      if (!heading || !body) continue;
-      html += '<h3>' + heading + '</h3>';
-      if (heading.toLowerCase().includes('bestimmung')) {
-        const rows = body.split('\n').filter(l => l.trim() && l.includes(':'));
-        html += '<table class="merkmale-table">';
-        rows.forEach(row => {
-          const [k, ...rest] = row.split(':');
-          html += '<tr><td class="merkmal-key">' + k.trim().replace(/^[-•*]\s*/, '') + '</td><td class="merkmal-val">' + rest.join(':').trim() + '</td></tr>';
-        });
-        html += '</table>';
-      } else {
-        body.split('\n').filter(l => l.trim()).forEach(l => { html += '<p>' + l + '</p>'; });
-      }
+    const merkmaleBody = merkmaleMatch ? stripBold(merkmaleMatch[1]) : '';
+    if (merkmaleBody) {
+      html += '<h3>Bestimmungsmerkmale</h3>';
+      const rows = merkmaleBody.split('\n').filter(l => l.trim() && l.includes(':'));
+      html += '<table class="merkmale-table">';
+      rows.forEach(row => {
+        const [k, ...rest] = row.split(':');
+        html += '<tr><td class="merkmal-key">' + k.trim().replace(/^[-•*]\s*/, '') + '</td><td class="merkmal-val">' + rest.join(':').trim() + '</td></tr>';
+      });
+      html += '</table>';
+    }
+    const funfactsBody = funfactsMatch ? stripBold(funfactsMatch[1]) : '';
+    if (funfactsBody) {
+      html += '<h3>Fun Facts</h3>';
+      funfactsBody.split('\n').filter(l => l.trim()).forEach(l => { html += '<p>' + l.replace(/^[-•*\d.]+\s*/, '') + '</p>'; });
+    }
+
+    if (!merkmaleBody && !funfactsBody) {
+      // Fallback: Antwort konnte nicht im erwarteten Format geparst werden.
+      // Fehler werfen statt stillschweigend leeres/kaputtes HTML zu speichern,
+      // damit "Infos neu laden" dem Nutzer sichtbar mitteilt, dass es erneut
+      // versucht werden sollte, statt scheinbar erfolgreich nichts zu tun.
+      throw new Error('Antwort konnte nicht ausgewertet werden (unerwartetes Format). Bitte erneut versuchen.');
+    }
+    if (choice?.finish_reason === 'length' && !funfactsBody) {
+      throw new Error('Antwort wurde abgeschnitten, bevor die Fun Facts kamen. Bitte erneut versuchen.');
     }
 
     const full = await dbGet(plantId);
@@ -1647,11 +1679,49 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ── Init ──────────────────────────────────────────────────────
+// ── Vorbelegte Standard-Keys ─────────────────────────────────
+// Werden nur beim allerersten Start übernommen (falls noch keine Keys
+// gespeichert sind) — Cornelia muss dafür nichts in den Einstellungen
+// eintragen. Jederzeit in den Einstellungen änderbar/löschbar.
+const DEFAULT_PLANTNET_KEY = '2b10iV6j2bei1LhPxuQguqJI';
+const DEFAULT_GROQ_KEY = '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';
+(function seedDefaultKeys() {
+  if (!localStorage.getItem('plantnet_key') && DEFAULT_PLANTNET_KEY) {
+    localStorage.setItem('plantnet_key', DEFAULT_PLANTNET_KEY);
+  }
+  if (!localStorage.getItem('groq_key') && DEFAULT_GROQ_KEY) {
+    localStorage.setItem('groq_key', DEFAULT_GROQ_KEY);
+  }
+})();
+
 openDB().then(() => {
   updateDueBadge();
   updatePlantNetKeyStatus();
   updateGroqKeyStatus();
 }).catch(err => alert('IndexedDB Fehler: ' + err));
+
+// ── iOS-Installationshinweis ─────────────────────────────────
+// iOS/Safari kennt kein automatisches "Installieren"-Popup wie Android.
+// Diese Blase zeigt stattdessen aktiv, wie man die App per Teilen-Menü
+// zum Home-Bildschirm hinzufügt — verschwindet automatisch, sobald die
+// App als installierte Home-Bildschirm-App läuft.
+function isIOSNotInstalled() {
+  const ua = navigator.userAgent;
+  const isIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  const isStandalone = window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
+  return isIOS && !isStandalone;
+}
+function dismissInstallHint() {
+  const el = document.getElementById('ios-install-hint');
+  if (el) el.style.display = 'none';
+  localStorage.setItem('installHintDismissed', '1');
+}
+document.addEventListener('DOMContentLoaded', () => {
+  const el = document.getElementById('ios-install-hint');
+  if (el && isIOSNotInstalled() && !localStorage.getItem('installHintDismissed')) {
+    el.style.display = 'flex';
+  }
+});
 function confirmRegenAll() {
   if (!confirm('⚠️ Alle Infos neu generieren?\n\nDies überschreibt alle bereits generierten Bestimmungsmerkmale und Fun Facts für alle Pflanzen in deiner Sammlung. Dieser Vorgang kann mehrere Minuten dauern und kann nicht rückgängig gemacht werden.')) return;
   if (!confirm('Wirklich alle Infos neu generieren? Alle vorherigen Texte gehen verloren!')) return;
