@@ -357,8 +357,10 @@
         <textarea id="add-notes" placeholder="Notizen, Fundort, Besonderheiten …"></textarea>
       </div>
 
-      <button class="btn btn-primary" onclick="savePlant()">Pflanze speichern</button>
-      <div id="add-msg" style="text-align:center;margin-top:12px;font-size:.9rem;color:var(--accent);display:none">✓ Gespeichert!</div>
+      <div id="add-save-bar" style="position:sticky;bottom:-16px;z-index:5;margin:20px -16px -16px;padding:12px 16px calc(12px + env(safe-area-inset-bottom));background:var(--surface);border-top:1px solid var(--border);box-shadow:0 -6px 16px rgba(0,0,0,.25);">
+        <button class="btn btn-primary" onclick="savePlant()">Pflanze speichern</button>
+        <div id="add-msg" style="text-align:center;margin-top:12px;font-size:.9rem;color:var(--accent);display:none">✓ Gespeichert!</div>
+      </div>
     </div>
 
     <!-- ARCHIVE -->
@@ -435,7 +437,7 @@
     <!-- SETTINGS -->
     <div class="screen" id="settings-screen">
       <h2>⚙️ Einstellungen</h2>
-      <p style="color:var(--muted);font-size:.8rem;margin-bottom:12px;">Version 3.33 — PlantNet + Groq</p>
+      <p style="color:var(--muted);font-size:.8rem;margin-bottom:12px;">Version 3.34 — PlantNet + Groq</p>
 
       <div class="card" style="margin-bottom:16px;">
         <div style="font-weight:600;color:var(--accent2);margin-bottom:8px;">🌿 Pflanzeninfos</div>
