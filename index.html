@@ -437,7 +437,7 @@
     <!-- SETTINGS -->
     <div class="screen" id="settings-screen">
       <h2>⚙️ Einstellungen</h2>
-      <p style="color:var(--muted);font-size:.8rem;margin-bottom:12px;">Version 3.35 — PlantNet + Groq</p>
+      <p style="color:var(--muted);font-size:.8rem;margin-bottom:12px;">Version 3.36 — PlantNet + Groq</p>
 
       <div class="card" style="margin-bottom:16px;">
         <div style="font-weight:600;color:var(--accent2);margin-bottom:8px;">🌿 Pflanzeninfos</div>
@@ -600,6 +600,7 @@ function saveGroqKey() {
   const val = document.getElementById('groq-key-input').value.trim();
   if (!val) { alert('Bitte einen Groq API-Key eingeben.'); return; }
   localStorage.setItem('groq_key', val);
+  localStorage.setItem('groq_key_source', 'user');
   document.getElementById('groq-key-input').value = '';
   updateGroqKeyStatus();
   alert('Groq API-Key gespeichert!');
@@ -607,6 +608,7 @@ function saveGroqKey() {
 function deleteGroqKey() {
   if (!confirm('Groq API-Key wirklich löschen?')) return;
   localStorage.removeItem('groq_key');
+  localStorage.removeItem('groq_key_source');
   updateGroqKeyStatus();
 }
 function updateGroqKeyStatus() {
@@ -1687,12 +1689,33 @@ document.addEventListener('DOMContentLoaded', () => {
 // eintragen. Jederzeit in den Einstellungen änderbar/löschbar.
 const DEFAULT_PLANTNET_KEY = '2b10iV6j2bei1LhPxuQguqJI';
 const DEFAULT_GROQ_KEY = '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';
+// Frühere im Code hinterlegte Standard-Keys. Wird gebraucht, um bei Freunden,
+// die die App schon länger installiert haben, den alten (evtl. ungültigen)
+// automatisch übernommenen Groq-Key durch den neuen zu ersetzen — OHNE dabei
+// einen Key zu überschreiben, den jemand manuell in den Einstellungen
+// eingetragen hat.
+const PREVIOUS_DEFAULT_GROQ_KEYS = ['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'];
 (function seedDefaultKeys() {
   if (!localStorage.getItem('plantnet_key') && DEFAULT_PLANTNET_KEY) {
     localStorage.setItem('plantnet_key', DEFAULT_PLANTNET_KEY);
   }
-  if (!localStorage.getItem('groq_key') && DEFAULT_GROQ_KEY) {
+  const storedGroq = localStorage.getItem('groq_key');
+  const groqSource = localStorage.getItem('groq_key_source');
+  if (!storedGroq && DEFAULT_GROQ_KEY) {
+    // Allererster Start: noch kein Key vorhanden.
     localStorage.setItem('groq_key', DEFAULT_GROQ_KEY);
+    localStorage.setItem('groq_key_source', 'default');
+  } else if (storedGroq && DEFAULT_GROQ_KEY && storedGroq !== DEFAULT_GROQ_KEY) {
+    // Es ist bereits ein Key gespeichert, der nicht dem aktuellen Standard
+    // entspricht. Nur automatisch überschreiben, wenn er selbst mal
+    // automatisch gesetzt wurde (source === 'default') oder einem bekannten
+    // alten Standard-Key entspricht — ein manuell eingetragener Key bleibt
+    // immer unangetastet.
+    const wasAutoSeeded = groqSource === 'default' || PREVIOUS_DEFAULT_GROQ_KEYS.includes(storedGroq);
+    if (wasAutoSeeded) {
+      localStorage.setItem('groq_key', DEFAULT_GROQ_KEY);
+      localStorage.setItem('groq_key_source', 'default');
+    }
   }
 })();
 
