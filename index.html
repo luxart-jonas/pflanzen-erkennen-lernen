@@ -437,7 +437,7 @@
     <!-- SETTINGS -->
     <div class="screen" id="settings-screen">
       <h2>⚙️ Einstellungen</h2>
-      <p style="color:var(--muted);font-size:.8rem;margin-bottom:12px;">Version 3.36 — PlantNet + Groq</p>
+      <p style="color:var(--muted);font-size:.8rem;margin-bottom:12px;">Version 3.37 — PlantNet + Groq</p>
 
       <div class="card" style="margin-bottom:16px;">
         <div style="font-weight:600;color:var(--accent2);margin-bottom:8px;">🌿 Pflanzeninfos</div>
@@ -466,9 +466,9 @@
 
       <hr style="border:none;border-top:1px solid var(--border);margin:24px 0">
 
-      <h2 style="margin-bottom:6px">💬 Groq API-Key</h2>
+      <h2 style="margin-bottom:6px">💬 Groq API-Key (optional)</h2>
       <p class="settings-note" style="margin-bottom:12px">
-        Für Pflanzeninfos (Fun Facts, Bestimmungsmerkmale) und die "Frage zur Pflanze"-Funktion (kostenlos, Llama 3.3 70B).<br>
+        Für Pflanzeninfos (Fun Facts, Bestimmungsmerkmale) und die "Frage zur Pflanze"-Funktion. Funktioniert bereits ohne eigenen Key. Trage hier nur einen eigenen ein, wenn du ein höheres Limit als das geteilte Kontingent möchtest.<br>
         Key unter <span style="color:var(--accent)">console.groq.com</span> registrieren — kein Kreditkarte nötig.
       </p>
       <label>Groq API-Key</label>
@@ -596,6 +596,28 @@ function computeNextReview(level) { return Date.now() + INTERVALS[Math.min(level
 // ── API Key (localStorage) ───────────────────────────────────
 function getPlantNetKey() { return localStorage.getItem('plantnet_key') || ''; }
 function getGroqKey() { return localStorage.getItem('groq_key') || ''; }
+
+// ── Groq-Anfrage: eigener Key falls hinterlegt, sonst über den
+//    serverseitigen Proxy (Supabase Edge Function), damit die App auch
+//    ohne eigenen Groq-Key "einfach funktioniert". ──
+const GROQ_PROXY_URL = 'https://ormpszktwwiahjooukjk.supabase.co/functions/v1/groq-proxy';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9ybXBzemt0d3dpYWhqb291a2prIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4NzM5NTAsImV4cCI6MjA5NjQ0OTk1MH0.Jz4rKTlrvRbfdxS1e8fRkwXeD3CJsITeC6Q4lDBjfCc';
+async function groqChat(messages, max_tokens) {
+  const key = getGroqKey();
+  if (key) {
+    return fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key },
+      body: JSON.stringify({ model: 'openai/gpt-oss-120b', max_tokens, messages })
+    });
+  }
+  return fetch(GROQ_PROXY_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY },
+    body: JSON.stringify({ max_tokens, messages })
+  });
+}
+
 function saveGroqKey() {
   const val = document.getElementById('groq-key-input').value.trim();
   if (!val) { alert('Bitte einen Groq API-Key eingeben.'); return; }
@@ -842,9 +864,7 @@ async function savePlant() {
   updateDueBadge();
 
   // ── Infos im Hintergrund laden (nicht blockierend) ──
-  if (getGroqKey()) {
-    generatePlantInfo(newId).catch(() => {});
-  }
+  generatePlantInfo(newId).catch(() => {});
 }
 
 // ── Archive ───────────────────────────────────────────────────
@@ -912,21 +932,9 @@ function closeModal(e) {
 let lastInfoError = '';
 async function generatePlantInfo(plantId) {
   const p = await dbGet(plantId); if (!p) return null;
-  const key = getGroqKey();
-  if (!key) { lastInfoError = 'Kein Groq API-Key hinterlegt. Bitte in den Einstellungen eintragen.'; return null; }
 
   try {
-    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + key
-      },
-      body: JSON.stringify({
-        model: 'openai/gpt-oss-120b', max_tokens: 1536,
-        messages: [{ role: 'user', content: 'Gib mir Informationen zur Pflanze "' + p.name + '"' + (p.latin ? ' (' + p.latin + ')' : '') + ' auf Deutsch.\n\n**Bestimmungsmerkmale:**\nListe NUR die zutreffenden Merkmale tabellarisch im Format "Punkt: Wert" auf — eine Zeile pro Merkmal. Prüfe folgende Punkte und nenne nur die, die für diese Pflanze relevant sind (z.B. Milchsaft nur wenn vorhanden, sonst weglassen):\nBlütenfarbe, Blütenform, Anzahl der Kronblätter, Blattstellung, Blattform, Blattrand, Behaarung, Geruch/Geschmack, Milchsaft, Standort.\nKurz und stichwortartig, kein Fließtext.\n\n**Fun Facts:**\n3-4 kurze Fun Facts auf Deutsch. Schreibe: modern, lebendig, seriös und historisch korrekt. Keine trockenen Kunstgeschichte-Vorlesungen, sondern überraschende Details die im Gedächtnis bleiben. Kurz und prägnant.\n\nWICHTIG: Verwende **ausschließlich** für die beiden Überschriften "**Bestimmungsmerkmale:**" und "**Fun Facts:**". Markiere innerhalb der Inhalte KEIN einziges Wort, keine Jahreszahl und keinen Begriff fett — auch nicht zur Betonung.' }]
-      })
-    });
+    const res = await groqChat([{ role: 'user', content: 'Gib mir Informationen zur Pflanze "' + p.name + '"' + (p.latin ? ' (' + p.latin + ')' : '') + ' auf Deutsch.\n\n**Bestimmungsmerkmale:**\nListe NUR die zutreffenden Merkmale tabellarisch im Format "Punkt: Wert" auf — eine Zeile pro Merkmal. Prüfe folgende Punkte und nenne nur die, die für diese Pflanze relevant sind (z.B. Milchsaft nur wenn vorhanden, sonst weglassen):\nBlütenfarbe, Blütenform, Anzahl der Kronblätter, Blattstellung, Blattform, Blattrand, Behaarung, Geruch/Geschmack, Milchsaft, Standort.\nKurz und stichwortartig, kein Fließtext.\n\n**Fun Facts:**\n3-4 kurze Fun Facts auf Deutsch. Schreibe: modern, lebendig, seriös und historisch korrekt. Keine trockenen Kunstgeschichte-Vorlesungen, sondern überraschende Details die im Gedächtnis bleiben. Kurz und prägnant.\n\nWICHTIG: Verwende **ausschließlich** für die beiden Überschriften "**Bestimmungsmerkmale:**" und "**Fun Facts:**". Markiere innerhalb der Inhalte KEIN einziges Wort, keine Jahreszahl und keinen Begriff fett — auch nicht zur Betonung.' }], 1536);
     const data = await res.json();
     if (!res.ok) throw new Error(data.error?.message);
     const choice = data.choices?.[0];
@@ -1025,9 +1033,6 @@ function askQuestionBlockHtml(context, plantId) {
 }
 
 async function askPlantQuestion(context, plantId) {
-  const groqKey = getGroqKey();
-  if (!groqKey) { alert('Bitte zuerst einen Groq API-Key in den Einstellungen eintragen.'); return; }
-
   const input = document.getElementById(context + '-ask-input');
   const btn = document.getElementById(context + '-ask-btn');
   const chat = document.getElementById(context + '-ask-chat');
@@ -1054,18 +1059,10 @@ async function askPlantQuestion(context, plantId) {
   chat.appendChild(answerEl);
 
   try {
-    const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + groqKey },
-      body: JSON.stringify({
-        model: 'openai/gpt-oss-120b',
-        max_tokens: 400,
-        messages: [{
+    const res = await groqChat([{
           role: 'user',
           content: 'Du bist ein botanischer Experte. Beantworte folgende Frage zur Pflanze "' + p.name + '"' + (p.latin ? ' (' + p.latin + ')' : '') + ' auf Deutsch, kurz und präzise (max. 4-5 Sätze):\n\n' + question
-        }]
-      })
-    });
+        }], 400);
     const data = await res.json();
     if (!res.ok) throw new Error(data.error?.message || 'Groq Fehler ' + res.status);
     const answer = data.choices?.[0]?.message?.content || 'Keine Antwort erhalten.';
@@ -1754,8 +1751,6 @@ function confirmRegenAll() {
 }
 
 async function loadAllInfos(forceReload=false) {
-  const key = getGroqKey();
-  if (!key) { alert('Bitte zuerst einen Groq API-Key eintragen!'); return; }
   const plantnetKey = getPlantNetKey();
 
   const btn = document.getElementById('btn-load-all');
@@ -1786,14 +1781,7 @@ async function loadAllInfos(forceReload=false) {
         } catch {}
         // Fallback: Groq nach lateinischem Namen fragen
         try {
-          const latinRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key },
-            body: JSON.stringify({
-              model: 'openai/gpt-oss-120b', max_tokens: 50,
-              messages: [{ role: 'user', content: `Was ist der lateinische Name der Pflanze "${p.name}"? Antworte NUR mit dem lateinischen Namen, sonst nichts.` }]
-            })
-          });
+          const latinRes = await groqChat([{ role: 'user', content: `Was ist der lateinische Name der Pflanze "${p.name}"? Antworte NUR mit dem lateinischen Namen, sonst nichts.` }], 50);
           const latinData = await latinRes.json();
           if (latinRes.ok) {
             const latin = latinData.choices[0].message.content.trim().replace(/[^a-zA-Z ]/g, '').trim();
@@ -1842,7 +1830,6 @@ async function loadAllInfos(forceReload=false) {
 // ── Beim Start: fehlende Infos still im Hintergrund nachladen ──
 document.addEventListener('DOMContentLoaded', () => {
   setTimeout(async () => {
-    if (!getGroqKey()) return;
     try {
       const all = await dbGetAll();
       const missing = all.filter(p => !p.infoHtml && p.name);
