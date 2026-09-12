@@ -437,7 +437,7 @@
     <!-- SETTINGS -->
     <div class="screen" id="settings-screen">
       <h2>⚙️ Einstellungen</h2>
-      <p style="color:var(--muted);font-size:.8rem;margin-bottom:12px;">Version 3.37 — PlantNet + Groq</p>
+      <p style="color:var(--muted);font-size:.8rem;margin-bottom:12px;">Version 3.38 — PlantNet + DeepSeek</p>
 
       <div class="card" style="margin-bottom:16px;">
         <div style="font-weight:600;color:var(--accent2);margin-bottom:8px;">🌿 Pflanzeninfos</div>
@@ -446,7 +446,7 @@
         <div id="load-all-status" style="margin-top:10px;font-size:.85rem;color:var(--muted);"></div>
       </div>
       <p class="settings-note">
-        Für Fun Facts und Bestimmungsmerkmale (Groq).<br>Wird nur lokal gespeichert.
+        Für Fun Facts und Bestimmungsmerkmale.<br>Wird nur lokal gespeichert.
       </p>
 
       <hr style="border:none;border-top:1px solid var(--border);margin:24px 0">
@@ -466,18 +466,18 @@
 
       <hr style="border:none;border-top:1px solid var(--border);margin:24px 0">
 
-      <h2 style="margin-bottom:6px">💬 Groq API-Key (optional)</h2>
+      <h2 style="margin-bottom:6px">💬 DeepSeek API-Key (optional)</h2>
       <p class="settings-note" style="margin-bottom:12px">
-        Für Pflanzeninfos (Fun Facts, Bestimmungsmerkmale) und die "Frage zur Pflanze"-Funktion. Funktioniert bereits ohne eigenen Key. Trage hier nur einen eigenen ein, wenn du ein höheres Limit als das geteilte Kontingent möchtest.<br>
-        Key unter <span style="color:var(--accent)">console.groq.com</span> registrieren — kein Kreditkarte nötig.
+        Für Pflanzeninfos (Fun Facts, Bestimmungsmerkmale) und die "Frage zur Pflanze"-Funktion. Funktioniert bereits ohne eigenen Key (geteiltes Kontingent). Trage hier nur einen eigenen ein, wenn du deinen eigenen DeepSeek-Zugang nutzen möchtest.<br>
+        Key unter <span style="color:var(--accent)">platform.deepseek.com</span> registrieren — dort ist vorher etwas Guthaben nötig (kostenpflichtig, kein Freikontingent).
       </p>
-      <label>Groq API-Key</label>
+      <label>DeepSeek API-Key</label>
       <div class="api-key-row">
-        <input type="text" id="groq-key-input" placeholder="gsk_…" autocomplete="new-password" autocorrect="off" autocapitalize="off" spellcheck="false" name="groq-key-field" style="-webkit-text-security:disc">
-        <button class="btn btn-primary btn-sm" onclick="saveGroqKey()">Speichern</button>
+        <input type="text" id="deepseek-key-input" placeholder="sk-…" autocomplete="new-password" autocorrect="off" autocapitalize="off" spellcheck="false" name="deepseek-key-field" style="-webkit-text-security:disc">
+        <button class="btn btn-primary btn-sm" onclick="saveDeepSeekKey()">Speichern</button>
       </div>
-      <div id="groq-key-status" class="key-none">Kein Groq API-Key gespeichert</div>
-      <button class="btn btn-danger" style="margin-top:12px" onclick="deleteGroqKey()">Groq Key löschen</button>
+      <div id="deepseek-key-status" class="key-none">Kein DeepSeek API-Key gespeichert</div>
+      <button class="btn btn-danger" style="margin-top:12px" onclick="deleteDeepSeekKey()">DeepSeek Key löschen</button>
 
       <hr style="border:none;border-top:1px solid var(--border);margin:24px 0">
 
@@ -643,6 +643,48 @@ function updateGroqKeyStatus() {
     el.textContent = 'Kein Groq API-Key gespeichert';
     el.className = 'key-none';
   }
+}
+
+// ── DeepSeek (eigener Key, optional) — hat Vorrang vor Groq ────
+function getDeepSeekKey() { return localStorage.getItem('deepseek_key') || ''; }
+async function deepSeekChat(messages, max_tokens) {
+  const key = getDeepSeekKey();
+  return fetch('https://api.deepseek.com/chat/completions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key },
+    body: JSON.stringify({ model: 'deepseek-chat', max_tokens, messages })
+  });
+}
+function saveDeepSeekKey() {
+  const val = document.getElementById('deepseek-key-input').value.trim();
+  if (!val) { alert('Bitte einen DeepSeek API-Key eingeben.'); return; }
+  localStorage.setItem('deepseek_key', val);
+  document.getElementById('deepseek-key-input').value = '';
+  updateDeepSeekKeyStatus();
+  alert('DeepSeek API-Key gespeichert!');
+}
+function deleteDeepSeekKey() {
+  if (!confirm('DeepSeek API-Key wirklich löschen?')) return;
+  localStorage.removeItem('deepseek_key');
+  updateDeepSeekKeyStatus();
+}
+function updateDeepSeekKeyStatus() {
+  const el = document.getElementById('deepseek-key-status');
+  if (!el) return;
+  if (getDeepSeekKey()) {
+    el.textContent = '✓ DeepSeek API-Key gespeichert';
+    el.className = 'key-ok';
+  } else {
+    el.textContent = 'Kein DeepSeek API-Key gespeichert';
+    el.className = 'key-none';
+  }
+}
+// ── Gemeinsamer Einstiegspunkt für alle KI-Anfragen: eigener
+//    DeepSeek-Key hat Vorrang, sonst wie bisher unverändert über
+//    Groq (eigener Key, geteilter Standard-Key oder Proxy). ──
+async function aiChat(messages, max_tokens) {
+  if (getDeepSeekKey()) return deepSeekChat(messages, max_tokens);
+  return groqChat(messages, max_tokens);
 }
 function savePlantNetKey() {
   const val = document.getElementById('plantnet-key-input').value.trim();
@@ -934,12 +976,12 @@ async function generatePlantInfo(plantId) {
   const p = await dbGet(plantId); if (!p) return null;
 
   try {
-    const res = await groqChat([{ role: 'user', content: 'Gib mir Informationen zur Pflanze "' + p.name + '"' + (p.latin ? ' (' + p.latin + ')' : '') + ' auf Deutsch.\n\n**Bestimmungsmerkmale:**\nListe NUR die zutreffenden Merkmale tabellarisch im Format "Punkt: Wert" auf — eine Zeile pro Merkmal. Prüfe folgende Punkte und nenne nur die, die für diese Pflanze relevant sind (z.B. Milchsaft nur wenn vorhanden, sonst weglassen):\nBlütenfarbe, Blütenform, Anzahl der Kronblätter, Blattstellung, Blattform, Blattrand, Behaarung, Geruch/Geschmack, Milchsaft, Standort.\nKurz und stichwortartig, kein Fließtext.\n\n**Fun Facts:**\n3-4 kurze Fun Facts auf Deutsch. Schreibe: modern, lebendig, seriös und historisch korrekt. Keine trockenen Kunstgeschichte-Vorlesungen, sondern überraschende Details die im Gedächtnis bleiben. Kurz und prägnant.\n\nWICHTIG: Verwende **ausschließlich** für die beiden Überschriften "**Bestimmungsmerkmale:**" und "**Fun Facts:**". Markiere innerhalb der Inhalte KEIN einziges Wort, keine Jahreszahl und keinen Begriff fett — auch nicht zur Betonung.' }], 1536);
+    const res = await aiChat([{ role: 'user', content: 'Gib mir Informationen zur Pflanze "' + p.name + '"' + (p.latin ? ' (' + p.latin + ')' : '') + ' auf Deutsch.\n\n**Bestimmungsmerkmale:**\nListe NUR die zutreffenden Merkmale tabellarisch im Format "Punkt: Wert" auf — eine Zeile pro Merkmal. Prüfe folgende Punkte und nenne nur die, die für diese Pflanze relevant sind (z.B. Milchsaft nur wenn vorhanden, sonst weglassen):\nBlütenfarbe, Blütenform, Anzahl der Kronblätter, Blattstellung, Blattform, Blattrand, Behaarung, Geruch/Geschmack, Milchsaft, Standort.\nKurz und stichwortartig, kein Fließtext.\n\n**Fun Facts:**\n3-4 kurze Fun Facts auf Deutsch. Schreibe: modern, lebendig, seriös und historisch korrekt. Keine trockenen Kunstgeschichte-Vorlesungen, sondern überraschende Details die im Gedächtnis bleiben. Kurz und prägnant.\n\nWICHTIG: Verwende **ausschließlich** für die beiden Überschriften "**Bestimmungsmerkmale:**" und "**Fun Facts:**". Markiere innerhalb der Inhalte KEIN einziges Wort, keine Jahreszahl und keinen Begriff fett — auch nicht zur Betonung.' }], 1536);
     const data = await res.json();
     if (!res.ok) throw new Error(data.error?.message);
     const choice = data.choices?.[0];
     const text = choice?.message?.content || '';
-    if (!text.trim()) throw new Error('Leere Antwort von Groq erhalten.');
+    if (!text.trim()) throw new Error('Leere Antwort von der KI erhalten.');
 
     // Bestimmungsmerkmale als Tabelle, Fun Facts als Fließtext.
     // Wichtig: Die Abschnitte werden anhand der BEKANNTEN Überschriften
@@ -1059,12 +1101,12 @@ async function askPlantQuestion(context, plantId) {
   chat.appendChild(answerEl);
 
   try {
-    const res = await groqChat([{
+    const res = await aiChat([{
           role: 'user',
           content: 'Du bist ein botanischer Experte. Beantworte folgende Frage zur Pflanze "' + p.name + '"' + (p.latin ? ' (' + p.latin + ')' : '') + ' auf Deutsch, kurz und präzise (max. 4-5 Sätze):\n\n' + question
         }], 400);
     const data = await res.json();
-    if (!res.ok) throw new Error(data.error?.message || 'Groq Fehler ' + res.status);
+    if (!res.ok) throw new Error(data.error?.message || 'Fehler ' + res.status);
     const answer = data.choices?.[0]?.message?.content || 'Keine Antwort erhalten.';
     answerEl.style.color = '';
     answerEl.innerHTML = answer.replace(/\n/g, '<br>');
@@ -1720,6 +1762,7 @@ openDB().then(() => {
   updateDueBadge();
   updatePlantNetKeyStatus();
   updateGroqKeyStatus();
+  updateDeepSeekKeyStatus();
 }).catch(err => alert('IndexedDB Fehler: ' + err));
 
 // ── iOS-Installationshinweis ─────────────────────────────────
@@ -1779,9 +1822,9 @@ async function loadAllInfos(forceReload=false) {
           const searchRes = await fetch(`https://ormpszktwwiahjooukjk.supabase.co/functions/v1/plantnet-proxy?api-key=${encodeURIComponent(plantnetKey)}&nb-results=1&lang=de&q=${encodeURIComponent(p.name)}`, { method: 'GET' });
           // PlantNet hat keine Textsuche — wir überspringen falls kein Foto
         } catch {}
-        // Fallback: Groq nach lateinischem Namen fragen
+        // Fallback: KI nach lateinischem Namen fragen
         try {
-          const latinRes = await groqChat([{ role: 'user', content: `Was ist der lateinische Name der Pflanze "${p.name}"? Antworte NUR mit dem lateinischen Namen, sonst nichts.` }], 50);
+          const latinRes = await aiChat([{ role: 'user', content: `Was ist der lateinische Name der Pflanze "${p.name}"? Antworte NUR mit dem lateinischen Namen, sonst nichts.` }], 50);
           const latinData = await latinRes.json();
           if (latinRes.ok) {
             const latin = latinData.choices[0].message.content.trim().replace(/[^a-zA-Z ]/g, '').trim();
