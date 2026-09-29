@@ -256,7 +256,6 @@
     border-radius: var(--radius); padding: 18px; text-align: center;
     min-height: 70px; display: flex; align-items: center; justify-content: center;
   }
-  #learn-name-hidden { color: var(--muted); font-size: 1rem; }
   #learn-name-revealed { font-family: var(--ff-head); font-size: 1.6rem; color: var(--accent2); display: none; }
   .learn-grade-row { display: flex; gap: 12px; }
   .learn-grade-row .btn { flex: 1; }
@@ -430,6 +429,70 @@
     font-weight: 800; color: var(--accent2); font-size: 1.1rem;
   }
 
+
+  /* ── XP Bar next-label ───────────────────────────── */
+  #xp-bar-wrap { cursor: pointer; }
+  #xp-bar-wrap:active { opacity: .8; }
+
+  /* ── Badge Galerie Overlay ───────────────────────── */
+  #badge-gallery {
+    position: fixed; inset: 0; background: rgba(0,0,0,.55);
+    z-index: 9800; display: none; align-items: flex-end;
+    justify-content: center;
+  }
+  #badge-gallery.show { display: flex; }
+  #badge-gallery-card {
+    background: var(--surface); border-radius: 24px 24px 0 0;
+    padding: 24px 20px 32px; width: 100%; max-width: 480px;
+    max-height: 85vh; overflow-y: auto;
+    animation: slideUp .35s cubic-bezier(.17,.89,.32,1.1) both;
+  }
+  @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+  #badge-gallery-card h2 {
+    font-size: 1.2rem; font-weight: 900; color: var(--accent2);
+    margin-bottom: 4px; text-align: center;
+  }
+  #badge-gallery-card .bg-xp-row {
+    text-align: center; color: var(--muted); font-size: .85rem; margin-bottom: 20px;
+  }
+  .badge-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px;
+  }
+  .badge-item {
+    background: var(--surface2); border: 1.5px solid var(--border);
+    border-radius: 16px; padding: 14px 8px; text-align: center;
+  }
+  .badge-item.earned {
+    background: linear-gradient(135deg, #edfbe8, #f8fdf4);
+    border-color: var(--accent);
+    box-shadow: 0 2px 10px rgba(58,170,85,.15);
+  }
+  .badge-item .bi-icon { font-size: 2rem; line-height: 1; margin-bottom: 4px; filter: grayscale(1); opacity: .4; }
+  .badge-item.earned .bi-icon { filter: none; opacity: 1; }
+  .badge-item .bi-name { font-size: .72rem; font-weight: 800; color: var(--text); margin-bottom: 2px; }
+  .badge-item .bi-desc { font-size: .65rem; color: var(--muted); line-height: 1.3; }
+  .badge-item.earned .bi-name { color: var(--accent2); }
+  #badge-gallery-nav { display: flex; gap: 10px; }
+  #badge-gallery-nav button { flex: 1; font-size: 1rem; padding: 14px; }
+
+  /* ── Pilz-Tab locked/unlocked ────────────────────── */
+  #tab-pilz { position: relative; }
+  #pilz-lock-icon {
+    position: absolute; top: 2px; right: 2px;
+    font-size: .6rem; background: var(--warn);
+    color: #fff; border-radius: 6px; padding: 1px 4px;
+    font-weight: 800;
+  }
+  #pilz-screen .pilz-locked-msg {
+    text-align: center; padding: 40px 20px;
+    background: var(--surface2); border-radius: 18px;
+    border: 2px dashed var(--border); margin-top: 20px;
+  }
+  #pilz-screen .pilz-locked-msg .pl-icon { font-size: 4rem; margin-bottom: 12px; }
+  #pilz-screen .pilz-locked-msg h2 { color: var(--accent2); margin-bottom: 8px; font-size: 1.2rem; }
+  #pilz-screen .pilz-locked-msg p { color: var(--muted); font-size: .9rem; line-height: 1.5; }
+  #pilz-unlocked { display: none; }
+
 </style>
 </head>
 <body>
@@ -450,9 +513,12 @@
     <h1>PflanzenLern</h1>
     <span id="due-badge" class="badge" style="display:none"></span>
     <!-- XP Bar -->
-    <div id="xp-bar-wrap">
-      <span id="xp-level-pill">Praktikant</span>
-      <div id="xp-track"><div id="xp-fill" style="width:0%"></div></div>
+    <div id="xp-bar-wrap" onclick="openBadgeGallery()" style="cursor:pointer" title="Badge-Galerie öffnen">
+      <span id="xp-level-pill">🔍 Pflanzensucher</span>
+      <div style="flex:1;display:flex;flex-direction:column;gap:2px">
+        <div id="xp-track"><div id="xp-fill" style="width:0%"></div></div>
+        <span id="xp-next-label" style="font-size:.6rem;color:var(--muted)"></span>
+      </div>
       <span id="xp-label">0 XP</span>
     </div>
     <button onclick="switchTab('settings')" id="tab-settings-btn" style="background:none;border:none;font-size:1.4rem;cursor:pointer;padding:2px 4px;color:var(--muted)">⚙️</button>
@@ -470,6 +536,10 @@
     </button>
     <button class="nav-btn" onclick="switchTab('exam')" id="tab-exam">
       <span class="icon">🎓</span>Prüfung
+    </button>
+    <button class="nav-btn" onclick="switchTab('pilz')" id="tab-pilz">
+      <span class="icon">🍄</span>Pilze
+      <span id="pilz-lock-icon">🔒</span>
     </button>
   </nav>
 
@@ -540,10 +610,9 @@
           <img id="learn-img" src="" alt="Pflanzenfoto">
         </div>
         <div id="learn-name-area">
-          <span id="learn-name-hidden">Name verborgen – tippe auf „Auflösen"</span>
           <span id="learn-name-revealed"></span>
         </div>
-        <button class="btn btn-secondary" id="btn-reveal" onclick="revealName()">Auflösen</button>
+        <button class="btn btn-secondary" id="btn-reveal" onclick="revealName()" style="width:100%;margin-top:4px">🔍 Auflösen</button>
         <div class="learn-grade-row" id="grade-row" style="display:none">
           <button class="btn btn-danger" onclick="gradeCard(false)">✗ Nicht gewusst</button>
           <button onclick="showInfoModal()" style="background:none;border:none;font-size:1.6rem;cursor:pointer;padding:0 6px;flex:0 0 auto;">ℹ️</button>
@@ -715,6 +784,64 @@
     <button class="btn btn-primary" onclick="saveEdit()">Speichern</button>
     <button class="btn btn-secondary" style="margin-top:10px" onclick="closeEditModal()">Abbrechen</button>
   </div>
+
+    <!-- PILZ -->
+    <div class="screen" id="pilz-screen">
+      <h2 style="display:flex;align-items:center;gap:8px">🍄 PilzModus <span id="pilz-beta-badge" style="font-size:.65rem;background:var(--accent);color:#fff;padding:2px 8px;border-radius:10px;font-weight:800">NEU</span></h2>
+
+      <!-- GESPERRT BIS 10.000 XP -->
+      <div class="pilz-locked-msg" id="pilz-locked-view">
+        <div class="pl-icon">🔒</div>
+        <h2>Noch nicht freigeschaltet</h2>
+        <p>Du erreichst <strong>10.000 XP</strong> und schaltest den PilzModus frei — als Dankeschön für dein Engagement!</p>
+        <div id="pilz-lock-progress" style="margin-top:16px;padding:14px;background:var(--surface);border-radius:12px;border:1px solid var(--border)">
+          <div style="font-weight:800;color:var(--accent2);margin-bottom:6px" id="pilz-xp-text">0 / 10.000 XP</div>
+          <div style="background:var(--border);border-radius:4px;height:8px;overflow:hidden">
+            <div id="pilz-xp-fill" style="height:100%;background:linear-gradient(90deg,#f59f00,#ff6b35);border-radius:4px;width:0%;transition:width .5s"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- FREIGESCHALTET -->
+      <div id="pilz-unlocked">
+        <p style="color:var(--muted);margin-bottom:16px;line-height:1.5">Fotografiere einen Pilz und lass ihn bestimmen — mit Hinweis ob <strong style="color:var(--accent)">essbar</strong>, <strong style="color:var(--warn)">ungenießbar</strong> oder <strong style="color:var(--danger)">giftig</strong>.</p>
+
+        <!-- Foto-Bereich -->
+        <div id="pilz-photo-area" class="photo-area"
+          onclick="document.getElementById('pilz-file-input').click()"
+          style="cursor:pointer;margin-bottom:16px">
+          <span class="big-icon">🍄</span>
+          <span>Tippen um Pilzfoto aufzunehmen</span>
+          <div class="overlay">Ändern</div>
+        </div>
+        <input type="file" id="pilz-file-input" accept="image/*" capture="environment" style="display:none" onchange="handlePilzPhoto(this)">
+
+        <button class="btn btn-primary" style="width:100%;margin-bottom:12px" onclick="identifyPilz()">🔍 Pilz bestimmen</button>
+
+        <!-- Ergebnis -->
+        <div id="pilz-result" style="display:none;background:var(--surface2);border-radius:16px;padding:16px;border:1px solid var(--border)">
+          <div id="pilz-result-name" style="font-size:1.3rem;font-weight:900;color:var(--accent2);margin-bottom:4px"></div>
+          <div id="pilz-result-latin" style="font-size:.85rem;color:var(--muted);font-style:italic;margin-bottom:12px"></div>
+          <div id="pilz-toxicity-badge" style="display:inline-block;padding:6px 16px;border-radius:20px;font-weight:800;font-size:.9rem;margin-bottom:12px"></div>
+          <div id="pilz-result-info" style="font-size:.88rem;line-height:1.6;color:var(--text)"></div>
+          <div style="margin-top:14px;display:flex;gap:8px">
+            <button class="btn btn-primary" style="flex:1" onclick="savePilz()">💾 In Archiv</button>
+            <button class="btn" style="flex:1" onclick="resetPilz()">Neu</button>
+          </div>
+        </div>
+
+        <div id="pilz-loading" style="display:none;text-align:center;padding:20px;color:var(--muted)">
+          <div style="font-size:2rem;margin-bottom:8px">🔍</div>
+          <div>Pilz wird bestimmt…</div>
+        </div>
+
+        <!-- Mini-Archiv -->
+        <div id="pilz-archive-section" style="margin-top:20px">
+          <h3 style="font-size:.95rem;color:var(--muted);margin-bottom:10px">Meine Pilze</h3>
+          <div id="pilz-archive-list"></div>
+        </div>
+      </div>
+    </div>
 
     <!-- EXAM -->
     <div class="screen" id="exam-screen">
@@ -919,6 +1046,7 @@ function switchTab(tab) {
   if (nb) nb.classList.add('active');
   if (tab === 'archive') renderArchive();
   if (tab === 'learn')   initLearn();
+  if (tab === 'pilz')    { renderPilzLockProgress(); if (getXP() >= 10000) unlockPilzModus(); }
   if (tab === 'exam')    { renderExamLevelInfo(); document.getElementById('exam-start-view').style.display='block'; document.getElementById('exam-active-view').style.display='none'; document.getElementById('exam-result-view').style.display='none'; }
   updatePlantNetKeyStatus();
   updateGroqKeyStatus();
@@ -1375,14 +1503,14 @@ function showLearnCard() {
   if (learnIndex >= learnQueue.length) {
     document.getElementById('learn-card').style.display = 'none';
     document.getElementById('learn-empty').style.display = 'block';
-    document.getElementById('learn-empty').querySelector('h2').textContent = 'Session abgeschlossen!';
+    document.getElementById('learn-empty').querySelector('h2').textContent = 'Session abgeschlossen! 🎉';
+    setTimeout(() => openBadgeGallery(true), 600);
     return;
   }
   const p = learnQueue[learnIndex];
   document.getElementById('learn-progress').textContent = `${learnIndex+1} / ${learnQueue.length} fällig`;
   document.getElementById('learn-img').src = p.photo || '';
   document.getElementById('learn-img-wrap').style.display = p.photo ? 'block' : 'none';
-  document.getElementById('learn-name-hidden').style.display = 'block';
   document.getElementById('learn-name-revealed').style.display = 'none';
   document.getElementById('learn-name-revealed').textContent = p.name;
   document.getElementById('btn-reveal').style.display = 'block';
@@ -1391,7 +1519,6 @@ function showLearnCard() {
   document.getElementById('delete-confirm').style.display = 'none';
 }
 function revealName() {
-  document.getElementById('learn-name-hidden').style.display = 'none';
   document.getElementById('learn-name-revealed').style.display = 'block';
   document.getElementById('btn-reveal').style.display = 'none';
   document.getElementById('grade-row').style.display = 'flex';
@@ -2091,11 +2218,13 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.getRegistrations().t
 //  GAMIFICATION
 // ══════════════════════════════════════════════════════════════
 const LEVELS = [
-  { name:'Botanik-Praktikant', minXP:0,    maxXP:150,  icon:'🌱' },
-  { name:'Bachelor of Botany', minXP:150,  maxXP:400,  icon:'📗' },
-  { name:'Master of Plants',   minXP:400,  maxXP:900,  icon:'🌿' },
-  { name:'Dr. rer. nat.',      minXP:900,  maxXP:2000, icon:'🔬' },
-  { name:'Prof. emeritus',     minXP:2000, maxXP:9999, icon:'🎓' },
+  { name:'Pflanzensucher',      minXP:0,     maxXP:150,   icon:'🔍' },
+  { name:'Feldnotizler',        minXP:150,   maxXP:400,   icon:'📓' },
+  { name:'Naturkundler',        minXP:400,   maxXP:900,   icon:'🗺️' },
+  { name:'Pflanzenkenner',      minXP:900,   maxXP:2000,  icon:'🌿' },
+  { name:'Waldweiser',          minXP:2000,  maxXP:5000,  icon:'🌳' },
+  { name:'Floraexperte',        minXP:5000,  maxXP:10000, icon:'🌺' },
+  { name:'Botanische Legende',  minXP:10000, maxXP:99999, icon:'✨' },
 ];
 
 const BADGES = [
@@ -2166,6 +2295,17 @@ function renderXPBar() {
   if (el_pill)  el_pill.textContent  = lv.icon + ' ' + lv.name;
   if (el_fill)  el_fill.style.width  = pct + '%';
   if (el_label) el_label.textContent = xp + ' XP';
+  const el_next = document.getElementById('xp-next-label');
+  if (el_next) {
+    if (next) {
+      const diff = next.minXP - xp;
+      el_next.textContent = 'Noch ' + diff + ' XP bis ' + next.icon + ' ' + next.name;
+    } else {
+      el_next.textContent = '✨ Maximalstufe erreicht!';
+    }
+  }
+  // Pilzmodus freischalten?
+  if (xp >= 10000) unlockPilzModus();
 }
 
 async function checkBadges() {
@@ -2270,6 +2410,7 @@ function finishExam() {
   const grade = pct >= .95 ? 1 : pct >= .85 ? 2 : pct >= .70 ? 3 : pct >= .50 ? 4 : 5;
   const gradeLabel = ['','Sehr gut','Gut','Befriedigend','Ausreichend','Nicht bestanden'][grade];
   const gradeNote  = ['','1 – Sehr gut','2 – Gut','3 – Befriedigend','4 – Ausreichend','5 – Nicht bestanden'][grade];
+  const acadTitle  = ['','Dr. rer. nat.','Master of Plants','Bachelor of Botany','Botanik-Praktikant','Praktikant (weiter üben!)'][grade];
 
   // Save exam result
   const exams = JSON.parse(localStorage.getItem('pflanz_exams') || '[]');
@@ -2308,6 +2449,8 @@ function finishExam() {
 
 function prepDiploma(grade, gradeNote, correct, total) {
   const stars = grade === 1 ? '⭐⭐⭐' : grade === 2 ? '⭐⭐' : '⭐';
+  const acadTitles = ['','Dr. rer. nat.','Master of Plants','Bachelor of Botany','Botanik-Praktikant','Praktikant'];
+  document.querySelector('#diploma-card .dc-title').textContent = acadTitles[grade] || 'Botanik-Urkunde';
   document.querySelector('#diploma-card .dc-stars').textContent = stars;
   document.getElementById('diploma-grade-display').textContent = 'Note ' + gradeNote;
   document.getElementById('diploma-score-note').textContent = correct + ' von ' + total + ' Fragen richtig';
@@ -2346,6 +2489,137 @@ function renderExamHistory() {
   el.innerHTML = h;
 }
 
+
+// ── Badge-Galerie ─────────────────────────────────────────────
+function openBadgeGallery(afterSession = false) {
+  const xp = getXP();
+  const lv = getCurrentLevel(xp);
+  const earned = getEarnedBadges();
+  const el = document.getElementById('badge-gallery');
+  const grid = document.getElementById('badge-grid');
+  const xpRow = document.getElementById('bg-xp-row');
+  const continueBtn = document.getElementById('bg-continue-btn');
+  if (!el) return;
+
+  xpRow.textContent = lv.icon + ' ' + lv.name + '  ·  ' + xp + ' XP';
+
+  grid.innerHTML = BADGES.map(b => {
+    const has = earned.includes(b.id);
+    return '<div class="badge-item' + (has ? ' earned' : '') + '">' +
+      '<div class="bi-icon">' + b.icon + '</div>' +
+      '<div class="bi-name">' + b.name + '</div>' +
+      '<div class="bi-desc">' + b.desc + '</div>' +
+      '</div>';
+  }).join('');
+
+  continueBtn.textContent = afterSession ? 'Weiter lernen →' : 'Schließen ✕';
+  el.classList.add('show');
+}
+
+function closeBadgeGallery() {
+  const el = document.getElementById('badge-gallery');
+  if (el) el.classList.remove('show');
+}
+
+// ── Pilz-Modus ────────────────────────────────────────────────
+let pilzPhotoData = null;
+
+function unlockPilzModus() {
+  const lockIcon = document.getElementById('pilz-lock-icon');
+  const lockedView = document.getElementById('pilz-locked-view');
+  const unlockedView = document.getElementById('pilz-unlocked');
+  if (lockIcon) lockIcon.style.display = 'none';
+  if (lockedView) lockedView.style.display = 'none';
+  if (unlockedView) unlockedView.style.display = 'block';
+  renderPilzArchive();
+}
+
+function renderPilzLockProgress() {
+  const xp = getXP();
+  const pct = Math.min(100, Math.round(xp / 10000 * 100));
+  const el_text = document.getElementById('pilz-xp-text');
+  const el_fill = document.getElementById('pilz-xp-fill');
+  if (el_text) el_text.textContent = xp.toLocaleString('de') + ' / 10.000 XP (' + pct + '%)';
+  if (el_fill) el_fill.style.width = pct + '%';
+}
+
+function handlePilzPhoto(input) {
+  const file = input.files[0];
+  if (!file) return;
+  resizeImage(file, 800, 800, 0.85).then(data => {
+    pilzPhotoData = data;
+    const area = document.getElementById('pilz-photo-area');
+    area.innerHTML = '<img src="' + data + '" style="width:100%;height:100%;object-fit:cover"><div class="overlay">Ändern</div>';
+  });
+}
+
+async function identifyPilz() {
+  if (!pilzPhotoData) { alert('Bitte erst ein Foto aufnehmen.'); return; }
+  document.getElementById('pilz-result').style.display = 'none';
+  document.getElementById('pilz-loading').style.display = 'block';
+  try {
+    const msgs = [{role:'user', content:[
+      {type:'text', text:'Du bist Mykologe. Bestimme diesen Pilz. Antworte NUR als JSON:
+{"name":"<Deutscher Name>","latin":"<Lateinischer Name>","toxicity":"essbar|giftig|tödlich giftig|ungenießbar|unbekannt","warning":"<kurze Warnung wenn giftig, sonst leer>","info":"<2-3 Sätze über den Pilz, Merkmale, Vorkommen>"}'},
+      {type:'image_url', image_url:{url: pilzPhotoData}}
+    ]}];
+    const raw = await aiChat(msgs, 400);
+    const m = raw.match(/\{[\s\S]*\}/);
+    if (!m) throw new Error('Kein JSON');
+    const d = JSON.parse(m[0]);
+    document.getElementById('pilz-result-name').textContent = d.name || 'Unbekannt';
+    document.getElementById('pilz-result-latin').textContent = d.latin || '';
+    const tox = d.toxicity || 'unbekannt';
+    const toxBadge = document.getElementById('pilz-toxicity-badge');
+    const colors = {essbar:'background:#edfbe8;color:#1e7a38', giftig:'background:#fff3e0;color:#e65100', 'tödlich giftig':'background:#fdeaea;color:#c62828', ungenießbar:'background:#f5f5f5;color:#666', unbekannt:'background:#f0f0f0;color:#888'};
+    const icons = {essbar:'✅ Essbar', giftig:'⚠️ Giftig', 'tödlich giftig':'☠️ TÖDLICH GIFTIG', ungenießbar:'⛔ Ungenießbar', unbekannt:'❓ Unbekannt'};
+    toxBadge.style.cssText = (colors[tox] || colors.unbekannt) + ';border-radius:20px;padding:6px 16px;font-weight:800;font-size:.9rem';
+    toxBadge.textContent = icons[tox] || '❓ Unbekannt';
+    let infoText = d.info || '';
+    if (d.warning) infoText = '<strong style="color:var(--danger)">⚠️ ' + esc(d.warning) + '</strong><br><br>' + esc(infoText);
+    else infoText = esc(infoText);
+    document.getElementById('pilz-result-info').innerHTML = infoText;
+    document.getElementById('pilz-loading').style.display = 'none';
+    document.getElementById('pilz-result').style.display = 'block';
+    window._lastPilzData = d;
+  } catch(e) {
+    document.getElementById('pilz-loading').style.display = 'none';
+    alert('Bestimmung fehlgeschlagen. Bitte prüfe deine KI-Einstellungen.');
+  }
+}
+
+function savePilz() {
+  const d = window._lastPilzData;
+  if (!d) return;
+  const pilze = JSON.parse(localStorage.getItem('pilz_archive') || '[]');
+  pilze.unshift({ name: d.name, latin: d.latin, toxicity: d.toxicity, info: d.info, photo: pilzPhotoData, date: Date.now() });
+  localStorage.setItem('pilz_archive', JSON.stringify(pilze));
+  renderPilzArchive();
+  alert('✓ ' + d.name + ' im Pilz-Archiv gespeichert!');
+}
+
+function resetPilz() {
+  pilzPhotoData = null;
+  document.getElementById('pilz-photo-area').innerHTML = '<span class="big-icon">🍄</span><span>Tippen um Pilzfoto aufzunehmen</span><div class="overlay">Ändern</div>';
+  document.getElementById('pilz-result').style.display = 'none';
+}
+
+function renderPilzArchive() {
+  const pilze = JSON.parse(localStorage.getItem('pilz_archive') || '[]');
+  const el = document.getElementById('pilz-archive-list');
+  if (!el) return;
+  if (!pilze.length) { el.innerHTML = '<p style="color:var(--muted);font-size:.85rem">Noch keine Pilze bestimmt.</p>'; return; }
+  const toxColors = {essbar:'var(--accent)', giftig:'#e65100', 'tödlich giftig':'var(--danger)', ungenießbar:'#888', unbekannt:'#aaa'};
+  el.innerHTML = pilze.slice(0,10).map(p =>
+    '<div style="display:flex;gap:10px;align-items:center;padding:10px;background:var(--surface);border:1px solid var(--border);border-radius:12px;margin-bottom:8px">' +
+    (p.photo ? '<img src="' + p.photo + '" style="width:48px;height:48px;object-fit:cover;border-radius:8px">' : '<div style="width:48px;height:48px;background:var(--surface2);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.5rem">🍄</div>') +
+    '<div style="flex:1;min-width:0">' +
+    '<div style="font-weight:800;font-size:.9rem;color:var(--text)">' + esc(p.name||'?') + '</div>' +
+    '<div style="font-size:.75rem;color:' + (toxColors[p.toxicity]||'#aaa') + ';font-weight:700">' + (p.toxicity||'unbekannt') + '</div>' +
+    '</div></div>'
+  ).join('');
+}
+
 // Init nach allen Definitionen
 document.addEventListener('DOMContentLoaded', () => { try { renderXPBar(); } catch(e) {} });
 
@@ -2364,6 +2638,20 @@ document.addEventListener('DOMContentLoaded', () => { try { renderXPBar(); } cat
 </div>
 <!-- Hidden file input for illustration upload -->
 <input type="file" id="illus-upload-input" accept="image/*" style="display:none" onchange="handleIllusUpload(this)">
+
+
+<!-- Badge Galerie -->
+<div id="badge-gallery">
+  <div id="badge-gallery-card">
+    <h2>🏅 Meine Abzeichen</h2>
+    <div class="bg-xp-row" id="bg-xp-row"></div>
+    <div class="badge-grid" id="badge-grid"></div>
+    <div id="badge-gallery-nav">
+      <button class="btn btn-secondary" onclick="closeBadgeGallery()">← Zurück</button>
+      <button class="btn btn-primary" id="bg-continue-btn" onclick="closeBadgeGallery()">Weiter lernen →</button>
+    </div>
+  </div>
+</div>
 
 <!-- Badge Pop-up -->
 <div id="badge-popup">
