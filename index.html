@@ -1099,7 +1099,7 @@ async function savePlant() {
   msg.style.display = 'block';
   setTimeout(() => msg.style.display = 'none', 2000);
   updateDueBadge();
-  awardXP(15); checkBadges();
+  try { awardXP(15); } catch(e) {} try { checkBadges(); } catch(e) {}
 
   // ── Infos im Hintergrund laden (nicht blockierend) ──
   generatePlantInfo(newId).catch(() => {});
@@ -1523,8 +1523,8 @@ async function gradeCard(knew) {
   await dbPut(full);
   learnIndex++;
   updateDueBadge();
-  if (knew) { awardXP(5); checkBadges(); }
   showLearnCard();
+  if (knew) { try { awardXP(5); } catch(e) {} try { checkBadges(); } catch(e) {} }
 }
 
 
