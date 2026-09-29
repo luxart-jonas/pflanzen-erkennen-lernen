@@ -294,6 +294,142 @@
 
   ::-webkit-scrollbar { width: 4px; }
   ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  /* ── Gamification: XP Bar ─────────────────────────── */
+  #xp-bar-wrap {
+    display: flex; align-items: center; gap: 8px;
+    flex: 1; margin: 0 8px;
+  }
+  #xp-level-pill {
+    background: var(--accent); color: #fff;
+    font-size: .65rem; font-weight: 800;
+    padding: 2px 8px; border-radius: 20px;
+    white-space: nowrap; letter-spacing: .02em;
+  }
+  #xp-track {
+    flex: 1; height: 6px; background: var(--border);
+    border-radius: 3px; overflow: hidden;
+  }
+  #xp-fill {
+    height: 100%; background: linear-gradient(90deg, var(--accent), #7ed957);
+    border-radius: 3px; transition: width .5s ease;
+  }
+  #xp-label {
+    font-size: .65rem; color: var(--muted);
+    white-space: nowrap;
+  }
+
+  /* ── Badge Pop-up ────────────────────────────────── */
+  #badge-popup {
+    position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: #fff; border: 2px solid var(--accent);
+    border-radius: 20px; padding: 14px 22px;
+    box-shadow: 0 8px 32px rgba(58,170,85,.25);
+    display: flex; align-items: center; gap: 12px;
+    z-index: 9000; opacity: 0;
+    transition: opacity .35s, transform .35s;
+    pointer-events: none; min-width: 240px; max-width: 320px;
+  }
+  #badge-popup.show {
+    opacity: 1; transform: translateX(-50%) translateY(0);
+  }
+  #badge-popup .bp-icon { font-size: 2rem; line-height: 1; }
+  #badge-popup .bp-title { font-weight: 800; font-size: .9rem; color: var(--text); }
+  #badge-popup .bp-sub { font-size: .78rem; color: var(--muted); margin-top: 2px; }
+
+  /* ── Diploma Overlay ─────────────────────────────── */
+  #diploma-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,.55);
+    z-index: 9900; display: none;
+    align-items: center; justify-content: center;
+    padding: 24px;
+  }
+  #diploma-overlay.show { display: flex; }
+  #diploma-card {
+    background: #fffef8;
+    border: 4px double var(--accent2);
+    border-radius: 20px;
+    padding: 36px 28px 28px;
+    text-align: center;
+    max-width: 340px; width: 100%;
+    box-shadow: 0 16px 60px rgba(30,122,56,.35);
+    animation: diplomaIn .5s cubic-bezier(.17,.89,.32,1.27) both;
+  }
+  @keyframes diplomaIn {
+    from { transform: scale(.7) rotate(-4deg); opacity: 0; }
+    to   { transform: scale(1) rotate(0deg); opacity: 1; }
+  }
+  #diploma-card .dc-stars { font-size: 2rem; letter-spacing: 4px; margin-bottom: 8px; }
+  #diploma-card .dc-title { font-size: 1.4rem; font-weight: 900; color: var(--accent2); margin-bottom: 4px; }
+  #diploma-card .dc-sub { font-size: .85rem; color: var(--muted); margin-bottom: 16px; }
+  #diploma-card .dc-grad { font-size: 1.1rem; font-weight: 800; color: var(--text); margin-bottom: 6px; }
+  #diploma-card .dc-note { font-size: .78rem; color: var(--muted); margin-bottom: 20px; }
+  #diploma-card .dc-seal { font-size: 3rem; margin-bottom: 8px; }
+  #diploma-card .dc-name { font-style: italic; font-size: 1rem; color: var(--accent); margin-bottom: 20px; }
+  #diploma-card button { margin-top: 4px; }
+
+  /* ── Exam Screen ─────────────────────────────────── */
+  #exam-screen .exam-progress {
+    text-align: center; color: var(--muted); font-size: .85rem; margin-bottom: 8px;
+  }
+  #exam-screen .exam-photo-wrap {
+    width: 100%; border-radius: 16px; overflow: hidden;
+    aspect-ratio: 1; background: var(--surface2);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 16px; border: 1px solid var(--border);
+  }
+  #exam-screen .exam-photo-wrap img {
+    width: 100%; height: 100%; object-fit: cover;
+  }
+  #exam-screen .exam-photo-wrap .no-photo {
+    font-size: 4rem; opacity: .3;
+  }
+  #exam-screen .exam-answer-row {
+    display: flex; gap: 8px; margin-bottom: 14px;
+  }
+  #exam-screen .exam-answer-row input {
+    flex: 1; padding: 10px 14px; border: 2px solid var(--border);
+    border-radius: 12px; font: inherit; font-size: 1rem;
+    background: var(--surface); color: var(--text);
+    outline: none; transition: border-color .2s;
+  }
+  #exam-screen .exam-answer-row input:focus { border-color: var(--accent); }
+  #exam-screen .exam-feedback {
+    border-radius: 12px; padding: 10px 14px;
+    font-size: .9rem; margin-bottom: 14px; display: none;
+    font-weight: 700;
+  }
+  #exam-screen .exam-feedback.correct {
+    background: #edfbe8; color: var(--accent2); display: block;
+  }
+  #exam-screen .exam-feedback.wrong {
+    background: #fdeaea; color: #c62828; display: block;
+  }
+  #exam-screen .exam-result-box {
+    background: var(--surface2); border-radius: 16px; padding: 20px;
+    text-align: center; border: 1px solid var(--border);
+  }
+  #exam-screen .exam-result-box .er-grade {
+    font-size: 3.5rem; font-weight: 900; color: var(--accent2); line-height: 1;
+  }
+  #exam-screen .exam-result-box .er-label {
+    font-size: 1.1rem; font-weight: 700; margin: 8px 0 4px;
+  }
+  #exam-screen .exam-result-box .er-note {
+    font-size: .85rem; color: var(--muted); margin-bottom: 16px;
+  }
+  #exam-history { margin-top: 18px; }
+  #exam-history h3 { font-size: .95rem; color: var(--muted); margin-bottom: 8px; }
+  .exam-hist-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 8px 12px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 10px; margin-bottom: 6px;
+    font-size: .85rem;
+  }
+  .exam-hist-row .ehr-grade {
+    font-weight: 800; color: var(--accent2); font-size: 1.1rem;
+  }
+
 </style>
 </head>
 <body>
@@ -313,6 +449,12 @@
     <span class="leaf">🌿</span>
     <h1>PflanzenLern</h1>
     <span id="due-badge" class="badge" style="display:none"></span>
+    <!-- XP Bar -->
+    <div id="xp-bar-wrap">
+      <span id="xp-level-pill">Praktikant</span>
+      <div id="xp-track"><div id="xp-fill" style="width:0%"></div></div>
+      <span id="xp-label">0 XP</span>
+    </div>
     <button onclick="switchTab('settings')" id="tab-settings-btn" style="background:none;border:none;font-size:1.4rem;cursor:pointer;padding:2px 4px;color:var(--muted)">⚙️</button>
   </div>
 
@@ -325,6 +467,9 @@
     </button>
     <button class="nav-btn" onclick="switchTab('learn')" id="tab-learn">
       <span class="icon">🧠</span>Lernen
+    </button>
+    <button class="nav-btn" onclick="switchTab('exam')" id="tab-exam">
+      <span class="icon">🎓</span>Prüfung
     </button>
   </nav>
 
@@ -570,6 +715,48 @@
     <button class="btn btn-primary" onclick="saveEdit()">Speichern</button>
     <button class="btn btn-secondary" style="margin-top:10px" onclick="closeEditModal()">Abbrechen</button>
   </div>
+
+    <!-- EXAM -->
+    <div class="screen" id="exam-screen">
+      <div id="exam-start-view">
+        <h2>🎓 Botanik-Prüfung</h2>
+        <p style="color:var(--muted);margin-bottom:16px;line-height:1.5">
+          Erkennst du 10 Pflanzen allein am Foto?<br>Tippe den deutschen oder lateinischen Namen ein.
+        </p>
+        <div id="exam-level-info" style="background:var(--surface2);border-radius:14px;padding:14px;margin-bottom:20px;border:1px solid var(--border)">
+          <div style="font-weight:800;font-size:1rem;color:var(--accent2);margin-bottom:4px" id="exam-level-title">Lade…</div>
+          <div style="font-size:.85rem;color:var(--muted)" id="exam-level-sub"></div>
+        </div>
+        <button class="btn btn-primary" style="width:100%;margin-bottom:12px" onclick="startExam()">🏁 Prüfung starten</button>
+        <div id="exam-history"></div>
+      </div>
+
+      <div id="exam-active-view" style="display:none">
+        <div class="exam-progress" id="exam-progress-text">Frage 1 von 10</div>
+        <div class="exam-photo-wrap">
+          <img id="exam-photo" src="" alt="" style="display:none">
+          <div class="no-photo" id="exam-no-photo">🌿</div>
+        </div>
+        <div class="exam-answer-row">
+          <input type="text" id="exam-input" placeholder="Pflanzennamen eingeben…"
+            onkeydown="if(event.key==='Enter')submitExamAnswer()">
+          <button class="btn btn-primary" onclick="submitExamAnswer()">✓</button>
+        </div>
+        <div class="exam-feedback" id="exam-feedback"></div>
+        <button class="btn" id="exam-next-btn" style="display:none;width:100%;background:var(--accent);color:#fff" onclick="nextExamQuestion()">Weiter →</button>
+      </div>
+
+      <div id="exam-result-view" style="display:none">
+        <div class="exam-result-box">
+          <div class="er-grade" id="exam-result-grade">1</div>
+          <div class="er-label" id="exam-result-label">Ausgezeichnet!</div>
+          <div class="er-note" id="exam-result-note">10 von 10 richtig</div>
+          <button class="btn btn-primary" style="margin-right:8px" onclick="showDiploma()">🎓 Urkunde</button>
+          <button class="btn" onclick="switchTab('exam')">Neue Prüfung</button>
+        </div>
+        <div id="exam-result-review" style="margin-top:16px"></div>
+      </div>
+    </div>
 </div>
 
 <script>
@@ -732,6 +919,7 @@ function switchTab(tab) {
   if (nb) nb.classList.add('active');
   if (tab === 'archive') renderArchive();
   if (tab === 'learn')   initLearn();
+  if (tab === 'exam')    { renderExamLevelInfo(); document.getElementById('exam-start-view').style.display='block'; document.getElementById('exam-active-view').style.display='none'; document.getElementById('exam-result-view').style.display='none'; }
   updatePlantNetKeyStatus();
   updateGroqKeyStatus();
 }
@@ -911,6 +1099,7 @@ async function savePlant() {
   msg.style.display = 'block';
   setTimeout(() => msg.style.display = 'none', 2000);
   updateDueBadge();
+  awardXP(15); checkBadges();
 
   // ── Infos im Hintergrund laden (nicht blockierend) ──
   generatePlantInfo(newId).catch(() => {});
@@ -1334,6 +1523,7 @@ async function gradeCard(knew) {
   await dbPut(full);
   learnIndex++;
   updateDueBadge();
+  if (knew) { awardXP(5); checkBadges(); }
   showLearnCard();
 }
 
@@ -1376,6 +1566,9 @@ async function removeDuplicates() {
 async function startBee() {
   const all = await dbGetAll();
   if (all.length === 0) { alert('Noch keine Pflanzen vorhanden.'); return; }
+  const beeCount = parseInt(localStorage.getItem('pflanz_bee_count')||'0') + 1;
+  localStorage.setItem('pflanz_bee_count', beeCount);
+  checkBadges();
   // Shuffle
   const shuffled = all.sort(() => Math.random() - 0.5);
   learnQueue = shuffled.slice(0, 15);
@@ -1891,7 +2084,269 @@ document.addEventListener('DOMContentLoaded', () => {
   }, 2000); // kurze Verzögerung, App soll erst geladen sein
 });
 
+renderXPBar();
 if ('serviceWorker' in navigator) { navigator.serviceWorker.getRegistrations().then(r => r.forEach(s => s.unregister())); }
+
+
+// ══════════════════════════════════════════════════════════════
+//  GAMIFICATION
+// ══════════════════════════════════════════════════════════════
+const LEVELS = [
+  { name:'Botanik-Praktikant', minXP:0,    maxXP:150,  icon:'🌱' },
+  { name:'Bachelor of Botany', minXP:150,  maxXP:400,  icon:'📗' },
+  { name:'Master of Plants',   minXP:400,  maxXP:900,  icon:'🌿' },
+  { name:'Dr. rer. nat.',      minXP:900,  maxXP:2000, icon:'🔬' },
+  { name:'Prof. emeritus',     minXP:2000, maxXP:9999, icon:'🎓' },
+];
+
+const BADGES = [
+  { id:'fruehaufsteher', icon:'🌅', name:'Frühaufsteher',
+    desc:'Lerne vor 8 Uhr morgens',
+    check: async () => new Date().getHours() < 8 },
+  { id:'giftkenner', icon:'☠️', name:'Giftkenner',
+    desc:'Habe eine Giftpflanze im Archiv',
+    check: async () => {
+      const all = await dbGetAll();
+      return all.some(p => /gift|toxisch|belladonna|bilsenkraut|stechapfel|eisenhut/i.test((p.name||'')+(p.notes||'')+(p.infoHtml||'')));
+    }},
+  { id:'waldlaeufer', icon:'🌲', name:'Waldläufer',
+    desc:'10 Pflanzen im Archiv',
+    check: async () => { const a = await dbGetAll(); return a.length >= 10; }},
+  { id:'jahreszeitenkenner', icon:'🍂', name:'Jahreszeitenkenner',
+    desc:'In allen 4 Jahreszeiten gelernt',
+    check: async () => {
+      const seasons = JSON.parse(localStorage.getItem('pflanz_seasons') || '[]');
+      return [0,1,2,3].every(s => seasons.includes(s));
+    }},
+  { id:'eiserne_biene', icon:'🐝', name:'Eiserne Biene',
+    desc:'5 Bienen-Runden abgeschlossen',
+    check: async () => parseInt(localStorage.getItem('pflanz_bee_count')||'0') >= 5 },
+  { id:'pruefling', icon:'🎓', name:'Prüfling',
+    desc:'Erste Prüfung bestanden',
+    check: async () => {
+      const exams = JSON.parse(localStorage.getItem('pflanz_exams') || '[]');
+      return exams.some(e => e.grade <= 3);
+    }},
+];
+
+function getXP() { return parseInt(localStorage.getItem('pflanz_xp') || '0'); }
+function setXP(v) { localStorage.setItem('pflanz_xp', v); }
+function getEarnedBadges() { return JSON.parse(localStorage.getItem('pflanz_badges') || '[]'); }
+
+function getCurrentLevel(xp) {
+  let lv = LEVELS[0];
+  for (const l of LEVELS) { if (xp >= l.minXP) lv = l; }
+  return lv;
+}
+
+function awardXP(amount) {
+  const oldXP = getXP();
+  const newXP = oldXP + amount;
+  setXP(newXP);
+  trackSeason();
+  renderXPBar();
+  // Level-up flash?
+  const oldLv = getCurrentLevel(oldXP);
+  const newLv = getCurrentLevel(newXP);
+  if (oldLv !== newLv) {
+    showBadge({ icon: newLv.icon, name: 'Level Up! ' + newLv.name, desc: 'Neues botanisches Level erreicht! 🎉' });
+  }
+}
+
+function renderXPBar() {
+  const xp = getXP();
+  const lv = getCurrentLevel(xp);
+  const lvIdx = LEVELS.indexOf(lv);
+  const next = LEVELS[lvIdx + 1];
+  const pct = next
+    ? Math.min(100, Math.round((xp - lv.minXP) / (next.minXP - lv.minXP) * 100))
+    : 100;
+  const el_pill  = document.getElementById('xp-level-pill');
+  const el_fill  = document.getElementById('xp-fill');
+  const el_label = document.getElementById('xp-label');
+  if (el_pill)  el_pill.textContent  = lv.icon + ' ' + lv.name;
+  if (el_fill)  el_fill.style.width  = pct + '%';
+  if (el_label) el_label.textContent = xp + ' XP';
+}
+
+async function checkBadges() {
+  const earned = getEarnedBadges();
+  for (const b of BADGES) {
+    if (earned.includes(b.id)) continue;
+    try {
+      const ok = await b.check();
+      if (ok) {
+        earned.push(b.id);
+        localStorage.setItem('pflanz_badges', JSON.stringify(earned));
+        showBadge(b);
+        break; // show one at a time
+      }
+    } catch {}
+  }
+}
+
+let badgeTimer = null;
+function showBadge(badge) {
+  const popup = document.getElementById('badge-popup');
+  document.getElementById('bp-icon').textContent  = badge.icon;
+  document.getElementById('bp-title').textContent = badge.name;
+  document.getElementById('bp-sub').textContent   = badge.desc;
+  popup.classList.add('show');
+  clearTimeout(badgeTimer);
+  badgeTimer = setTimeout(() => popup.classList.remove('show'), 4000);
+}
+
+function trackSeason() {
+  const m = new Date().getMonth(); // 0-11
+  const season = m < 3 ? 3 : m < 6 ? 0 : m < 9 ? 1 : 2; // winter=3,spring=0,summer=1,fall=2
+  const seasons = JSON.parse(localStorage.getItem('pflanz_seasons') || '[]');
+  if (!seasons.includes(season)) {
+    seasons.push(season);
+    localStorage.setItem('pflanz_seasons', JSON.stringify(seasons));
+  }
+}
+
+// ── Exam ──────────────────────────────────────────────────────
+let examPlants = [], examIndex = 0, examCorrect = 0, examAnswers = [];
+
+async function startExam() {
+  const all = await dbGetAll();
+  if (all.length < 5) { alert('Du brauchst mindestens 5 Pflanzen im Archiv für die Prüfung.'); return; }
+  const count = Math.min(10, all.length);
+  examPlants = all.sort(() => Math.random() - 0.5).slice(0, count);
+  examIndex = 0; examCorrect = 0; examAnswers = [];
+  document.getElementById('exam-start-view').style.display  = 'none';
+  document.getElementById('exam-result-view').style.display = 'none';
+  document.getElementById('exam-active-view').style.display = 'block';
+  showExamQuestion();
+}
+
+function showExamQuestion() {
+  if (examIndex >= examPlants.length) { finishExam(); return; }
+  const p = examPlants[examIndex];
+  const pct = examIndex + 1;
+  document.getElementById('exam-progress-text').textContent = 'Frage ' + pct + ' von ' + examPlants.length;
+  const photo = document.getElementById('exam-photo');
+  const noPhoto = document.getElementById('exam-no-photo');
+  if (p.photo) {
+    photo.src = p.photo; photo.style.display = 'block'; noPhoto.style.display = 'none';
+  } else {
+    photo.style.display = 'none'; noPhoto.style.display = 'block';
+  }
+  document.getElementById('exam-input').value = '';
+  document.getElementById('exam-input').disabled = false;
+  document.getElementById('exam-feedback').className = 'exam-feedback';
+  document.getElementById('exam-next-btn').style.display = 'none';
+  setTimeout(() => document.getElementById('exam-input').focus(), 100);
+}
+
+function submitExamAnswer() {
+  const input = document.getElementById('exam-input');
+  const answer = input.value.trim();
+  if (!answer) return;
+  const p = examPlants[examIndex];
+  const norm = s => (s||'').toLowerCase().replace(/[^a-zäöüß]/g,'');
+  const correct = norm(answer) === norm(p.name) ||
+                  (p.latin && norm(answer) === norm(p.latin)) ||
+                  (p.name && norm(p.name).includes(norm(answer)) && norm(answer).length > 3);
+  examAnswers.push({ plant: p, answer, correct });
+  if (correct) { examCorrect++; awardXP(5); }
+  const fb = document.getElementById('exam-feedback');
+  fb.className = 'exam-feedback ' + (correct ? 'correct' : 'wrong');
+  fb.textContent = correct
+    ? '✓ Richtig! ' + p.name
+    : '✗ Falsch. Gesuchte Pflanze: ' + p.name + (p.latin ? ' (' + p.latin + ')' : '');
+  input.disabled = true;
+  document.getElementById('exam-next-btn').style.display = 'block';
+}
+
+function nextExamQuestion() {
+  examIndex++;
+  showExamQuestion();
+}
+
+function finishExam() {
+  const total = examPlants.length;
+  const pct = examCorrect / total;
+  const grade = pct >= .95 ? 1 : pct >= .85 ? 2 : pct >= .70 ? 3 : pct >= .50 ? 4 : 5;
+  const gradeLabel = ['','Sehr gut','Gut','Befriedigend','Ausreichend','Nicht bestanden'][grade];
+  const gradeNote  = ['','1 – Sehr gut','2 – Gut','3 – Befriedigend','4 – Ausreichend','5 – Nicht bestanden'][grade];
+
+  // Save exam result
+  const exams = JSON.parse(localStorage.getItem('pflanz_exams') || '[]');
+  exams.unshift({ date: Date.now(), grade, correct: examCorrect, total, gradeNote });
+  if (exams.length > 20) exams.length = 20;
+  localStorage.setItem('pflanz_exams', JSON.stringify(exams));
+
+  document.getElementById('exam-active-view').style.display = 'none';
+  document.getElementById('exam-result-view').style.display = 'block';
+  document.getElementById('exam-result-grade').textContent = grade;
+  document.getElementById('exam-result-label').textContent = gradeLabel;
+  document.getElementById('exam-result-note').textContent  = examCorrect + ' von ' + total + ' richtig';
+
+  // Review list
+  let rv = '<h3 style="margin-bottom:10px;font-size:.95rem;color:var(--muted)">Alle Antworten:</h3>';
+  for (const a of examAnswers) {
+    rv += '<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:.85rem">' +
+          '<span>' + esc(a.plant.name) + '</span>' +
+          '<span style="color:' + (a.correct ? 'var(--accent)' : 'var(--danger)') + '">' +
+          (a.correct ? '✓' : '✗ ' + esc(a.answer)) + '</span></div>';
+  }
+  document.getElementById('exam-result-review').innerHTML = rv;
+
+  // XP for exam
+  if (grade <= 3) { awardXP(30); checkBadges(); }
+  else if (grade === 4) { awardXP(10); }
+
+  // Auto-show diploma if passed
+  if (grade <= 3) {
+    setTimeout(() => {
+      prepDiploma(grade, gradeNote, examCorrect, total);
+      document.getElementById('diploma-overlay').classList.add('show');
+    }, 800);
+  }
+}
+
+function prepDiploma(grade, gradeNote, correct, total) {
+  const stars = grade === 1 ? '⭐⭐⭐' : grade === 2 ? '⭐⭐' : '⭐';
+  document.querySelector('#diploma-card .dc-stars').textContent = stars;
+  document.getElementById('diploma-grade-display').textContent = 'Note ' + gradeNote;
+  document.getElementById('diploma-score-note').textContent = correct + ' von ' + total + ' Fragen richtig';
+  document.getElementById('diploma-date').textContent =
+    'ausgestellt am ' + new Date().toLocaleDateString('de-DE', { day:'2-digit', month:'long', year:'numeric' });
+}
+
+function showDiploma() {
+  const total = examPlants.length;
+  const pct = examCorrect / total;
+  const grade = pct >= .95 ? 1 : pct >= .85 ? 2 : pct >= .70 ? 3 : pct >= .50 ? 4 : 5;
+  const gradeNote = ['','1 – Sehr gut','2 – Gut','3 – Befriedigend','4 – Ausreichend','5 – Nicht bestanden'][grade];
+  prepDiploma(grade, gradeNote, examCorrect, total);
+  document.getElementById('diploma-overlay').classList.add('show');
+}
+
+function renderExamLevelInfo() {
+  const xp = getXP();
+  const lv = getCurrentLevel(xp);
+  document.getElementById('exam-level-title').textContent = lv.icon + ' ' + lv.name;
+  document.getElementById('exam-level-sub').textContent =
+    'Prüfe dein Wissen und sammle XP für deinen botanischen Aufstieg!';
+  renderExamHistory();
+}
+
+function renderExamHistory() {
+  const exams = JSON.parse(localStorage.getItem('pflanz_exams') || '[]');
+  const el = document.getElementById('exam-history');
+  if (!exams.length) { el.innerHTML = ''; return; }
+  let h = '<h3>Letzte Prüfungen</h3>';
+  for (const e of exams.slice(0, 5)) {
+    const d = new Date(e.date).toLocaleDateString('de-DE',{day:'2-digit',month:'short'});
+    h += '<div class="exam-hist-row"><span>' + d + ' · ' + e.correct + '/' + e.total + '</span>' +
+         '<span class="ehr-grade">Note ' + e.grade + '</span></div>';
+  }
+  el.innerHTML = h;
+}
+
 </script>
 <!-- Zoom Overlay -->
 <div id="zoom-overlay">
@@ -1907,5 +2362,30 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.getRegistrations().t
 </div>
 <!-- Hidden file input for illustration upload -->
 <input type="file" id="illus-upload-input" accept="image/*" style="display:none" onchange="handleIllusUpload(this)">
+
+<!-- Badge Pop-up -->
+<div id="badge-popup">
+  <div class="bp-icon" id="bp-icon">🏅</div>
+  <div>
+    <div class="bp-title" id="bp-title">Badge freigeschaltet!</div>
+    <div class="bp-sub" id="bp-sub">Beschreibung</div>
+  </div>
+</div>
+
+<!-- Diploma Overlay -->
+<div id="diploma-overlay">
+  <div id="diploma-card">
+    <div class="dc-stars">⭐⭐⭐</div>
+    <div class="dc-title">Botanik-Urkunde</div>
+    <div class="dc-sub">PflanzenLern Akademie</div>
+    <div class="dc-seal">🌿</div>
+    <div style="font-size:.8rem;color:var(--muted);margin-bottom:6px">hiermit wird verliehen an</div>
+    <div class="dc-name">Botanik-Begeisterte:r</div>
+    <div class="dc-grad" id="diploma-grade-display">Note 1 – Sehr gut</div>
+    <div class="dc-note" id="diploma-score-note">10 von 10 Fragen richtig</div>
+    <div style="font-size:.75rem;color:var(--muted);margin-bottom:16px" id="diploma-date"></div>
+    <button class="btn btn-primary" onclick="document.getElementById('diploma-overlay').classList.remove('show')">Schließen</button>
+  </div>
+</div>
 </body>
 </html>
