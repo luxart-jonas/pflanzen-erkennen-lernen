@@ -2559,8 +2559,7 @@ async function identifyPilz() {
   document.getElementById('pilz-loading').style.display = 'block';
   try {
     const msgs = [{role:'user', content:[
-      {type:'text', text:'Du bist Mykologe. Bestimme diesen Pilz. Antworte NUR als JSON:
-{"name":"<Deutscher Name>","latin":"<Lateinischer Name>","toxicity":"essbar|giftig|tödlich giftig|ungenießbar|unbekannt","warning":"<kurze Warnung wenn giftig, sonst leer>","info":"<2-3 Sätze über den Pilz, Merkmale, Vorkommen>"}'},
+      {type:'text', text:'Du bist Mykologe. Bestimme diesen Pilz. Antworte NUR als JSON: {"name":"<Deutscher Name>","latin":"<Lateinischer Name>","toxicity":"essbar|giftig|tödlich giftig|ungenießbar|unbekannt","warning":"<kurze Warnung wenn giftig, sonst leer>","info":"<2-3 Sätze über den Pilz, Merkmale, Vorkommen>"}'},
       {type:'image_url', image_url:{url: pilzPhotoData}}
     ]}];
     const raw = await aiChat(msgs, 400);
