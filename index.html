@@ -2084,7 +2084,6 @@ document.addEventListener('DOMContentLoaded', () => {
   }, 2000); // kurze Verzögerung, App soll erst geladen sein
 });
 
-renderXPBar();
 if ('serviceWorker' in navigator) { navigator.serviceWorker.getRegistrations().then(r => r.forEach(s => s.unregister())); }
 
 
@@ -2346,6 +2345,9 @@ function renderExamHistory() {
   }
   el.innerHTML = h;
 }
+
+// Init nach allen Definitionen
+document.addEventListener('DOMContentLoaded', () => { try { renderXPBar(); } catch(e) {} });
 
 </script>
 <!-- Zoom Overlay -->
