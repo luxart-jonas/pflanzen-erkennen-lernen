@@ -533,12 +533,22 @@
 
       <div class="form-group">
         <label>Foto</label>
-        <div class="photo-area" id="photo-area" onclick="document.getElementById('photo-input').click()">
-          <span class="big-icon">📷</span>
-          <span>Tippen um Foto aufzunehmen</span>
-          <div class="overlay">Ändern</div>
+        <div style="display:flex;gap:10px">
+          <!-- Linke Hälfte: Kamera -->
+          <div class="photo-area" id="photo-area" onclick="document.getElementById('photo-input').click()" style="flex:1">
+            <span class="big-icon">📷</span>
+            <span style="font-size:.78rem;text-align:center">Foto aufnehmen</span>
+            <div class="overlay">Ändern</div>
+          </div>
+          <!-- Rechte Hälfte: Datei-Upload -->
+          <div class="photo-area" id="photo-area-upload" onclick="document.getElementById('photo-upload-input').click()" style="flex:1;border-style:dashed;border-color:var(--accent2)">
+            <span class="big-icon">⬆️</span>
+            <span style="font-size:.78rem;text-align:center">Foto hochladen</span>
+            <div class="overlay">Ändern</div>
+          </div>
         </div>
         <input type="file" id="photo-input" accept="image/*" capture="environment">
+        <input type="file" id="photo-upload-input" accept="image/*" style="display:none">
       </div>
 
       <!-- AI Recognition -->
@@ -1032,6 +1042,25 @@ document.getElementById('photo-input').addEventListener('change', async e => {
   if (getPlantNetKey()) recognizePlant();
 });
 
+// Foto-Upload (aus Galerie/Datei, kein capture)
+document.getElementById('photo-upload-input').addEventListener('change', async e => {
+  const file = e.target.files[0]; if (!file) return;
+  addPhotoData = await resizeImage(file, 1200, 1200, 0.82);
+  // Beide Hälften mit Foto füllen → zeigt, dass Foto gesetzt ist
+  setPhotoArea('photo-area', addPhotoData);
+  setPhotoArea('photo-upload-area-preview', addPhotoData);
+  // Upload-Box optisch bestätigen
+  const box = document.getElementById('photo-area-upload');
+  if (box) {
+    box.innerHTML = '<img src="' + addPhotoData + '" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;border-radius:calc(var(--radius) - 2px)"><div class="overlay">Ändern</div>';
+  }
+  const ll = document.getElementById('lens-link'); if(ll) ll.style.display = 'none';
+  document.getElementById('ai-result').style.display = 'none';
+  e.target.value = '';
+  getGPSAuto();
+  if (getPlantNetKey()) recognizePlant();
+});
+
 document.getElementById('edit-photo-input').addEventListener('change', async e => {
   const file = e.target.files[0]; if (!file) return;
   editPhotoData = await resizeImage(file, 1200, 1200, 0.82);
@@ -1163,7 +1192,9 @@ async function savePlant() {
   document.getElementById('add-notes').value = '';
   addPhotoData = null; addGpsData = null; lastAiName = ''; lastAiLatin = '';
   document.getElementById('photo-area').innerHTML =
-    '<span class="big-icon">📷</span><span>Tippen um Foto aufzunehmen</span><div class="overlay">Ändern</div>';
+    '<span class="big-icon">📷</span><span style="font-size:.78rem;text-align:center">Foto aufnehmen</span><div class="overlay">Ändern</div>';
+  const upBox = document.getElementById('photo-area-upload');
+  if (upBox) upBox.innerHTML = '<span class="big-icon">⬆️</span><span style="font-size:.78rem;text-align:center">Foto hochladen</span><div class="overlay">Ändern</div>';
 
   document.getElementById('ai-result').style.display = 'none';
   document.getElementById('gps-hint').textContent = '';
