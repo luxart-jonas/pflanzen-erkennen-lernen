@@ -1048,7 +1048,7 @@ document.getElementById('photo-upload-input').addEventListener('change', async e
   addPhotoData = await resizeImage(file, 1200, 1200, 0.82);
   // Beide Hälften mit Foto füllen → zeigt, dass Foto gesetzt ist
   setPhotoArea('photo-area', addPhotoData);
-  setPhotoArea('photo-upload-area-preview', addPhotoData);
+  // photo-area-upload preview is updated directly below
   // Upload-Box optisch bestätigen
   const box = document.getElementById('photo-area-upload');
   if (box) {
