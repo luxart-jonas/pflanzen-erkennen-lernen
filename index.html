@@ -2491,6 +2491,16 @@ const LEVELS = [
   { name:'Meister der Pflanzenwelt', minXP:42000, maxXP:999999,icon:'🌿👑'},
 ];
 
+// Nur explizit bekannte Giftpflanzennamen (name/latin). Kein infoHtml –
+// der KI-Text enthält Sätze wie "im Gegensatz zu Giftpflanzen harmlos"
+// und würde sonst massenweise False-Positives liefern.
+const GIFT_REGEX = /^(Bilsenkraut|Stechapfel|Eisenhut|Belladonna|Tollkirsche|Herbstzeitlose|Seidelbast|Fingerhut|Schierling|Pfaffenhütchen|Goldregen|Aronstab|Maiglöckchen|Taxus|Eibe|Rizinus|Oleander|Wunderbaum)$/i;
+function isGiftpflanze(p) {
+  const n = (p.name||'').trim();
+  const l = (p.latin||'').trim();
+  return GIFT_REGEX.test(n) || GIFT_REGEX.test(l);
+}
+
 // secret=true badges show as ??? until earned
 const BADGES = [
   // ── 🌱 Entdecker ──────────────────────────────────────────
@@ -2744,13 +2754,8 @@ const BADGES = [
     check: async () => getXP() >= 42000,
     secret: true },
 
-// Nur explizit bekannte Giftpflanzennamen (name/latin). Kein infoHtml – der
-// KI-Text enthält Sätze wie "im Gegensatz zu Giftpflanzen harmlos" und
-// würde sonst massenweise False-Positives liefern.
-const GIFT_REGEX = /Bilsenkraut|Stechapfel|Eisenhut|Belladonna|Tollkirsche|Herbstzeitlose|Seidelbast|Fingerhut|Schierling|Pfaffenhütchen|Goldregen|Aronstab|Maiglöckchen|Taxus|Eibe|Rizinus|Oleander|Wunderbaum|Schwarze Tollkirsche|Bärlauch(?!.{0,5}harmlos)/i;
-function isGiftpflanze(p) {
-  return GIFT_REGEX.test((p.name||'') + ' ' + (p.latin||''));
-}icon:'🍂', name:'Jahreszeitenkenner',
+  // ── 🌟 Bonus-Badges ────────────────────────────────────────
+  { id:'jahreszeitenkenner', icon:'🍂', name:'Jahreszeitenkenner',
     desc:'In allen 4 Jahreszeiten gelernt',
     check: async () => {
       const seasons = JSON.parse(localStorage.getItem('pflanz_seasons') || '[]');
