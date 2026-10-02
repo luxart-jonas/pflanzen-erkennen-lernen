@@ -291,6 +291,75 @@
   }
   #edit-modal-box h2 { font-family: var(--ff-head); color: var(--accent2); font-size: 1.2rem; margin-bottom: 16px; }
 
+  /* ── Level-Up Overlay ────────────────────────────────────── */
+  #levelup-overlay {
+    position: fixed; inset: 0; z-index: 9990; display: none;
+    align-items: center; justify-content: center;
+    background: rgba(0,0,0,.65);
+  }
+  #levelup-overlay.show { display: flex; }
+  #levelup-canvas {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    pointer-events: none;
+  }
+  #levelup-card {
+    position: relative; z-index: 1;
+    background: linear-gradient(145deg, #fffef0, #f0fde4);
+    border: 3px solid var(--accent2);
+    border-radius: 28px; padding: 36px 28px 28px;
+    text-align: center; max-width: 340px; width: 90%;
+    box-shadow: 0 20px 60px rgba(30,122,56,.45);
+    animation: luPop .55s cubic-bezier(.17,.89,.32,1.35) both;
+  }
+  @keyframes luPop {
+    from { transform: scale(.5) rotate(-6deg); opacity: 0; }
+    to   { transform: scale(1) rotate(0deg);  opacity: 1; }
+  }
+  #levelup-card .lu-wreath {
+    font-size: 3.5rem; position: relative; line-height: 1;
+    margin-bottom: -10px; filter: drop-shadow(0 2px 6px rgba(0,100,0,.3));
+  }
+  #levelup-card .lu-badge-text {
+    font-size: .75rem; letter-spacing: .12em; text-transform: uppercase;
+    color: var(--accent); font-weight: 800; margin-bottom: 8px;
+  }
+  #levelup-card .lu-icon { font-size: 3.2rem; line-height: 1; margin-bottom: 6px; }
+  #levelup-card .lu-name {
+    font-family: var(--ff-head); font-size: 1.7rem; font-weight: 900;
+    color: var(--accent2); margin-bottom: 4px;
+  }
+  #levelup-card .lu-sub { font-size: .88rem; color: var(--muted); margin-bottom: 20px; }
+  #levelup-card .lu-stars { font-size: 1.4rem; letter-spacing: 4px; margin-bottom: 16px; }
+
+  /* ── Badge-Earn Overlay ──────────────────────────────────── */
+  #badgeearn-overlay {
+    position: fixed; inset: 0; z-index: 9980; display: none;
+    align-items: center; justify-content: center;
+    background: rgba(0,0,0,.55);
+  }
+  #badgeearn-overlay.show { display: flex; }
+  #badgeearn-card {
+    background: var(--surface); border: 2.5px solid var(--accent);
+    border-radius: 24px; padding: 28px 28px 24px;
+    text-align: center; max-width: 300px; width: 88%;
+    box-shadow: 0 12px 40px rgba(58,170,85,.35);
+    animation: luPop .4s cubic-bezier(.17,.89,.32,1.35) both;
+  }
+  #badgeearn-card .be-icon { font-size: 3.5rem; line-height: 1; margin-bottom: 8px; }
+  #badgeearn-card .be-title {
+    font-size: .7rem; text-transform: uppercase; letter-spacing: .1em;
+    color: var(--accent); font-weight: 800; margin-bottom: 8px;
+  }
+  #badgeearn-card .be-name {
+    font-family: var(--ff-head); font-size: 1.4rem; font-weight: 900;
+    color: var(--accent2); margin-bottom: 6px;
+  }
+  #badgeearn-card .be-desc { font-size: .85rem; color: var(--muted); margin-bottom: 18px; }
+
+  /* ── Secret badge style ──────────────────────────────────── */
+  .badge-item.secret-badge { opacity: .55; }
+  .badge-item.secret-badge .bi-icon { filter: none; opacity: .5; }
+
   ::-webkit-scrollbar { width: 4px; }
   ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 
@@ -510,10 +579,10 @@
   </div>
 
   <nav id="nav">
-    <button class="nav-btn active" onclick="switchTab('profil')" id="tab-profil">
+    <button class="nav-btn" onclick="switchTab('profil')" id="tab-profil">
       <span class="icon">🌿</span>Profil
     </button>
-    <button class="nav-btn" onclick="switchTab('add')" id="tab-add">
+    <button class="nav-btn active" onclick="switchTab('add')" id="tab-add">
       <span class="icon">➕</span>Erfassen
     </button>
     <button class="nav-btn" onclick="switchTab('archive')" id="tab-archive">
@@ -530,7 +599,7 @@
   <div id="screens">
 
     <!-- PROFIL -->
-    <div class="screen active" id="profil-screen">
+    <div class="screen" id="profil-screen">
       <div id="profil-level-card" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:12px;text-align:center;box-shadow:var(--shadow)">
         <div id="profil-level-icon" style="font-size:3rem;margin-bottom:6px">🌱</div>
         <div id="profil-level-name" style="font-family:var(--ff-head);font-size:1.5rem;font-weight:900;color:var(--accent2);margin-bottom:4px"></div>
@@ -597,7 +666,7 @@
     </div>
 
     <!-- ADD -->
-    <div class="screen" id="add-screen">
+    <div class="screen active" id="add-screen">
       <h2>Neue Pflanze erfassen</h2>
 
       <div class="form-group">
@@ -2504,41 +2573,23 @@ const BADGES = [
 
   // ── ☠️ Giftpflanzen ────────────────────────────────────────
   { id:'vorsicht',          icon:'⚠️', name:'Vorsicht!',
-    desc:'Erste Giftpflanze entdeckt',
-    check: async () => {
-      const a = await dbGetAll();
-      return a.some(p => /gift|toxisch|belladonna|bilsenkraut|stechapfel|eisenhut|herbst.?zeitlose|tollkirsche|schierling/i.test((p.name||'')+(p.notes||'')+(p.infoHtml||'')));
-    }},
+    desc:'Erste bekannte Giftpflanze bestimmt',
+    check: async () => { const a = await dbGetAll(); return a.some(isGiftpflanze); }},
   { id:'giftig',            icon:'☠️', name:'Giftig!',
     desc:'5 Giftpflanzen',
-    check: async () => {
-      const a = await dbGetAll();
-      return a.filter(p => /gift|toxisch|belladonna|bilsenkraut|stechapfel|eisenhut|herbst.?zeitlose|tollkirsche|schierling/i.test((p.name||'')+(p.notes||'')+(p.infoHtml||''))).length >= 5;
-    }},
+    check: async () => { const a = await dbGetAll(); return a.filter(isGiftpflanze).length >= 5; }},
   { id:'giftkenner',        icon:'🧪', name:'Giftkenner',
     desc:'10 Giftpflanzen',
-    check: async () => {
-      const a = await dbGetAll();
-      return a.filter(p => /gift|toxisch|belladonna|bilsenkraut|stechapfel|eisenhut|herbst.?zeitlose|tollkirsche|schierling/i.test((p.name||'')+(p.notes||'')+(p.infoHtml||''))).length >= 10;
-    }},
+    check: async () => { const a = await dbGetAll(); return a.filter(isGiftpflanze).length >= 10; }},
   { id:'giftjäger',         icon:'💀', name:'Giftjäger',
     desc:'25 Giftpflanzen',
-    check: async () => {
-      const a = await dbGetAll();
-      return a.filter(p => /gift|toxisch|belladonna|bilsenkraut|stechapfel|eisenhut|herbst.?zeitlose|tollkirsche|schierling/i.test((p.name||'')+(p.notes||'')+(p.infoHtml||''))).length >= 25;
-    }},
+    check: async () => { const a = await dbGetAll(); return a.filter(isGiftpflanze).length >= 25; }},
   { id:'toxikologe',        icon:'⚗️', name:'Toxikologe',
     desc:'50 Giftpflanzen',
-    check: async () => {
-      const a = await dbGetAll();
-      return a.filter(p => /gift|toxisch|belladonna|bilsenkraut|stechapfel|eisenhut|herbst.?zeitlose|tollkirsche|schierling/i.test((p.name||'')+(p.notes||'')+(p.infoHtml||''))).length >= 50;
-    }},
+    check: async () => { const a = await dbGetAll(); return a.filter(isGiftpflanze).length >= 50; }},
   { id:'schwarze_sammlung', icon:'🖤', name:'Schwarze Sammlung',
     desc:'100 Giftpflanzen',
-    check: async () => {
-      const a = await dbGetAll();
-      return a.filter(p => /gift|toxisch|belladonna|bilsenkraut|stechapfel|eisenhut|herbst.?zeitlose|tollkirsche|schierling/i.test((p.name||'')+(p.notes||'')+(p.infoHtml||''))).length >= 100;
-    }},
+    check: async () => { const a = await dbGetAll(); return a.filter(isGiftpflanze).length >= 100; }},
 
   // ── 🌳 Pflanzenwelten ──────────────────────────────────────
   { id:'baumfreund',        icon:'🌳', name:'Baumfreund',
@@ -2693,8 +2744,13 @@ const BADGES = [
     check: async () => getXP() >= 42000,
     secret: true },
 
-  // ── 🌟 Bonus-Badges ────────────────────────────────────────
-  { id:'jahreszeitenkenner',icon:'🍂', name:'Jahreszeitenkenner',
+// Nur explizit bekannte Giftpflanzennamen (name/latin). Kein infoHtml – der
+// KI-Text enthält Sätze wie "im Gegensatz zu Giftpflanzen harmlos" und
+// würde sonst massenweise False-Positives liefern.
+const GIFT_REGEX = /Bilsenkraut|Stechapfel|Eisenhut|Belladonna|Tollkirsche|Herbstzeitlose|Seidelbast|Fingerhut|Schierling|Pfaffenhütchen|Goldregen|Aronstab|Maiglöckchen|Taxus|Eibe|Rizinus|Oleander|Wunderbaum|Schwarze Tollkirsche|Bärlauch(?!.{0,5}harmlos)/i;
+function isGiftpflanze(p) {
+  return GIFT_REGEX.test((p.name||'') + ' ' + (p.latin||''));
+}icon:'🍂', name:'Jahreszeitenkenner',
     desc:'In allen 4 Jahreszeiten gelernt',
     check: async () => {
       const seasons = JSON.parse(localStorage.getItem('pflanz_seasons') || '[]');
@@ -2745,11 +2801,11 @@ function awardXP(amount) {
   if (h < 6) localStorage.setItem('pflanz_early_bird', '1');
   if (h >= 23) localStorage.setItem('pflanz_night_owl', '1');
   renderXPBar();
-  // Level-up flash?
+  // Level-up?
   const oldLv = getCurrentLevel(oldXP);
   const newLv = getCurrentLevel(newXP);
   if (oldLv !== newLv) {
-    showBadge({ icon: newLv.icon, name: 'Level Up! ' + newLv.name, desc: 'Neues botanisches Level erreicht! 🎉' });
+    showLevelUp(newLv);
   }
 }
 
@@ -2794,9 +2850,8 @@ async function checkBadges() {
   }
   if (newlyEarned.length) {
     localStorage.setItem('pflanz_badges', JSON.stringify(earned));
-    // Pop-ups nacheinander anzeigen (max 3)
-    const toShow = newlyEarned.slice(0, 3);
-    toShow.forEach((b, i) => setTimeout(() => showBadge(b), i * 4200));
+    // Badges nacheinander mit eigenem Overlay anzeigen
+    newlyEarned.forEach(b => showBadgeEarn(b));
   }
 }
 
@@ -2870,7 +2925,7 @@ function updateStreak() {
       awardXP(b.xp);
       bonusCount++;
       localStorage.setItem('pflanz_streak_bonus_count', bonusCount);
-      showBadge({ icon: '🔥', name: `Streak-Bonus: ${b.label}!`, desc: `+${b.xp} XP für ${b.days} Tage in Folge` });
+      showBadgeEarn({ icon: '🔥', name: `Streak-Bonus: ${b.label}!`, desc: `+${b.xp} XP für ${b.days} Tage in Folge` });
     }
   }
   return streak;
@@ -3047,6 +3102,164 @@ function renderExamHistory() {
 }
 
 
+// ══════════════════════════════════════════════════════════════
+//  SOUND & ANIMATION
+// ══════════════════════════════════════════════════════════════
+
+// ── Web-Audio-Kontext (einmal erzeugen) ───────────────────────
+let _audioCtx = null;
+function getAudioCtx() {
+  if (!_audioCtx) _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (_audioCtx.state === 'suspended') _audioCtx.resume();
+  return _audioCtx;
+}
+
+// ── Fanfare für Level-up ──────────────────────────────────────
+function playFanfare() {
+  try {
+    const ctx = getAudioCtx();
+    // Aufsteigende Triumphe: C-E-G-C' dann Finalakkord
+    const sequence = [
+      { freq: 523,  t: 0,    dur: .22, type: 'triangle', gain: .32 },
+      { freq: 659,  t: .18,  dur: .22, type: 'triangle', gain: .32 },
+      { freq: 784,  t: .36,  dur: .22, type: 'triangle', gain: .32 },
+      { freq: 1047, t: .54,  dur: .45, type: 'triangle', gain: .32 },
+      // Akkord
+      { freq: 523,  t: .60,  dur: .50, type: 'sine',     gain: .18 },
+      { freq: 659,  t: .60,  dur: .50, type: 'sine',     gain: .18 },
+      { freq: 784,  t: .60,  dur: .50, type: 'sine',     gain: .18 },
+    ];
+    sequence.forEach(({ freq, t, dur, type, gain }) => {
+      const osc = ctx.createOscillator();
+      const g   = ctx.createGain();
+      osc.connect(g); g.connect(ctx.destination);
+      osc.type = type; osc.frequency.value = freq;
+      const s = ctx.currentTime + t;
+      g.gain.setValueAtTime(gain, s);
+      g.gain.exponentialRampToValueAtTime(.0001, s + dur + .05);
+      osc.start(s); osc.stop(s + dur + .1);
+    });
+  } catch(e) {}
+}
+
+// ── Ding für Badge-Gewinn ─────────────────────────────────────
+function playBadgeSound() {
+  try {
+    const ctx = getAudioCtx();
+    [[784,.0],[1047,.15],[1319,.30]].forEach(([freq, t]) => {
+      const osc = ctx.createOscillator();
+      const g   = ctx.createGain();
+      osc.connect(g); g.connect(ctx.destination);
+      osc.type = 'sine'; osc.frequency.value = freq;
+      const s = ctx.currentTime + t;
+      g.gain.setValueAtTime(.25, s);
+      g.gain.exponentialRampToValueAtTime(.0001, s + .5);
+      osc.start(s); osc.stop(s + .55);
+    });
+  } catch(e) {}
+}
+
+// ── Blüten-Konfetti ───────────────────────────────────────────
+const PETALS = ['🌸','🌺','🌼','🌷','🌻','✿','❀','🍀'];
+let _confettiAnim = null;
+
+function startConfetti(canvasId) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  canvas.width  = window.innerWidth;
+  canvas.height = window.innerHeight;
+  const pieces = Array.from({ length: 60 }, () => ({
+    x: Math.random() * canvas.width,
+    y: -20 - Math.random() * 100,
+    petal: PETALS[Math.floor(Math.random() * PETALS.length)],
+    size: 18 + Math.random() * 20,
+    speed: 1.5 + Math.random() * 2.5,
+    drift: (Math.random() - .5) * 1.2,
+    rot: Math.random() * 360,
+    rotSpeed: (Math.random() - .5) * 4,
+    opacity: .7 + Math.random() * .3,
+  }));
+  let frame = 0;
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    pieces.forEach(p => {
+      ctx.save();
+      ctx.globalAlpha = p.opacity;
+      ctx.font = p.size + 'px serif';
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot * Math.PI / 180);
+      ctx.fillText(p.petal, -p.size/2, p.size/2);
+      ctx.restore();
+      p.y += p.speed;
+      p.x += p.drift;
+      p.rot += p.rotSpeed;
+      if (p.y > canvas.height + 20) {
+        p.y = -20; p.x = Math.random() * canvas.width;
+      }
+    });
+    frame++;
+    if (frame < 300) _confettiAnim = requestAnimationFrame(draw);
+    else ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }
+  if (_confettiAnim) cancelAnimationFrame(_confettiAnim);
+  draw();
+}
+
+function stopConfetti() {
+  if (_confettiAnim) { cancelAnimationFrame(_confettiAnim); _confettiAnim = null; }
+  const c = document.getElementById('levelup-canvas');
+  if (c) c.getContext('2d').clearRect(0, 0, c.width, c.height);
+}
+
+// ── Level-Up Overlay ──────────────────────────────────────────
+function showLevelUp(level) {
+  const idx  = LEVELS.indexOf(level);
+  document.getElementById('lu-icon').textContent = level.icon;
+  document.getElementById('lu-name').textContent = level.name;
+  document.getElementById('lu-sub').textContent  = 'Level ' + (idx+1) + ' erreicht! 🎉';
+  document.getElementById('levelup-overlay').classList.add('show');
+  startConfetti('levelup-canvas');
+  setTimeout(() => playFanfare(), 100);
+}
+
+function closeLevelUp() {
+  document.getElementById('levelup-overlay').classList.remove('show');
+  stopConfetti();
+}
+
+// ── Badge-Earn Overlay ────────────────────────────────────────
+let _badgeQueue = [];
+let _badgeShowing = false;
+
+function showBadgeEarn(badge) {
+  _badgeQueue.push(badge);
+  if (!_badgeShowing) processNextBadge();
+}
+
+function processNextBadge() {
+  if (!_badgeQueue.length) { _badgeShowing = false; return; }
+  _badgeShowing = true;
+  const b = _badgeQueue.shift();
+  document.getElementById('be-icon').textContent = b.icon;
+  document.getElementById('be-name').textContent = b.name;
+  document.getElementById('be-desc').textContent = b.desc || '';
+  document.getElementById('badgeearn-overlay').classList.add('show');
+  playBadgeSound();
+  // Auch den kleinen Pop-up setzen (legacy)
+  const popup = document.getElementById('badge-popup');
+  if (popup) {
+    document.getElementById('bp-icon').textContent  = b.icon;
+    document.getElementById('bp-title').textContent = b.name;
+    document.getElementById('bp-sub').textContent   = b.desc || '';
+  }
+}
+
+function closeBadgeEarn() {
+  document.getElementById('badgeearn-overlay').classList.remove('show');
+  setTimeout(() => processNextBadge(), 400);
+}
+
 // ── Badge-Galerie ─────────────────────────────────────────────
 async function openBadgeGallery(afterSession = false) {
   const xp = getXP();
@@ -3107,22 +3320,29 @@ async function openBadgeGallery(afterSession = false) {
     recentWrap.style.display = 'block';
   } else { recentWrap.style.display = 'none'; }
 
-  // Badge-Grid: geheime als ??? bis verdient
-  grid.innerHTML = BADGES.map(b => {
+  // Badge-Grid: verdiente zuerst, geheime als 🔒 bis verdient
+  const secretCount = BADGES.filter(b => b.secret && !earned.includes(b.id)).length;
+  const earnedBadges  = BADGES.filter(b =>  earned.includes(b.id));
+  const openBadges    = BADGES.filter(b => !earned.includes(b.id) && !b.secret);
+  const secretBadges  = BADGES.filter(b => !earned.includes(b.id) &&  b.secret);
+  const sorted = [...earnedBadges, ...openBadges, ...secretBadges];
+  grid.innerHTML = sorted.map(b => {
     const has = earned.includes(b.id);
     if (b.secret && !has) {
-      return '<div class="badge-item">' +
-        '<div class="bi-icon">❓</div>' +
+      return '<div class="badge-item secret-badge">' +
+        '<div class="bi-icon">🔒</div>' +
         '<div class="bi-name">???</div>' +
-        '<div class="bi-desc">Geheimerfolg</div>' +
+        '<div class="bi-desc" style="font-style:italic;color:#aaa">Versteckter Erfolg – weiter lernen!</div>' +
         '</div>';
     }
     return '<div class="badge-item' + (has ? ' earned' : '') + '">' +
       '<div class="bi-icon">' + b.icon + '</div>' +
       '<div class="bi-name">' + b.name + '</div>' +
       '<div class="bi-desc">' + b.desc + '</div>' +
+      (has ? '<div style="font-size:.6rem;color:var(--accent);margin-top:2px">✓ Verdient</div>' : '') +
       '</div>';
-  }).join('');
+  }).join('') +
+  (secretCount > 0 ? '<div style="grid-column:1/-1;text-align:center;font-size:.78rem;color:var(--muted);padding:8px 0;margin-top:4px">🔒 ' + secretCount + ' versteckte Erfolge warten auf dich</div>' : '');
 
   continueBtn.textContent = afterSession ? 'Weiter lernen →' : 'Schließen ✕';
   el.classList.add('show');
@@ -3249,6 +3469,31 @@ document.addEventListener('DOMContentLoaded', () => {
       <button class="btn btn-secondary" onclick="closeBadgeGallery()">← Zurück</button>
       <button class="btn btn-primary" id="bg-continue-btn" onclick="closeBadgeGallery()">Weiter lernen →</button>
     </div>
+  </div>
+</div>
+
+<!-- Level-Up Overlay -->
+<div id="levelup-overlay">
+  <canvas id="levelup-canvas"></canvas>
+  <div id="levelup-card">
+    <div class="lu-wreath">🌿🌿🌿</div>
+    <div class="lu-badge-text">✦ Neues Level ✦</div>
+    <div class="lu-icon" id="lu-icon">🌳</div>
+    <div class="lu-name" id="lu-name">Pflanzenkenner</div>
+    <div class="lu-sub" id="lu-sub">Level 5 erreicht</div>
+    <div class="lu-stars">⭐⭐⭐</div>
+    <button class="btn btn-primary" onclick="closeLevelUp()" style="width:100%;padding:14px;font-size:1rem">🎉 Weiter!</button>
+  </div>
+</div>
+
+<!-- Badge-Earn Overlay -->
+<div id="badgeearn-overlay">
+  <div id="badgeearn-card">
+    <div class="be-title">✦ Neues Abzeichen ✦</div>
+    <div class="be-icon" id="be-icon">🏅</div>
+    <div class="be-name" id="be-name"></div>
+    <div class="be-desc" id="be-desc"></div>
+    <button class="btn btn-primary" onclick="closeBadgeEarn()" style="width:100%;padding:12px">✓ Super!</button>
   </div>
 </div>
 
