@@ -510,7 +510,10 @@
   </div>
 
   <nav id="nav">
-    <button class="nav-btn active" onclick="switchTab('add')" id="tab-add">
+    <button class="nav-btn active" onclick="switchTab('profil')" id="tab-profil">
+      <span class="icon">🌿</span>Profil
+    </button>
+    <button class="nav-btn" onclick="switchTab('add')" id="tab-add">
       <span class="icon">➕</span>Erfassen
     </button>
     <button class="nav-btn" onclick="switchTab('archive')" id="tab-archive">
@@ -522,13 +525,79 @@
     <button class="nav-btn" onclick="switchTab('exam')" id="tab-exam">
       <span class="icon">🎓</span>Prüfung
     </button>
-
   </nav>
 
   <div id="screens">
 
+    <!-- PROFIL -->
+    <div class="screen active" id="profil-screen">
+      <div id="profil-level-card" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:12px;text-align:center;box-shadow:var(--shadow)">
+        <div id="profil-level-icon" style="font-size:3rem;margin-bottom:6px">🌱</div>
+        <div id="profil-level-name" style="font-family:var(--ff-head);font-size:1.5rem;font-weight:900;color:var(--accent2);margin-bottom:4px"></div>
+        <div style="display:flex;align-items:center;gap:8px;margin:10px 0">
+          <div style="flex:1;height:12px;background:var(--border);border-radius:6px;overflow:hidden">
+            <div id="profil-xp-fill" style="height:100%;background:linear-gradient(90deg,var(--accent),#7ed957);border-radius:6px;transition:width .6s ease"></div>
+          </div>
+          <span id="profil-xp-pct" style="font-size:.75rem;color:var(--muted);white-space:nowrap">0 %</span>
+        </div>
+        <div id="profil-xp-label" style="font-size:.85rem;color:var(--muted)"></div>
+      </div>
+
+      <!-- Stats-Grid -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:14px;text-align:center;box-shadow:var(--shadow)">
+          <div style="font-size:2rem;margin-bottom:4px">🌱</div>
+          <div id="profil-stat-pflanzen" style="font-size:1.8rem;font-weight:900;color:var(--accent2);line-height:1">0</div>
+          <div style="font-size:.78rem;color:var(--muted);margin-top:2px">Pflanzen erfasst</div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:14px;text-align:center;box-shadow:var(--shadow)">
+          <div style="font-size:2rem;margin-bottom:4px">🧠</div>
+          <div id="profil-stat-gelernt" style="font-size:1.8rem;font-weight:900;color:var(--accent2);line-height:1">0</div>
+          <div style="font-size:.78rem;color:var(--muted);margin-top:2px">davon gelernt</div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:14px;text-align:center;box-shadow:var(--shadow)">
+          <div style="font-size:2rem;margin-bottom:4px">🔥</div>
+          <div id="profil-stat-streak" style="font-size:1.8rem;font-weight:900;color:var(--accent2);line-height:1">0</div>
+          <div style="font-size:.78rem;color:var(--muted);margin-top:2px">Tage-Serie</div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:14px;text-align:center;box-shadow:var(--shadow)">
+          <div style="font-size:2rem;margin-bottom:4px">🏆</div>
+          <div id="profil-stat-badges" style="font-size:1.8rem;font-weight:900;color:var(--accent2);line-height:1">0</div>
+          <div style="font-size:.78rem;color:var(--muted);margin-top:2px">Abzeichen</div>
+        </div>
+      </div>
+
+      <!-- Pflanzenwissen -->
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:12px;box-shadow:var(--shadow)">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+          <div style="font-family:var(--ff-head);font-size:1rem;color:var(--accent2)">🧬 Pflanzenwissen</div>
+          <div id="profil-pw-pct" style="font-weight:900;font-size:1.3rem;color:var(--accent2)">0 %</div>
+        </div>
+        <div style="height:10px;background:var(--border);border-radius:5px;overflow:hidden;margin-bottom:8px">
+          <div id="profil-pw-fill" style="height:100%;background:linear-gradient(90deg,#1e7a38,#7ed957);border-radius:5px;transition:width .6s ease"></div>
+        </div>
+        <div style="font-size:.8rem;color:var(--muted)">Wie sicher beherrschst du deine bisher gelernten Pflanzen?</div>
+      </div>
+
+      <!-- Heute lernen + Nächstes Badge -->
+      <button class="btn btn-primary" style="margin-bottom:12px;font-size:1.05rem;padding:16px" onclick="switchTab('learn')">🧠 HEUTE LERNEN</button>
+
+      <div id="profil-next-badge" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:12px;box-shadow:var(--shadow);display:none">
+        <div style="font-size:.7rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:8px">Nächstes Abzeichen</div>
+        <div id="profil-next-badge-inner" style="display:flex;align-items:center;gap:12px"></div>
+      </div>
+
+      <!-- Letzte Abzeichen -->
+      <div id="profil-recent-badges-wrap" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:12px;box-shadow:var(--shadow);display:none">
+        <div style="font-size:.7rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:10px">Letzte Erfolge</div>
+        <div id="profil-recent-badges" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+      </div>
+
+      <button class="btn btn-secondary" onclick="openBadgeGallery()" style="width:100%">🏅 Alle Abzeichen ansehen</button>
+    </div>
+
     <!-- ADD -->
-    <div class="screen active" id="add-screen">
+    <div class="screen" id="add-screen">
       <h2>Neue Pflanze erfassen</h2>
 
       <div class="form-group">
@@ -991,6 +1060,56 @@ let currentDetailId = null;
 let learnQueue = [], learnIndex = 0;
 let lastAiName = '', lastAiLatin = '';
 
+// ── Profil rendern ────────────────────────────────────────────
+async function renderProfile() {
+  const xp = getXP();
+  const lv = getCurrentLevel(xp);
+  const lvIdx = LEVELS.indexOf(lv);
+  const next = LEVELS[lvIdx + 1];
+  const pct = next ? Math.min(100, Math.round((xp - lv.minXP) / (next.minXP - lv.minXP) * 100)) : 100;
+  const diff = next ? (next.minXP - xp) + ' XP bis ' + next.icon + ' ' + next.name : '✨ Maximalstufe!';
+  document.getElementById('profil-level-icon').textContent = lv.icon;
+  document.getElementById('profil-level-name').textContent = 'Level ' + (lvIdx+1) + ' – ' + lv.name;
+  document.getElementById('profil-xp-fill').style.width = pct + '%';
+  document.getElementById('profil-xp-pct').textContent = pct + ' %';
+  document.getElementById('profil-xp-label').textContent = xp + ' XP  ·  Noch ' + diff;
+  const earned = getEarnedBadges();
+  let all = [];
+  try { all = await dbGetAll(); } catch(e) {}
+  const gelernt = all.filter(p => (p.level||0) >= 1).length;
+  const streak = parseInt(localStorage.getItem('pflanz_streak')||'0');
+  document.getElementById('profil-stat-pflanzen').textContent = all.length;
+  document.getElementById('profil-stat-gelernt').textContent = gelernt;
+  document.getElementById('profil-stat-streak').textContent = streak;
+  document.getElementById('profil-stat-badges').textContent = earned.length;
+  let pw = 0;
+  try { pw = await berechnePflanzenwissen(); } catch(e) {}
+  document.getElementById('profil-pw-fill').style.width = pw + '%';
+  document.getElementById('profil-pw-pct').textContent = pw + ' %';
+  // Nächstes Abzeichen
+  const nextBadge = BADGES.find(b => !earned.includes(b.id) && !b.secret);
+  const nbWrap = document.getElementById('profil-next-badge');
+  const nbInner = document.getElementById('profil-next-badge-inner');
+  if (nextBadge && nbWrap && nbInner) {
+    nbInner.innerHTML = '<div style="font-size:1.8rem">' + nextBadge.icon + '</div>' +
+      '<div><div style="font-weight:800;color:var(--text)">' + nextBadge.name + '</div>' +
+      '<div style="font-size:.8rem;color:var(--muted)">' + nextBadge.desc + '</div></div>';
+    nbWrap.style.display = 'block';
+  } else if (nbWrap) { nbWrap.style.display = 'none'; }
+  // Letzte Abzeichen
+  const recentWrap = document.getElementById('profil-recent-badges-wrap');
+  const recentEl = document.getElementById('profil-recent-badges');
+  const recentEarned = BADGES.filter(b => earned.includes(b.id)).slice(-3).reverse();
+  if (recentEarned.length && recentWrap && recentEl) {
+    recentEl.innerHTML = recentEarned.map(b =>
+      '<div style="background:var(--surface2);border:1.5px solid var(--accent);border-radius:12px;padding:8px 12px;display:flex;align-items:center;gap:8px">' +
+      '<span style="font-size:1.4rem">' + b.icon + '</span>' +
+      '<span style="font-size:.85rem;font-weight:700;color:var(--accent2)">' + b.name + '</span></div>'
+    ).join('');
+    recentWrap.style.display = 'block';
+  } else if (recentWrap) { recentWrap.style.display = 'none'; }
+}
+
 // ── Tab Switching ────────────────────────────────────────────
 function switchTab(tab) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -998,6 +1117,7 @@ function switchTab(tab) {
   document.getElementById(tab + '-screen').classList.add('active');
   const nb = document.getElementById('tab-' + tab);
   if (nb) nb.classList.add('active');
+  if (tab === 'profil')  renderProfile();
   if (tab === 'archive') renderArchive();
   if (tab === 'learn')   initLearn();
   if (tab === 'exam')    { renderExamLevelInfo(); document.getElementById('exam-start-view').style.display='block'; document.getElementById('exam-active-view').style.display='none'; document.getElementById('exam-result-view').style.display='none'; }
@@ -1202,6 +1322,7 @@ async function savePlant() {
   msg.style.display = 'block';
   setTimeout(() => msg.style.display = 'none', 2000);
   updateDueBadge();
+  // +10 erstmals bestimmt, +5 zur Sammlung hinzugefügt
   try { awardXP(15); } catch(e) {} try { checkBadges(); } catch(e) {}
 
   // ── Foto auf GitHub sichern (fire & forget) ──
@@ -1228,7 +1349,8 @@ async function renderArchive() {
       ? `<img class="plant-thumb" src="${p.photo}" alt="">`
       : `<div class="plant-thumb-placeholder">🌿</div>`;
     const due = isDue(p) ? '<div class="due-indicator"></div>' : '';
-    div.innerHTML = `${thumb}<div style="flex:1;min-width:0"><div class="plant-name">${esc(p.name)}</div><div class="plant-sub"><span class="level-pill">Stufe ${p.level}</span></div></div>${due}`;
+    const st = pflanzenStatus(p.level||0);
+    div.innerHTML = `${thumb}<div style="flex:1;min-width:0"><div class="plant-name">${esc(p.name)}</div><div class="plant-sub"><span class="level-pill" style="color:${st.color};border-color:${st.color}">${st.label}</span>${p.latin?'<span class="level-pill" style="margin-left:4px;font-style:italic">'+esc(p.latin)+'</span>':''}</div></div>${due}`;
     list.appendChild(div);
   });
 }
@@ -1623,13 +1745,38 @@ async function confirmDeleteLearn() {
 async function gradeCard(knew) {
   const p = learnQueue[learnIndex];
   const full = await dbGet(p.id);
-  full.level = knew ? Math.min((full.level||0)+1, INTERVALS.length-1) : 0;
+  const oldLevel = full.level || 0;
+  if (knew) {
+    full.level = Math.min(oldLevel + 1, INTERVALS.length - 1);
+    // Comeback-Badge: war bei Level 0 (vergessen) und wird jetzt wieder richtig
+    if (oldLevel === 0 && (full._prevFailed)) {
+      localStorage.setItem('pflanz_comeback', '1');
+    }
+    full._prevFailed = false;
+  } else {
+    if (oldLevel > 0) full._prevFailed = true;
+    full.level = 0;
+  }
   full.nextReview = computeNextReview(full.level);
   await dbPut(full);
+  // XP: mehr XP je höher die erreichte Stufe (längere Erinnerung = mehr wert)
+  if (knew) {
+    const xp = xpForLevel(full.level);
+    // Korrekte Antworten zählen
+    const ct = parseInt(localStorage.getItem('pflanz_correct_total')||'0') + 1;
+    localStorage.setItem('pflanz_correct_total', ct);
+    // Tages-Lerncount
+    const dc = parseInt(localStorage.getItem('pflanz_daily_count')||'0') + 1;
+    localStorage.setItem('pflanz_daily_count', dc);
+    const prevMax = parseInt(localStorage.getItem('pflanz_daily_max')||'0');
+    if (dc > prevMax) localStorage.setItem('pflanz_daily_max', dc);
+    updateStreak();
+    try { awardXP(xp); } catch(e) {}
+    try { checkBadges(); } catch(e) {}
+  }
   learnIndex++;
   updateDueBadge();
   showLearnCard();
-  if (knew) { try { awardXP(5); } catch(e) {} try { checkBadges(); } catch(e) {} }
 }
 
 
@@ -2125,12 +2272,14 @@ async function pushPhotoToGithub(plantName, photoDataUrl) {
   }
 }
 
-openDB().then(() => {
+openDB().then(async () => {
   updateDueBadge();
   updatePlantNetKeyStatus();
   updateGroqKeyStatus();
   updateDeepSeekKeyStatus();
   updateGithubTokenStatus();
+  renderXPBar();
+  try { renderProfile(); } catch(e) {}
 }).catch(err => alert('IndexedDB Fehler: ' + err));
 
 // ── iOS-Installationshinweis ─────────────────────────────────
@@ -2259,43 +2408,321 @@ if ('serviceWorker' in navigator) { navigator.serviceWorker.getRegistrations().t
 //  GAMIFICATION
 // ══════════════════════════════════════════════════════════════
 const LEVELS = [
-  { name:'Pflanzensucher',      minXP:0,     maxXP:150,   icon:'🔍' },
-  { name:'Feldnotizler',        minXP:150,   maxXP:400,   icon:'📓' },
-  { name:'Naturkundler',        minXP:400,   maxXP:900,   icon:'🗺️' },
-  { name:'Pflanzenkenner',      minXP:900,   maxXP:2000,  icon:'🌿' },
-  { name:'Waldweiser',          minXP:2000,  maxXP:5000,  icon:'🌳' },
-  { name:'Floraexperte',        minXP:5000,  maxXP:10000, icon:'🌺' },
-  { name:'Botanische Legende',  minXP:10000, maxXP:99999, icon:'✨' },
+  { name:'Keimling',                 minXP:0,     maxXP:250,   icon:'🌱' },
+  { name:'Pflanzenentdecker',        minXP:250,   maxXP:750,   icon:'🌿' },
+  { name:'Pflanzenfreund',           minXP:750,   maxXP:1500,  icon:'🍃' },
+  { name:'Naturbeobachter',          minXP:1500,  maxXP:2750,  icon:'🌼' },
+  { name:'Pflanzenkenner',           minXP:2750,  maxXP:4500,  icon:'🌳' },
+  { name:'Flora-Kenner',             minXP:4500,  maxXP:7000,  icon:'🌾' },
+  { name:'Pflanzenkundiger',         minXP:7000,  maxXP:10500, icon:'🔬' },
+  { name:'Botaniker',                minXP:10500, maxXP:15000, icon:'🌲' },
+  { name:'Flora-Experte',            minXP:15000, maxXP:21000, icon:'🧭' },
+  { name:'Pflanzenmeister',          minXP:21000, maxXP:30000, icon:'🏆' },
+  { name:'Flora-Meister',            minXP:30000, maxXP:42000, icon:'👑' },
+  { name:'Meister der Pflanzenwelt', minXP:42000, maxXP:999999,icon:'🌿👑'},
 ];
 
+// secret=true badges show as ??? until earned
 const BADGES = [
-  { id:'fruehaufsteher', icon:'🌅', name:'Frühaufsteher',
-    desc:'Lerne vor 8 Uhr morgens',
-    check: async () => new Date().getHours() < 8 },
-  { id:'giftkenner', icon:'☠️', name:'Giftkenner',
-    desc:'Habe eine Giftpflanze im Archiv',
-    check: async () => {
-      const all = await dbGetAll();
-      return all.some(p => /gift|toxisch|belladonna|bilsenkraut|stechapfel|eisenhut/i.test((p.name||'')+(p.notes||'')+(p.infoHtml||'')));
-    }},
-  { id:'waldlaeufer', icon:'🌲', name:'Waldläufer',
-    desc:'10 Pflanzen im Archiv',
+  // ── 🌱 Entdecker ──────────────────────────────────────────
+  { id:'erster_schritt',    icon:'🌱', name:'Erster Schritt',
+    desc:'Erste Pflanze bestimmt',
+    check: async () => { const a = await dbGetAll(); return a.length >= 1; }},
+  { id:'kleine_sammlung',   icon:'🌿', name:'Kleine Sammlung',
+    desc:'10 verschiedene Pflanzen',
     check: async () => { const a = await dbGetAll(); return a.length >= 10; }},
-  { id:'jahreszeitenkenner', icon:'🍂', name:'Jahreszeitenkenner',
+  { id:'entdecker',         icon:'🗺️', name:'Entdecker',
+    desc:'25 verschiedene Pflanzen',
+    check: async () => { const a = await dbGetAll(); return a.length >= 25; }},
+  { id:'pflanzensammler',   icon:'🌼', name:'Pflanzensammler',
+    desc:'50 verschiedene Pflanzen',
+    check: async () => { const a = await dbGetAll(); return a.length >= 50; }},
+  { id:'artenjäger',        icon:'🔭', name:'Artenjäger',
+    desc:'100 verschiedene Pflanzen',
+    check: async () => { const a = await dbGetAll(); return a.length >= 100; }},
+  { id:'flora_sammler',     icon:'🌸', name:'Flora-Sammler',
+    desc:'250 verschiedene Pflanzen',
+    check: async () => { const a = await dbGetAll(); return a.length >= 250; }},
+  { id:'pflanzenarchiv',    icon:'📚', name:'Pflanzenarchiv',
+    desc:'500 verschiedene Pflanzen',
+    check: async () => { const a = await dbGetAll(); return a.length >= 500; }},
+  { id:'grosse_expedition', icon:'🌍', name:'Große Expedition',
+    desc:'1000 verschiedene Pflanzen',
+    check: async () => { const a = await dbGetAll(); return a.length >= 1000; }},
+
+  // ── 🧠 Lernen ─────────────────────────────────────────────
+  { id:'erstes_wissen',     icon:'💡', name:'Erstes Wissen',
+    desc:'10 Pflanzen erfolgreich gelernt',
+    check: async () => { const a = await dbGetAll(); return a.filter(p=>(p.level||0)>=1).length >= 10; }},
+  { id:'lernender',         icon:'📖', name:'Lernender',
+    desc:'25 Pflanzen gelernt',
+    check: async () => { const a = await dbGetAll(); return a.filter(p=>(p.level||0)>=1).length >= 25; }},
+  { id:'pflanzenkenner_b',  icon:'🧠', name:'Pflanzenkenner',
+    desc:'50 Pflanzen gelernt',
+    check: async () => { const a = await dbGetAll(); return a.filter(p=>(p.level||0)>=2).length >= 50; }},
+  { id:'wissenssammler',    icon:'🏛️', name:'Wissenssammler',
+    desc:'100 Pflanzen gelernt',
+    check: async () => { const a = await dbGetAll(); return a.filter(p=>(p.level||0)>=2).length >= 100; }},
+  { id:'gedächtniskünstler',icon:'🎭', name:'Gedächtniskünstler',
+    desc:'250 Pflanzen gelernt',
+    check: async () => { const a = await dbGetAll(); return a.filter(p=>(p.level||0)>=3).length >= 250; }},
+  { id:'pflanzenbibliothek',icon:'📦', name:'Pflanzenbibliothek',
+    desc:'500 Pflanzen gelernt',
+    check: async () => { const a = await dbGetAll(); return a.filter(p=>(p.level||0)>=3).length >= 500; }},
+  { id:'lebendes_buch',     icon:'🌿📖', name:'Lebendes Pflanzenbuch',
+    desc:'1000 Pflanzen gelernt',
+    check: async () => { const a = await dbGetAll(); return a.filter(p=>(p.level||0)>=3).length >= 1000; }},
+  { id:'unkraut_im_kopf',   icon:'🧩', name:'Unkraut im Kopf',
+    desc:'2000 korrekte Lernantworten',
+    check: async () => parseInt(localStorage.getItem('pflanz_correct_total')||'0') >= 2000 },
+
+  // ── 🔥 Fleiß / Streak ─────────────────────────────────────
+  { id:'drei_tage',         icon:'🔥', name:'Drei Tage',
+    desc:'3 Tage hintereinander gelernt',
+    check: async () => parseInt(localStorage.getItem('pflanz_streak')||'0') >= 3 },
+  { id:'drangeblieben',     icon:'🔥🔥', name:'Drangeblieben',
+    desc:'7 Tage hintereinander gelernt',
+    check: async () => parseInt(localStorage.getItem('pflanz_streak')||'0') >= 7 },
+  { id:'zwei_wochen',       icon:'📅', name:'Zwei Wochen',
+    desc:'14 Tage hintereinander gelernt',
+    check: async () => parseInt(localStorage.getItem('pflanz_streak')||'0') >= 14 },
+  { id:'gewohnheit',        icon:'💪', name:'Gewohnheit',
+    desc:'30 Tage hintereinander gelernt',
+    check: async () => parseInt(localStorage.getItem('pflanz_streak')||'0') >= 30 },
+  { id:'unermüdlich',       icon:'⚡', name:'Unermüdlich',
+    desc:'60 Tage hintereinander gelernt',
+    check: async () => parseInt(localStorage.getItem('pflanz_streak')||'0') >= 60 },
+  { id:'ausdauer',          icon:'🏅', name:'Ausdauer',
+    desc:'100 Tage hintereinander gelernt',
+    check: async () => parseInt(localStorage.getItem('pflanz_streak')||'0') >= 100 },
+  { id:'jahreszeit_streak', icon:'🍂', name:'Jahreszeit',
+    desc:'180 Tage hintereinander gelernt',
+    check: async () => parseInt(localStorage.getItem('pflanz_streak')||'0') >= 180 },
+  { id:'ein_ganzes_jahr',   icon:'🎆', name:'Ein ganzes Jahr',
+    desc:'365 Tage hintereinander gelernt',
+    check: async () => parseInt(localStorage.getItem('pflanz_streak')||'0') >= 365 },
+
+  // ── ☠️ Giftpflanzen ────────────────────────────────────────
+  { id:'vorsicht',          icon:'⚠️', name:'Vorsicht!',
+    desc:'Erste Giftpflanze entdeckt',
+    check: async () => {
+      const a = await dbGetAll();
+      return a.some(p => /gift|toxisch|belladonna|bilsenkraut|stechapfel|eisenhut|herbst.?zeitlose|tollkirsche|schierling/i.test((p.name||'')+(p.notes||'')+(p.infoHtml||'')));
+    }},
+  { id:'giftig',            icon:'☠️', name:'Giftig!',
+    desc:'5 Giftpflanzen',
+    check: async () => {
+      const a = await dbGetAll();
+      return a.filter(p => /gift|toxisch|belladonna|bilsenkraut|stechapfel|eisenhut|herbst.?zeitlose|tollkirsche|schierling/i.test((p.name||'')+(p.notes||'')+(p.infoHtml||''))).length >= 5;
+    }},
+  { id:'giftkenner',        icon:'🧪', name:'Giftkenner',
+    desc:'10 Giftpflanzen',
+    check: async () => {
+      const a = await dbGetAll();
+      return a.filter(p => /gift|toxisch|belladonna|bilsenkraut|stechapfel|eisenhut|herbst.?zeitlose|tollkirsche|schierling/i.test((p.name||'')+(p.notes||'')+(p.infoHtml||''))).length >= 10;
+    }},
+  { id:'giftjäger',         icon:'💀', name:'Giftjäger',
+    desc:'25 Giftpflanzen',
+    check: async () => {
+      const a = await dbGetAll();
+      return a.filter(p => /gift|toxisch|belladonna|bilsenkraut|stechapfel|eisenhut|herbst.?zeitlose|tollkirsche|schierling/i.test((p.name||'')+(p.notes||'')+(p.infoHtml||''))).length >= 25;
+    }},
+  { id:'toxikologe',        icon:'⚗️', name:'Toxikologe',
+    desc:'50 Giftpflanzen',
+    check: async () => {
+      const a = await dbGetAll();
+      return a.filter(p => /gift|toxisch|belladonna|bilsenkraut|stechapfel|eisenhut|herbst.?zeitlose|tollkirsche|schierling/i.test((p.name||'')+(p.notes||'')+(p.infoHtml||''))).length >= 50;
+    }},
+  { id:'schwarze_sammlung', icon:'🖤', name:'Schwarze Sammlung',
+    desc:'100 Giftpflanzen',
+    check: async () => {
+      const a = await dbGetAll();
+      return a.filter(p => /gift|toxisch|belladonna|bilsenkraut|stechapfel|eisenhut|herbst.?zeitlose|tollkirsche|schierling/i.test((p.name||'')+(p.notes||'')+(p.infoHtml||''))).length >= 100;
+    }},
+
+  // ── 🌳 Pflanzenwelten ──────────────────────────────────────
+  { id:'baumfreund',        icon:'🌳', name:'Baumfreund',
+    desc:'10 Baumarten',
+    check: async () => {
+      const a = await dbGetAll();
+      return a.filter(p => /baum|eiche|buche|ahorn|kiefer|fichte|birke|linde|esche|ulme|pappel|walnuss|kastanie|weide/i.test((p.name||'')+(p.latin||''))).length >= 10;
+    }},
+  { id:'waldläufer',        icon:'🌲', name:'Waldläufer',
+    desc:'25 Waldpflanzen',
+    check: async () => {
+      const a = await dbGetAll();
+      return a.filter(p => /wald|farn|moos|pilz|baum|buche|eiche|fichte|kiefer|birke/i.test((p.name||'')+(p.notes||''))).length >= 25;
+    }},
+  { id:'wiesenforscher',    icon:'🌾', name:'Wiesenforscher',
+    desc:'25 Wiesenpflanzen',
+    check: async () => {
+      const a = await dbGetAll();
+      return a.filter(p => /wiese|gras|klee|löwenzahn|gänseblümchen|schafgarbe|margerite|hahnenfuß/i.test((p.name||'')+(p.notes||''))).length >= 25;
+    }},
+  { id:'blütenfreund',      icon:'🌺', name:'Blütenfreund',
+    desc:'25 Blütenpflanzen',
+    check: async () => {
+      const a = await dbGetAll();
+      return a.filter(p => /blüt|rose|tulpe|orchidee|nelke|sonnenblume|lilie|veilchen|primel/i.test((p.name||'')+(p.notes||'')+(p.infoHtml||''))).length >= 25;
+    }},
+  { id:'kräuterkenner',     icon:'🌿', name:'Kräuterkenner',
+    desc:'25 Kräuter',
+    check: async () => {
+      const a = await dbGetAll();
+      return a.filter(p => /kraut|petersilie|thymian|rosmarin|salbei|pfefferminze|brennnessel|kamille|bärlauch|schnittlauch/i.test((p.name||'')+(p.notes||'')+(p.infoHtml||''))).length >= 25;
+    }},
+  { id:'wildpflanzenfreund',icon:'🍀', name:'Wildpflanzenfreund',
+    desc:'50 Wildpflanzen',
+    check: async () => {
+      const a = await dbGetAll();
+      return a.filter(p => /wild|unkraut|wiese|feld|wegrand|wald/i.test((p.notes||''))).length >= 50;
+    }},
+  { id:'gartenkenner',      icon:'🏡', name:'Gartenkenner',
+    desc:'50 Gartenpflanzen',
+    check: async () => {
+      const a = await dbGetAll();
+      return a.filter(p => /garten|rose|tomate|sunflower|zucchini|basilikum|gurke/i.test((p.name||'')+(p.notes||''))).length >= 50;
+    }},
+  { id:'flora_spezialist',  icon:'🔬🌸', name:'Flora-Spezialist',
+    desc:'100 Pflanzen einer Pflanzenfamilie',
+    check: async () => {
+      const a = await dbGetAll();
+      const families = {};
+      a.forEach(p => {
+        const fam = (p.infoHtml||'').match(/Familie[:\s]+([A-Z][a-zäöü]+)/);
+        if (fam) { families[fam[1]] = (families[fam[1]]||0)+1; }
+      });
+      return Object.values(families).some(v => v >= 100);
+    }},
+
+  // ── 📸 Entdecken & Fotografieren ──────────────────────────
+  { id:'augen_auf',         icon:'👁️', name:'Augen auf!',
+    desc:'Erste Pflanze selbst fotografiert',
+    check: async () => { const a = await dbGetAll(); return a.some(p => p.photo); }},
+  { id:'pflanzenfotograf',  icon:'📷', name:'Pflanzenfotograf',
+    desc:'50 Pflanzen fotografiert',
+    check: async () => { const a = await dbGetAll(); return a.filter(p=>p.photo).length >= 50; }},
+  { id:'fotopirsch',        icon:'🎯', name:'Fotopirsch',
+    desc:'100 Pflanzen fotografiert',
+    check: async () => { const a = await dbGetAll(); return a.filter(p=>p.photo).length >= 100; }},
+  { id:'makrojäger',        icon:'🔍', name:'Makrojäger',
+    desc:'25 Pflanzen mit lateinischem Namen',
+    check: async () => { const a = await dbGetAll(); return a.filter(p=>p.latin).length >= 25; }},
+  { id:'pflanzenwanderung', icon:'🚶', name:'Pflanzenwanderung',
+    desc:'Pflanze entdecken und Standort notieren',
+    check: async () => { const a = await dbGetAll(); return a.filter(p=>p.gps?.lat).length >= 20; }},
+  { id:'feldforscher',      icon:'🧭', name:'Feldforscher',
+    desc:'100 Pflanzen mit GPS-Standort',
+    check: async () => { const a = await dbGetAll(); return a.filter(p=>p.gps?.lat).length >= 100; }},
+  { id:'wiedersehen',       icon:'💞', name:'Wiedersehen macht Freude',
+    desc:'Pflanze auf Stufe 5 gebracht',
+    check: async () => { const a = await dbGetAll(); return a.some(p=>(p.level||0)>=5); },
+    secret: true },
+  { id:'gute_beobachtung',  icon:'🦅', name:'Gute Beobachtung',
+    desc:'10 Pflanzen auf Stufe 4+',
+    check: async () => { const a = await dbGetAll(); return a.filter(p=>(p.level||0)>=4).length >= 10; }},
+
+  // ── 🗺️ Expedition ─────────────────────────────────────────
+  { id:'heimische_flora',   icon:'🏠', name:'Heimische Flora',
+    desc:'10 Pflanzen mit GPS-Standort',
+    check: async () => { const a = await dbGetAll(); return a.filter(p=>p.gps?.lat).length >= 10; }},
+  { id:'regionalforscher',  icon:'📍', name:'Regionalforscher',
+    desc:'50 Pflanzen mit GPS-Standort',
+    check: async () => { const a = await dbGetAll(); return a.filter(p=>p.gps?.lat).length >= 50; }},
+  { id:'stadtflora',        icon:'🏙️', name:'Stadtflora',
+    desc:'Notizen von 25 verschiedenen Orten',
+    check: async () => {
+      const a = await dbGetAll();
+      const orte = new Set(a.filter(p=>p.gps?.label).map(p=>p.gps.label));
+      return orte.size >= 25;
+    }},
+  { id:'waldexpedition',    icon:'🌳🗺️', name:'Waldexpedition',
+    desc:'25 Pflanzen aus dem Wald',
+    check: async () => {
+      const a = await dbGetAll();
+      return a.filter(p=>/wald|forst|gehölz/i.test((p.notes||'')+(p.gps?.label||''))).length >= 25;
+    }},
+  { id:'wiesenexpedition',  icon:'🌾🗺️', name:'Wiesenexpedition',
+    desc:'25 Pflanzen aus der Wiese',
+    check: async () => {
+      const a = await dbGetAll();
+      return a.filter(p=>/wiese|feld|flur|au/i.test((p.notes||'')+(p.gps?.label||''))).length >= 25;
+    }},
+  { id:'flora_weltreisender',icon:'🌏', name:'Flora-Weltreisender',
+    desc:'Pflanzen aus 5 verschiedenen Städten/Regionen',
+    check: async () => {
+      const a = await dbGetAll();
+      const orte = new Set(a.filter(p=>p.gps?.label).map(p=>(p.gps.label||'').split(',')[0].trim()));
+      return orte.size >= 5;
+    }},
+
+  // ── 🏆 Besondere Erfolge (teils geheim) ───────────────────
+  { id:'fruehaufsteher',    icon:'🌅', name:'Frühaufsteher',
+    desc:'Vor 6 Uhr morgens gelernt',
+    check: async () => localStorage.getItem('pflanz_early_bird') === '1',
+    secret: true },
+  { id:'nachtbotaniker',    icon:'🌙', name:'Nachtbotaniker',
+    desc:'Nach 23 Uhr gelernt',
+    check: async () => localStorage.getItem('pflanz_night_owl') === '1',
+    secret: true },
+  { id:'pflanzenmarathon',  icon:'🏃', name:'Pflanzenmarathon',
+    desc:'25 Pflanzen an einem Tag gelernt',
+    check: async () => parseInt(localStorage.getItem('pflanz_daily_max')||'0') >= 25,
+    secret: true },
+  { id:'unbekanntes_terrain',icon:'🧩', name:'Unbekanntes Terrain',
+    desc:'10 neue Pflanzen in einer Session gelernt',
+    check: async () => { const a = await dbGetAll(); return a.length >= 10 && a.filter(p=>(p.level||0)===0).length <= a.length - 10; }},
+  { id:'schwer_zu_knacken', icon:'💎', name:'Schwer zu knacken',
+    desc:'5 Prüfungen bestanden',
+    check: async () => {
+      const exams = JSON.parse(localStorage.getItem('pflanz_exams') || '[]');
+      return exams.filter(e => e.grade <= 3).length >= 5;
+    }, secret: true },
+  { id:'comeback',          icon:'🔄', name:'Comeback',
+    desc:'Pflanze die vergessen wurde dauerhaft gelernt',
+    check: async () => localStorage.getItem('pflanz_comeback') === '1',
+    secret: true },
+  { id:'botanischer_schatz',icon:'💰', name:'Botanischer Schatz',
+    desc:'Pflanze mit lateinischem Namen auf Stufe 5',
+    check: async () => {
+      const a = await dbGetAll();
+      return a.some(p => p.latin && (p.level||0) >= 5);
+    }, secret: true },
+  { id:'flora_legende',     icon:'🌿👑', name:'Flora-Legende',
+    desc:'Level 12 erreicht',
+    check: async () => getXP() >= 42000,
+    secret: true },
+
+  // ── 🌟 Bonus-Badges ────────────────────────────────────────
+  { id:'jahreszeitenkenner',icon:'🍂', name:'Jahreszeitenkenner',
     desc:'In allen 4 Jahreszeiten gelernt',
     check: async () => {
       const seasons = JSON.parse(localStorage.getItem('pflanz_seasons') || '[]');
       return [0,1,2,3].every(s => seasons.includes(s));
     }},
-  { id:'eiserne_biene', icon:'🐝', name:'Eiserne Biene',
+  { id:'eiserne_biene',     icon:'🐝', name:'Eiserne Biene',
     desc:'5 Bienen-Runden abgeschlossen',
     check: async () => parseInt(localStorage.getItem('pflanz_bee_count')||'0') >= 5 },
-  { id:'pruefling', icon:'🎓', name:'Prüfling',
-    desc:'Erste Prüfung bestanden',
+  { id:'pruefling',         icon:'🎓', name:'Prüfling',
+    desc:'Erste Prüfung bestanden (Note 1–3)',
     check: async () => {
       const exams = JSON.parse(localStorage.getItem('pflanz_exams') || '[]');
       return exams.some(e => e.grade <= 3);
     }},
+  { id:'info_sammler',      icon:'📝', name:'Info-Sammler',
+    desc:'50 Pflanzen mit vollständigen Infos',
+    check: async () => { const a = await dbGetAll(); return a.filter(p=>p.infoHtml).length >= 50; }},
+  { id:'pflanzenwissen_50', icon:'🧬', name:'Pflanzenwissen 50 %',
+    desc:'Pflanzenwissen-Wert 50% erreicht',
+    check: async () => (await berechnePflanzenwissen()) >= 50 },
+  { id:'pflanzenwissen_80', icon:'🧬🏅', name:'Pflanzenwissen 80 %',
+    desc:'Pflanzenwissen-Wert 80% erreicht',
+    check: async () => (await berechnePflanzenwissen()) >= 80,
+    secret: true },
+  { id:'streak_bonus_3',    icon:'🎁', name:'Bonusregen',
+    desc:'3-Tage-Streak-Bonus eingesammelt',
+    check: async () => parseInt(localStorage.getItem('pflanz_streak_bonus_count')||'0') >= 1,
+    secret: true },
 ];
 
 function getXP() { return parseInt(localStorage.getItem('pflanz_xp') || '0'); }
@@ -2313,6 +2740,10 @@ function awardXP(amount) {
   const newXP = oldXP + amount;
   setXP(newXP);
   trackSeason();
+  // Tageszeit-Tracking
+  const h = new Date().getHours();
+  if (h < 6) localStorage.setItem('pflanz_early_bird', '1');
+  if (h >= 23) localStorage.setItem('pflanz_night_owl', '1');
   renderXPBar();
   // Level-up flash?
   const oldLv = getCurrentLevel(oldXP);
@@ -2350,17 +2781,22 @@ function renderXPBar() {
 
 async function checkBadges() {
   const earned = getEarnedBadges();
+  const newlyEarned = [];
   for (const b of BADGES) {
     if (earned.includes(b.id)) continue;
     try {
       const ok = await b.check();
       if (ok) {
         earned.push(b.id);
-        localStorage.setItem('pflanz_badges', JSON.stringify(earned));
-        showBadge(b);
-        break; // show one at a time
+        newlyEarned.push(b);
       }
     } catch {}
+  }
+  if (newlyEarned.length) {
+    localStorage.setItem('pflanz_badges', JSON.stringify(earned));
+    // Pop-ups nacheinander anzeigen (max 3)
+    const toShow = newlyEarned.slice(0, 3);
+    toShow.forEach((b, i) => setTimeout(() => showBadge(b), i * 4200));
   }
 }
 
@@ -2383,6 +2819,87 @@ function trackSeason() {
     seasons.push(season);
     localStorage.setItem('pflanz_seasons', JSON.stringify(seasons));
   }
+}
+
+// ── Streak-System ─────────────────────────────────────────────
+// Streak = Anzahl aufeinanderfolgender Tage an denen gelernt wurde.
+// INTERVALS[0..5] entsprechen level 0..5 → Streak-Bonus ab 3 Tagen.
+const STREAK_BONUSES = [
+  { days: 3,   xp: 10,   label: '3 Tage' },
+  { days: 7,   xp: 30,   label: '7 Tage' },
+  { days: 14,  xp: 50,   label: '2 Wochen' },
+  { days: 30,  xp: 100,  label: '30 Tage' },
+  { days: 100, xp: 300,  label: '100 Tage' },
+  { days: 365, xp: 1000, label: '1 Jahr' },
+];
+
+function updateStreak() {
+  const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+  const lastDay = localStorage.getItem('pflanz_streak_date');
+  let streak = parseInt(localStorage.getItem('pflanz_streak') || '0');
+  if (lastDay === today) return streak; // schon heute aktualisiert
+  const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+  if (lastDay === yesterday) {
+    streak += 1;
+  } else if (lastDay && lastDay !== today) {
+    // Streak unterbrochen
+    if (streak > parseInt(localStorage.getItem('pflanz_streak_max')||'0'))
+      localStorage.setItem('pflanz_streak_max', streak);
+    streak = 1;
+  } else {
+    streak = 1; // erster Tag
+  }
+  localStorage.setItem('pflanz_streak', streak);
+  localStorage.setItem('pflanz_streak_date', today);
+  // Tagescount
+  const dayCount = parseInt(localStorage.getItem('pflanz_daily_count')||'0') + 1;
+  localStorage.setItem('pflanz_daily_count', dayCount);
+  // Tages-Maximum
+  const prevMax = parseInt(localStorage.getItem('pflanz_daily_max')||'0');
+  if (dayCount > prevMax) localStorage.setItem('pflanz_daily_max', dayCount);
+  // Tagesreset
+  if (lastDay !== today) localStorage.setItem('pflanz_daily_count', 1);
+  // Tageszeit tracken
+  const h = new Date().getHours();
+  if (h < 6) localStorage.setItem('pflanz_early_bird', '1');
+  if (h >= 23) localStorage.setItem('pflanz_night_owl', '1');
+  // Streak-Bonus-XP vergeben
+  let bonusCount = parseInt(localStorage.getItem('pflanz_streak_bonus_count')||'0');
+  for (const b of STREAK_BONUSES) {
+    if (streak === b.days) {
+      awardXP(b.xp);
+      bonusCount++;
+      localStorage.setItem('pflanz_streak_bonus_count', bonusCount);
+      showBadge({ icon: '🔥', name: `Streak-Bonus: ${b.label}!`, desc: `+${b.xp} XP für ${b.days} Tage in Folge` });
+    }
+  }
+  return streak;
+}
+
+// ── XP-Vergabe nach Anki-Prinzip (je länger erinnert, desto mehr XP) ──
+const LEVEL_XP = [0, 5, 8, 10, 15, 25]; // xp für level 0→1, 1→2, …, 4→5
+function xpForLevel(level) {
+  return LEVEL_XP[Math.min(level, LEVEL_XP.length-1)] || 5;
+}
+
+// ── Pflanzenwissen-Berechnung ─────────────────────────────────
+// Misst wie sicher der User seine bisher gelernten Pflanzen beherrscht.
+// Formel: sum(level/maxLevel) / anzahl_pflanzen_mit_level>0 * 100
+async function berechnePflanzenwissen() {
+  const MAX_LEVEL = INTERVALS.length - 1; // = 5
+  const all = await dbGetAll();
+  const mit = all.filter(p => (p.level||0) > 0);
+  if (!mit.length) return 0;
+  const summe = mit.reduce((s, p) => s + (p.level||0), 0);
+  return Math.round(summe / (mit.length * MAX_LEVEL) * 100);
+}
+
+// ── Pflanzenstatus (nach Anki-Level) ─────────────────────────
+function pflanzenStatus(level) {
+  if (!level || level === 0) return { label:'🌱 Entdeckt',    color:'#aaa' };
+  if (level <= 1)            return { label:'🌿 Gelernt',     color:'var(--accent)' };
+  if (level <= 3)            return { label:'🌳 Sicher',      color:'#2e7d32' };
+  return                            { label:'🌟 Meisterhaft', color:'#f59f00' };
 }
 
 // ── Exam ──────────────────────────────────────────────────────
@@ -2531,20 +3048,75 @@ function renderExamHistory() {
 
 
 // ── Badge-Galerie ─────────────────────────────────────────────
-function openBadgeGallery(afterSession = false) {
+async function openBadgeGallery(afterSession = false) {
   const xp = getXP();
   const lv = getCurrentLevel(xp);
+  const lvIdx = LEVELS.indexOf(lv);
+  const next = LEVELS[lvIdx + 1];
   const earned = getEarnedBadges();
   const el = document.getElementById('badge-gallery');
   const grid = document.getElementById('badge-grid');
-  const xpRow = document.getElementById('bg-xp-row');
   const continueBtn = document.getElementById('bg-continue-btn');
   if (!el) return;
 
-  xpRow.textContent = lv.icon + ' ' + lv.name + '  ·  ' + xp + ' XP';
+  // Level-Info
+  document.getElementById('bg-level-icon').textContent = lv.icon;
+  document.getElementById('bg-level-name').textContent = 'Level ' + (lvIdx+1) + ' – ' + lv.name;
+  const pct = next ? Math.min(100, Math.round((xp - lv.minXP) / (next.minXP - lv.minXP) * 100)) : 100;
+  document.getElementById('bg-xp-fill').style.width = pct + '%';
+  const diff = next ? (next.minXP - xp) + ' XP bis ' + next.name : '✨ Maximalstufe!';
+  document.getElementById('bg-xp-row').textContent = xp + ' XP  ·  ' + diff;
 
+  // Stats
+  let all = [];
+  try { all = await dbGetAll(); } catch(e) {}
+  const gelernt = all.filter(p => (p.level||0) >= 1).length;
+  const streak = parseInt(localStorage.getItem('pflanz_streak')||'0');
+  document.getElementById('bg-stat-pflanzen').textContent = all.length;
+  document.getElementById('bg-stat-gelernt').textContent = gelernt;
+  document.getElementById('bg-stat-streak').textContent = streak;
+  document.getElementById('bg-stat-badges').textContent = earned.length;
+
+  // Pflanzenwissen
+  let pw = 0;
+  try { pw = await berechnePflanzenwissen(); } catch(e) {}
+  document.getElementById('bg-pw-fill').style.width = pw + '%';
+  document.getElementById('bg-pw-pct').textContent = pw + ' %';
+
+  // Nächstes noch-nicht-verdientes, nicht-geheimes Badge
+  const nextBadge = BADGES.find(b => !earned.includes(b.id) && !b.secret);
+  const nbWrap = document.getElementById('bg-next-badge');
+  const nbInner = document.getElementById('bg-next-badge-inner');
+  if (nextBadge) {
+    nbInner.innerHTML = '<div style="font-size:1.8rem">' + nextBadge.icon + '</div>' +
+      '<div><div style="font-weight:800;color:var(--text)">' + nextBadge.name + '</div>' +
+      '<div style="font-size:.8rem;color:var(--muted)">' + nextBadge.desc + '</div></div>';
+    nbWrap.style.display = 'block';
+  } else { nbWrap.style.display = 'none'; }
+
+  // Letzte 3 verdiente Abzeichen
+  const recentWrap = document.getElementById('bg-recent-badges-wrap');
+  const recentEl = document.getElementById('bg-recent-badges');
+  const recentEarned = BADGES.filter(b => earned.includes(b.id)).slice(-3).reverse();
+  if (recentEarned.length) {
+    recentEl.innerHTML = recentEarned.map(b =>
+      '<div style="background:var(--surface);border:1.5px solid var(--accent);border-radius:12px;padding:8px 12px;display:flex;align-items:center;gap:8px">' +
+      '<span style="font-size:1.4rem">' + b.icon + '</span>' +
+      '<span style="font-size:.8rem;font-weight:700;color:var(--accent2)">' + b.name + '</span></div>'
+    ).join('');
+    recentWrap.style.display = 'block';
+  } else { recentWrap.style.display = 'none'; }
+
+  // Badge-Grid: geheime als ??? bis verdient
   grid.innerHTML = BADGES.map(b => {
     const has = earned.includes(b.id);
+    if (b.secret && !has) {
+      return '<div class="badge-item">' +
+        '<div class="bi-icon">❓</div>' +
+        '<div class="bi-name">???</div>' +
+        '<div class="bi-desc">Geheimerfolg</div>' +
+        '</div>';
+    }
     return '<div class="badge-item' + (has ? ' earned' : '') + '">' +
       '<div class="bi-icon">' + b.icon + '</div>' +
       '<div class="bi-name">' + b.name + '</div>' +
@@ -2564,7 +3136,24 @@ function closeBadgeGallery() {
 // ── Pilz-Modus ────────────────────────────────────────────────
 
 // Init nach allen Definitionen
-document.addEventListener('DOMContentLoaded', () => { try { renderXPBar(); } catch(e) {} });
+document.addEventListener('DOMContentLoaded', () => {
+  try { renderXPBar(); } catch(e) {}
+  // Streaks initialisieren (ohne XP zu vergeben, nur Datum prüfen)
+  try {
+    const today = new Date().toISOString().slice(0,10);
+    if (localStorage.getItem('pflanz_streak_date') !== today) {
+      // Nicht via updateStreak aufrufen (würde XP vergeben), nur Datum/Streak pflegen
+      const lastDay = localStorage.getItem('pflanz_streak_date');
+      const yesterday = new Date(Date.now()-86400000).toISOString().slice(0,10);
+      let streak = parseInt(localStorage.getItem('pflanz_streak')||'0');
+      if (lastDay && lastDay !== yesterday && lastDay !== today) {
+        if (streak > parseInt(localStorage.getItem('pflanz_streak_max')||'0'))
+          localStorage.setItem('pflanz_streak_max', streak);
+        // Streak unterbrochen aber noch nicht auf 0 setzen – erst beim aktiven Lernen
+      }
+    }
+  } catch(e) {}
+});
 
 </script>
 <!-- Zoom Overlay -->
@@ -2583,12 +3172,79 @@ document.addEventListener('DOMContentLoaded', () => { try { renderXPBar(); } cat
 <input type="file" id="illus-upload-input" accept="image/*" style="display:none" onchange="handleIllusUpload(this)">
 
 
-<!-- Badge Galerie -->
+<!-- Badge Galerie + Profil -->
 <div id="badge-gallery">
   <div id="badge-gallery-card">
-    <h2>🏅 Meine Abzeichen</h2>
-    <div class="bg-xp-row" id="bg-xp-row"></div>
+    <h2>🌿 Mein Profil</h2>
+
+    <!-- XP / Level Block -->
+    <div style="background:var(--surface2);border-radius:16px;padding:16px 18px;margin-bottom:16px;border:1px solid var(--border)">
+      <div style="text-align:center">
+        <div id="bg-level-icon" style="font-size:2.4rem;line-height:1;margin-bottom:4px">🌱</div>
+        <div id="bg-level-name" style="font-weight:900;font-size:1.3rem;color:var(--accent2);margin-bottom:4px"></div>
+        <div style="display:flex;align-items:center;gap:8px;margin:8px 0">
+          <div style="flex:1;height:10px;background:var(--border);border-radius:5px;overflow:hidden">
+            <div id="bg-xp-fill" style="height:100%;background:linear-gradient(90deg,var(--accent),#7ed957);border-radius:5px;transition:width .5s"></div>
+          </div>
+        </div>
+        <div id="bg-xp-row" style="font-size:.82rem;color:var(--muted);margin-bottom:0"></div>
+      </div>
+      <!-- Stats-Zeile -->
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:14px">
+        <div style="text-align:center;background:var(--surface);border-radius:10px;padding:8px 4px;border:1px solid var(--border)">
+          <div style="font-size:1.3rem">🌱</div>
+          <div id="bg-stat-pflanzen" style="font-weight:800;font-size:1.1rem;color:var(--accent2)">0</div>
+          <div style="font-size:.65rem;color:var(--muted)">Pflanzen</div>
+        </div>
+        <div style="text-align:center;background:var(--surface);border-radius:10px;padding:8px 4px;border:1px solid var(--border)">
+          <div style="font-size:1.3rem">🧠</div>
+          <div id="bg-stat-gelernt" style="font-weight:800;font-size:1.1rem;color:var(--accent2)">0</div>
+          <div style="font-size:.65rem;color:var(--muted)">Gelernt</div>
+        </div>
+        <div style="text-align:center;background:var(--surface);border-radius:10px;padding:8px 4px;border:1px solid var(--border)">
+          <div style="font-size:1.3rem">🔥</div>
+          <div id="bg-stat-streak" style="font-weight:800;font-size:1.1rem;color:var(--accent2)">0</div>
+          <div style="font-size:.65rem;color:var(--muted)">Tage-Serie</div>
+        </div>
+        <div style="text-align:center;background:var(--surface);border-radius:10px;padding:8px 4px;border:1px solid var(--border)">
+          <div style="font-size:1.3rem">🏆</div>
+          <div id="bg-stat-badges" style="font-weight:800;font-size:1.1rem;color:var(--accent2)">0</div>
+          <div style="font-size:.65rem;color:var(--muted)">Abzeichen</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pflanzenwissen -->
+    <div id="bg-pflanzenwissen-wrap" style="background:var(--surface2);border-radius:14px;padding:12px 16px;margin-bottom:16px;border:1px solid var(--border);display:flex;align-items:center;gap:12px">
+      <div style="font-size:1.8rem">🧬</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:.75rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:4px">Pflanzenwissen</div>
+        <div style="height:8px;background:var(--border);border-radius:4px;overflow:hidden;margin-bottom:4px">
+          <div id="bg-pw-fill" style="height:100%;background:linear-gradient(90deg,#1e7a38,#7ed957);border-radius:4px;transition:width .5s"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:.8rem">
+          <span style="color:var(--muted)">Wie sicher beherrschst du deine Pflanzen?</span>
+          <span id="bg-pw-pct" style="font-weight:800;color:var(--accent2)">0 %</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Nächstes Abzeichen -->
+    <div id="bg-next-badge" style="margin-bottom:16px;display:none">
+      <div style="font-size:.7rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:8px">Nächstes Abzeichen</div>
+      <div id="bg-next-badge-inner" style="background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:12px 14px;display:flex;align-items:center;gap:12px"></div>
+    </div>
+
+    <!-- Letzte Abzeichen -->
+    <div id="bg-recent-badges-wrap" style="margin-bottom:16px;display:none">
+      <div style="font-size:.7rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:8px">Zuletzt verdient</div>
+      <div id="bg-recent-badges" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+    </div>
+
+    <!-- Alle Abzeichen -->
+    <div style="font-size:.7rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:8px">Alle Abzeichen</div>
     <div class="badge-grid" id="badge-grid"></div>
+
     <div id="badge-gallery-nav">
       <button class="btn btn-secondary" onclick="closeBadgeGallery()">← Zurück</button>
       <button class="btn btn-primary" id="bg-continue-btn" onclick="closeBadgeGallery()">Weiter lernen →</button>
