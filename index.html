@@ -153,8 +153,19 @@
   /* ── AI result box ── */
   #ai-result {
     background: #edfbe8; border: 1.5px solid #a5d6a7;
-    border-radius: var(--radius); padding: 14px; margin-bottom: 12px;
-    display: none;
+    border-radius: var(--radius); margin-bottom: 12px;
+    display: none; overflow: hidden;
+  }
+  #ai-result-header {
+    padding: 14px 14px 10px;
+    background: #edfbe8;
+    border-bottom: 1px solid rgba(165,214,167,.6);
+  }
+  #ai-result-body {
+    max-height: 56vh;
+    overflow-y: auto;
+    padding: 12px 14px 14px;
+    -webkit-overflow-scrolling: touch;
   }
   #ai-result .ai-label { font-size: .75rem; color: #2e7d32; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; margin-bottom: 6px; }
 
@@ -758,10 +769,21 @@
       <!-- AI Recognition -->
       <div id="ai-spinner">🔍 PlantNet erkennt Pflanze …</div>
       <div id="ai-result">
-        <div class="ai-label">🌿 PlantNet-Vorschlag</div>
-        <div class="ai-name" id="ai-name-text"></div>
-        <div class="ai-info" id="ai-info-text"></div>
-        <a id="lens-link" href="https://lens.google.com" target="_blank" style="display:none;margin-top:8px;font-size:.8rem;color:var(--muted);text-decoration:none;">🔍 Mit Google Lens prüfen ↗</a>
+        <!-- Sticky name header -->
+        <div id="ai-result-header">
+          <div class="ai-label">🌿 PlantNet-Vorschlag</div>
+          <div class="ai-name" id="ai-name-text"></div>
+          <div class="ai-info" id="ai-info-text"></div>
+          <a id="lens-link" href="https://lens.google.com" target="_blank" style="display:none;margin-top:4px;font-size:.8rem;color:var(--muted);text-decoration:none;">🔍 Mit Google Lens prüfen ↗</a>
+        </div>
+        <!-- Scrollable body: illustration + features + fun facts -->
+        <div id="ai-result-body">
+          <div id="ai-illustration" style="display:none;margin-bottom:12px">
+            <img id="ai-illus-img" src="" alt="" style="width:100%;border-radius:8px;max-height:200px;object-fit:cover">
+            <div id="ai-illus-credit" style="font-size:.68rem;color:var(--muted);text-align:right;margin-top:3px"></div>
+          </div>
+          <div id="ai-enrichment"></div>
+        </div>
       </div>
       <div id="gps-hint" style="font-size:.78rem;color:var(--muted);margin-bottom:6px;min-height:18px"></div>
 
@@ -1373,12 +1395,19 @@ async function recognizePlant() {
 
     lastAiName = germanName;
     lastAiLatin = latinName;
+    lastAiInfoHtml = null;
     autoApplyAiName(germanName);
     document.getElementById('ai-name-text').textContent =
       germanName + (latinName && latinName !== germanName ? ` (${latinName})` : '');
     document.getElementById('ai-info-text').textContent = info;
+    // Reset enrichment area
+    document.getElementById('ai-enrichment').innerHTML =
+      '<div style="color:#388e3c;font-size:.82rem;padding:6px 0">🔍 Lade Details …</div>';
+    document.getElementById('ai-illustration').style.display = 'none';
     resultBox.style.display = 'block';
     document.getElementById('lens-link').style.display = 'inline-block';
+    // Auto-load enrichment (non-blocking)
+    _loadAiEnrichment(germanName, latinName);
 
   } catch (err) {
     alert('Fehler bei der Pflanzenerkennung:\n' + err.message);
@@ -1440,12 +1469,13 @@ async function savePlant() {
     notes: addGpsData?.label || '',
     photo: addPhotoData,
     gps: addGpsData,
+    infoHtml: lastAiInfoHtml || undefined,
     level: 0,
     nextReview: Date.now(),
     created: Date.now()
   });
   // Reset
-  addPhotoData = null; addGpsData = null; lastAiName = ''; lastAiLatin = '';
+  addPhotoData = null; addGpsData = null; lastAiName = ''; lastAiLatin = ''; lastAiInfoHtml = null;
   document.getElementById('photo-area').innerHTML =
     '<span class="big-icon">📷</span><span style="font-size:.78rem;text-align:center">Foto aufnehmen</span><div class="overlay">Ändern</div>';
   const upBox = document.getElementById('photo-area-upload');
@@ -1531,6 +1561,75 @@ function closeModal(e) {
     document.getElementById('modal-overlay').classList.remove('open');
 }
 
+
+// ── Vorschau-Enrichment direkt nach Erkennung ────────────────
+let lastAiInfoHtml = null;
+
+async function _fetchWikiImage(latinName) {
+  try {
+    const url = `https://en.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(latinName)}&prop=pageimages&format=json&pithumbsize=500&origin=*`;
+    const r = await fetch(url);
+    const d = await r.json();
+    const pages = d.query?.pages || {};
+    const page = Object.values(pages)[0];
+    const thumb = page?.thumbnail;
+    if (thumb) return { src: thumb.source };
+    return null;
+  } catch { return null; }
+}
+
+async function _loadAiEnrichment(germanName, latinName) {
+  // Wikipedia image (parallel with AI)
+  const wikiPromise = latinName ? _fetchWikiImage(latinName) : Promise.resolve(null);
+
+  // AI info (same prompt as generatePlantInfo, but with names directly)
+  let infoHtml = null;
+  try {
+    const res = await aiChat([{ role: 'user', content:
+      'Gib mir Informationen zur Pflanze "' + germanName + '"' + (latinName ? ' (' + latinName + ')' : '') +
+      ' auf Deutsch.\n\n**Bestimmungsmerkmale:**\nListe NUR die zutreffenden Merkmale tabellarisch im Format "Punkt: Wert" auf — eine Zeile pro Merkmal. Prüfe folgende Punkte und nenne nur die, die für diese Pflanze relevant sind (z.B. Milchsaft nur wenn vorhanden, sonst weglassen):\nBlütenfarbe, Blütenform, Anzahl der Kronblätter, Blattstellung, Blattform, Blattrand, Behaarung, Geruch/Geschmack, Milchsaft, Standort.\nKurz und stichwortartig, kein Fließtext.\n\n**Fun Facts:**\n3-4 kurze Fun Facts auf Deutsch. Schreibe: modern, lebendig, seriös und historisch korrekt. Keine trockenen Kunstgeschichte-Vorlesungen, sondern überraschende Details die im Gedächtnis bleiben. Kurz und prägnant.\n\nWICHTIG: Verwende **ausschließlich** für die beiden Überschriften "**Bestimmungsmerkmale:**" und "**Fun Facts:**". Markiere innerhalb der Inhalte KEIN einziges Wort fett.'
+    }], 1536);
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error?.message);
+    const text = data.choices?.[0]?.message?.content || '';
+    if (!text.trim()) throw new Error('Leere Antwort');
+    const stripBold = s => (s || '').replace(/\*\*/g, '').trim();
+    const merkmaleMatch = text.match(/\*\*\s*Bestimmungsmerkmale\s*:?\s*\*\*([\s\S]*?)(?=\*\*\s*Fun\s*Facts|$)/i);
+    const funfactsMatch = text.match(/\*\*\s*Fun\s*Facts\s*:?\s*\*\*([\s\S]*)/i);
+    let html = '';
+    const merkmaleBody = merkmaleMatch ? stripBold(merkmaleMatch[1]) : '';
+    if (merkmaleBody) {
+      html += '<h3>Bestimmungsmerkmale</h3><table class="merkmale-table">';
+      merkmaleBody.split('\n').filter(l => l.trim() && l.includes(':')).forEach(row => {
+        const [k, ...rest] = row.split(':');
+        html += '<tr><td class="merkmal-key">' + k.trim().replace(/^[-•*]\s*/,'') + '</td><td class="merkmal-val">' + rest.join(':').trim() + '</td></tr>';
+      });
+      html += '</table>';
+    }
+    const funfactsBody = funfactsMatch ? stripBold(funfactsMatch[1]) : '';
+    if (funfactsBody) {
+      html += '<h3>Fun Facts</h3>';
+      funfactsBody.split('\n').filter(l => l.trim()).forEach(l => {
+        html += '<p>' + l.replace(/^[-•*\d.]+\s*/,'') + '</p>';
+      });
+    }
+    if (html) infoHtml = html;
+  } catch(e) { console.warn('Enrichment error:', e.message); }
+
+  // Update enrichment div
+  const enrichDiv = document.getElementById('ai-enrichment');
+  if (enrichDiv) enrichDiv.innerHTML = infoHtml || '<p style="color:var(--muted);font-size:.82rem">Details nicht verfügbar.</p>';
+  if (infoHtml) lastAiInfoHtml = infoHtml;
+
+  // Wikipedia illustration
+  const wikiImg = await wikiPromise;
+  const illustDiv = document.getElementById('ai-illustration');
+  if (wikiImg && illustDiv) {
+    document.getElementById('ai-illus-img').src = wikiImg.src;
+    document.getElementById('ai-illus-credit').textContent = '© Wikipedia / Wikimedia Commons';
+    illustDiv.style.display = 'block';
+  }
+}
 
 // ── Pflanzeninfo generieren (Bestimmungsmerkmale + Fun Facts) ──
 let lastInfoError = '';
