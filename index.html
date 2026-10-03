@@ -677,8 +677,8 @@
 
     <!-- PROFIL -->
     <div class="screen" id="profil-screen">
-      <button onclick="switchTab('add')" style="display:flex;align-items:center;gap:6px;background:none;border:none;color:var(--muted);font-size:.95rem;cursor:pointer;padding:0 0 14px;font-family:inherit">
-        <span style="font-size:1.2rem">←</span> Schließen
+      <button onclick="switchTab('add')" style="display:flex;align-items:center;gap:8px;background:var(--surface2);border:1px solid var(--border);border-radius:24px;color:var(--text);font-size:1rem;font-weight:600;cursor:pointer;padding:10px 20px;font-family:inherit;margin-bottom:16px">
+        <span style="font-size:1.3rem">←</span> Schließen
       </button>
       <div id="profil-level-card" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:12px;text-align:center;box-shadow:var(--shadow)">
         <div id="profil-level-icon" style="font-size:3rem;margin-bottom:6px">🌱</div>
@@ -804,11 +804,17 @@
         <div id="add-status-bar" style="display:flex;align-items:center;gap:14px;margin-top:14px;min-height:56px;opacity:0;transition:opacity .4s">
           <div id="add-level-info" style="display:flex;align-items:center;gap:10px;color:var(--accent2);font-weight:700">
             <span id="add-level-icon" style="font-size:2.6rem;line-height:1"></span>
-            <span id="add-level-name" style="font-size:1.15rem"></span>
+            <div style="display:flex;flex-direction:column;line-height:1.25">
+              <span id="add-level-name" style="font-size:1.15rem"></span>
+              <span id="add-level-num" style="font-size:.75rem;font-weight:400;color:var(--muted)"></span>
+            </div>
           </div>
           <div id="add-badge-info" style="display:none;align-items:center;gap:10px;border-left:2px solid var(--accent);padding-left:14px">
             <span id="add-badge-icon" style="font-size:2.6rem;line-height:1"></span>
-            <span id="add-badge-name" style="font-size:1.05rem;font-weight:700;color:var(--text)"></span>
+            <div style="display:flex;flex-direction:column;line-height:1.25">
+              <span id="add-badge-name" style="font-size:1.05rem;font-weight:700;color:var(--text)"></span>
+              <span id="add-badge-num" style="font-size:.75rem;color:var(--muted)"></span>
+            </div>
           </div>
         </div>
         <div id="add-msg" style="display:none"></div>
@@ -3609,18 +3615,15 @@ function showBadgeBanner(badges) {
   if (!badges || !badges.length) return;
   // Level-Info immer aktuell halten
   _updateAddLevelDisplay();
-  // Badge-Info befüllen (nur erste 2 zeigen)
+  // Badge-Info befüllen (immer nur erstes Badge zeigen)
   const bar = document.getElementById('add-status-bar');
   const badgeInfo = document.getElementById('add-badge-info');
   if (bar) {
     const b0 = badges[0];
-    const b1 = badges[1];
-    const badgeNum = b => { const i = BADGES.findIndex(x => x.id === b.id); return i >= 0 ? i + 1 : ''; };
-    const n0 = badgeNum(b0), n1 = b1 ? badgeNum(b1) : null;
-    document.getElementById('add-badge-icon').textContent =
-      b1 ? (b0.icon||'🏅') + ' ' + (b1.icon||'🏅') : (b0.icon||'🏅');
-    document.getElementById('add-badge-name').textContent =
-      b1 ? 'Auszeichnung ' + n0 + ' & ' + n1 : 'Auszeichnung ' + n0;
+    const n0 = BADGES.findIndex(x => x.id === b0.id) + 1;
+    document.getElementById('add-badge-icon').textContent = b0.icon || '🏅';
+    document.getElementById('add-badge-name').textContent = b0.name;
+    document.getElementById('add-badge-num').textContent = 'Badge ' + String(n0).padStart(2, '0');
     badgeInfo.style.display = 'flex';
     bar.style.opacity = '1';
     playBadgeSound();
@@ -3640,8 +3643,10 @@ function _updateAddLevelDisplay() {
   const idx = LEVELS.indexOf(lv);
   const el = document.getElementById('add-level-icon');
   const en = document.getElementById('add-level-name');
+  const enu = document.getElementById('add-level-num');
   if (el) el.textContent = lv.icon;
-  if (en) en.textContent = lv.name + ' · Level ' + (idx + 1);
+  if (en) en.textContent = lv.name;
+  if (enu) enu.textContent = 'Level ' + String(idx + 1).padStart(2, '0');
   bar.style.opacity = '1';
 }
 
@@ -3752,6 +3757,9 @@ function simResetAll() {
 <!-- Badge Galerie + Profil -->
 <div id="badge-gallery">
   <div id="badge-gallery-card">
+    <button onclick="closeBadgeGallery()" style="display:flex;align-items:center;gap:8px;background:var(--surface2);border:1px solid var(--border);border-radius:24px;color:var(--text);font-size:1rem;font-weight:600;cursor:pointer;padding:10px 20px;font-family:inherit;margin-bottom:16px">
+      <span style="font-size:1.3rem">←</span> Schließen
+    </button>
     <h2>🌿 Mein Profil</h2>
 
     <!-- XP / Level Block -->
