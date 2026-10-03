@@ -765,25 +765,17 @@
       </div>
       <div id="gps-hint" style="font-size:.78rem;color:var(--muted);margin-bottom:6px;min-height:18px"></div>
 
-      <div class="form-group">
-        <input type="text" id="add-name" placeholder="Pflanzenname" autocomplete="off" style="margin-top:4px">
-      </div>
-
-      <div class="form-group">
-        <textarea id="add-notes" placeholder="Notizen, Fundort …" style="margin-top:4px"></textarea>
-      </div>
-
-      <div id="add-save-bar" style="position:sticky;bottom:-16px;z-index:5;margin:20px -16px -16px;padding:12px 16px calc(12px + env(safe-area-inset-bottom));background:var(--surface);border-top:1px solid var(--border);box-shadow:0 -6px 16px rgba(40,100,40,.12);">
+      <div id="add-save-bar" style="position:sticky;bottom:-16px;z-index:5;margin:20px -16px -16px;padding:14px 16px calc(14px + env(safe-area-inset-bottom));background:var(--surface);border-top:1px solid var(--border);box-shadow:0 -6px 16px rgba(40,100,40,.12);">
         <button class="btn btn-primary" onclick="savePlant()">Pflanze speichern</button>
-        <!-- Level + Badge Statuszeile (ersetzt add-msg und floating banner) -->
-        <div id="add-status-bar" style="display:flex;align-items:center;gap:10px;margin-top:10px;min-height:36px;opacity:0;transition:opacity .4s">
-          <div id="add-level-info" style="display:flex;align-items:center;gap:6px;font-size:.88rem;color:var(--accent2);font-weight:600">
-            <span id="add-level-icon" style="font-size:1.2rem"></span>
-            <span id="add-level-name"></span>
+        <!-- Level + Badge Statuszeile -->
+        <div id="add-status-bar" style="display:flex;align-items:center;gap:14px;margin-top:14px;min-height:56px;opacity:0;transition:opacity .4s">
+          <div id="add-level-info" style="display:flex;align-items:center;gap:10px;color:var(--accent2);font-weight:700">
+            <span id="add-level-icon" style="font-size:2.6rem;line-height:1"></span>
+            <span id="add-level-name" style="font-size:1.15rem"></span>
           </div>
-          <div id="add-badge-info" style="display:none;align-items:center;gap:6px;font-size:.88rem;color:var(--text);border-left:1px solid var(--border);padding-left:10px">
-            <span id="add-badge-icon" style="font-size:1.4rem"></span>
-            <span id="add-badge-name" style="font-weight:600"></span>
+          <div id="add-badge-info" style="display:none;align-items:center;gap:10px;border-left:2px solid var(--accent);padding-left:14px">
+            <span id="add-badge-icon" style="font-size:2.6rem;line-height:1"></span>
+            <span id="add-badge-name" style="font-size:1.05rem;font-weight:700;color:var(--text)"></span>
           </div>
         </div>
         <div id="add-msg" style="display:none"></div>
@@ -1396,11 +1388,10 @@ async function recognizePlant() {
 }
 
 function applyAiName() {
-  if (lastAiName) document.getElementById('add-name').value = lastAiName;
   document.getElementById('ai-result').style.display = 'none';
 }
 function autoApplyAiName(name) {
-  if (name) document.getElementById('add-name').value = name;
+  if (name) lastAiName = name;
 }
 
 
@@ -1429,9 +1420,6 @@ async function getGPSAuto() {
         const label = parts.length ? parts.join(', ') : geo.display_name?.split(',').slice(0,2).join(',').trim();
         addGpsData.label = label;
         addGpsData.display = geo.display_name;
-        // In Sonstiges eintragen
-        const notes = document.getElementById('add-notes');
-        if (!notes.value.trim()) notes.value = label;
         hint.textContent = '✓ ' + label;
       } catch {
         hint.textContent = `✓ ${addGpsData.lat}, ${addGpsData.lon}`;
@@ -1444,13 +1432,12 @@ async function getGPSAuto() {
 
 // ── Save New Plant ────────────────────────────────────────────
 async function savePlant() {
-  const name = document.getElementById('add-name').value.trim();
-  if (!name) { alert('Bitte einen Pflanzennamen eingeben.'); return; }
+  const name = lastAiName || ('Pflanze ' + new Date().toLocaleDateString('de-DE'));
   const savedPhoto = addPhotoData; // capture before reset
   const newId = await dbPut({
     name,
     latin: lastAiLatin || '',
-    notes: document.getElementById('add-notes').value.trim(),
+    notes: addGpsData?.label || '',
     photo: addPhotoData,
     gps: addGpsData,
     level: 0,
@@ -1458,8 +1445,6 @@ async function savePlant() {
     created: Date.now()
   });
   // Reset
-  document.getElementById('add-name').value = '';
-  document.getElementById('add-notes').value = '';
   addPhotoData = null; addGpsData = null; lastAiName = ''; lastAiLatin = '';
   document.getElementById('photo-area').innerHTML =
     '<span class="big-icon">📷</span><span style="font-size:.78rem;text-align:center">Foto aufnehmen</span><div class="overlay">Ändern</div>';
