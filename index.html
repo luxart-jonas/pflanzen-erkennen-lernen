@@ -598,14 +598,7 @@
 
 
   /* ── Badge-Banner (non-blocking, bottom) ──────────────── */
-  #badge-banner {
-    position: fixed; bottom: 74px; left: 0; right: 0; z-index: 800;
-    padding: 0 14px;
-    transform: translateY(130%);
-    transition: transform .45s cubic-bezier(.17,.89,.32,1.2);
-    pointer-events: none;
-  }
-  #badge-banner.show { transform: translateY(0); pointer-events: auto; }
+  #badge-banner { display: none !important; }  /* replaced by add-status-bar */
   #badge-banner-inner {
     background: var(--surface); border: 2px solid var(--accent);
     border-radius: 18px; padding: 14px 18px;
@@ -773,18 +766,27 @@
       <div id="gps-hint" style="font-size:.78rem;color:var(--muted);margin-bottom:6px;min-height:18px"></div>
 
       <div class="form-group">
-        <label>Pflanzenname</label>
-        <input type="text" id="add-name" placeholder="z. B. Löwenzahn" autocomplete="off">
+        <input type="text" id="add-name" placeholder="Pflanzenname" autocomplete="off" style="margin-top:4px">
       </div>
 
       <div class="form-group">
-        <label>Sonstiges</label>
-        <textarea id="add-notes" placeholder="Notizen, Fundort, Besonderheiten …"></textarea>
+        <textarea id="add-notes" placeholder="Notizen, Fundort …" style="margin-top:4px"></textarea>
       </div>
 
       <div id="add-save-bar" style="position:sticky;bottom:-16px;z-index:5;margin:20px -16px -16px;padding:12px 16px calc(12px + env(safe-area-inset-bottom));background:var(--surface);border-top:1px solid var(--border);box-shadow:0 -6px 16px rgba(40,100,40,.12);">
         <button class="btn btn-primary" onclick="savePlant()">Pflanze speichern</button>
-        <div id="add-msg" style="text-align:center;margin-top:12px;font-size:.9rem;color:var(--accent);display:none">✓ Gespeichert!</div>
+        <!-- Level + Badge Statuszeile (ersetzt add-msg und floating banner) -->
+        <div id="add-status-bar" style="display:flex;align-items:center;gap:10px;margin-top:10px;min-height:36px;opacity:0;transition:opacity .4s">
+          <div id="add-level-info" style="display:flex;align-items:center;gap:6px;font-size:.88rem;color:var(--accent2);font-weight:600">
+            <span id="add-level-icon" style="font-size:1.2rem"></span>
+            <span id="add-level-name"></span>
+          </div>
+          <div id="add-badge-info" style="display:none;align-items:center;gap:6px;font-size:.88rem;color:var(--text);border-left:1px solid var(--border);padding-left:10px">
+            <span id="add-badge-icon" style="font-size:1.4rem"></span>
+            <span id="add-badge-name" style="font-weight:600"></span>
+          </div>
+        </div>
+        <div id="add-msg" style="display:none"></div>
       </div>
     </div>
 
@@ -1472,7 +1474,9 @@ async function savePlant() {
   updateDueBadge();
   // +10 erstmals bestimmt, +5 zur Sammlung hinzugefügt
   hideBadgeBanner();
-  try { awardXP(15); } catch(e) {} try { checkBadges(); } catch(e) {}
+  try { awardXP(15); } catch(e) {}
+  try { checkBadges(); } catch(e) {}
+  try { _updateAddLevelDisplay(); } catch(e) {}
 
   // ── Foto auf GitHub sichern (fire & forget) ──
   if (savedPhoto) pushPhotoToGithub(name, savedPhoto).catch(() => {});
@@ -2429,6 +2433,7 @@ openDB().then(async () => {
   updateGithubTokenStatus();
   renderXPBar();
   try { renderProfile(); } catch(e) {}
+  try { _updateAddLevelDisplay(); } catch(e) {}
   setTimeout(() => { try { showPendingBadges(); } catch(e) {} }, 800);
 }).catch(err => alert('IndexedDB Fehler: ' + err));
 
@@ -2919,6 +2924,7 @@ function renderXPBar() {
     }
   }
   // Pilzmodus freischalten?
+  try { _updateAddLevelDisplay(); } catch(e) {}
 }
 
 async function checkBadges() {
@@ -3502,25 +3508,39 @@ function showPendingBadges() {
 
 function showBadgeBanner(badges) {
   if (!badges || !badges.length) return;
-  const title = badges.length === 1 ? '🏅 Neues Abzeichen!' : '🏅 ' + badges.length + ' neue Abzeichen!';
-  const inner = document.getElementById('badge-banner-inner');
-  inner.innerHTML =
-    '<div class="bb-header">' + title + '</div>' +
-    '<div class="bb-badges">' +
-    badges.map(b =>
-      '<div class="bb-badge">' +
-        '<div class="bb-icon">' + (b.icon||'🏅') + '</div>' +
-        '<div><div class="bb-name">' + b.name + '</div>' +
-        (b.desc ? '<div class="bb-desc">' + b.desc + '</div>' : '') +
-        '</div></div>'
-    ).join('') +
-    '</div>';
-  document.getElementById('badge-banner').classList.add('show');
-  playBadgeSound();
+  // Level-Info immer aktuell halten
+  _updateAddLevelDisplay();
+  // Badge-Info befüllen (nur erste 2 zeigen)
+  const bar = document.getElementById('add-status-bar');
+  const badgeInfo = document.getElementById('add-badge-info');
+  if (bar) {
+    const b0 = badges[0];
+    const b1 = badges[1];
+    document.getElementById('add-badge-icon').textContent =
+      b1 ? (b0.icon||'🏅') + ' ' + (b1.icon||'🏅') : (b0.icon||'🏅');
+    document.getElementById('add-badge-name').textContent =
+      b1 ? b0.name + ' & ' + b1.name : b0.name;
+    badgeInfo.style.display = 'flex';
+    bar.style.opacity = '1';
+    playBadgeSound();
+  }
 }
 
 function hideBadgeBanner() {
-  document.getElementById('badge-banner').classList.remove('show');
+  const badgeInfo = document.getElementById('add-badge-info');
+  if (badgeInfo) badgeInfo.style.display = 'none';
+  // Level bleibt sichtbar
+}
+
+function _updateAddLevelDisplay() {
+  const bar = document.getElementById('add-status-bar');
+  if (!bar) return;
+  const lv = getCurrentLevel(getXP());
+  const el = document.getElementById('add-level-icon');
+  const en = document.getElementById('add-level-name');
+  if (el) el.textContent = lv.icon;
+  if (en) en.textContent = lv.name;
+  bar.style.opacity = '1';
 }
 
 /* ── Simulation Panel ── */
