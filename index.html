@@ -361,6 +361,55 @@
   .badge-item.secret-badge .bi-icon { filter: none; opacity: .5; }
 
   ::-webkit-scrollbar { width: 4px; }
+
+  /* ── Simulations-Panel ───────────────────────────────────── */
+  #sim-overlay {
+    position: fixed; inset: 0; z-index: 9999; display: none;
+    background: rgba(0,0,0,.6); align-items: flex-end; justify-content: center;
+  }
+  #sim-overlay.show { display: flex; }
+  #sim-panel {
+    background: var(--surface); width: 100%; max-width: 480px;
+    border-radius: 24px 24px 0 0; padding: 0 0 32px;
+    max-height: 90vh; overflow-y: auto;
+    box-shadow: 0 -8px 40px rgba(0,0,0,.3);
+    animation: slideUp .3s cubic-bezier(.17,.89,.32,1.2) both;
+  }
+  @keyframes slideUp {
+    from { transform: translateY(100%); }
+    to   { transform: translateY(0); }
+  }
+  #sim-panel h3 {
+    position: sticky; top: 0; background: var(--surface);
+    margin: 0; padding: 18px 20px 12px;
+    font-size: 1rem; color: var(--accent2); border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between; z-index: 1;
+  }
+  .sim-section {
+    padding: 14px 20px 0; border-bottom: 1px solid var(--border); margin-bottom: 0;
+  }
+  .sim-section:last-child { border-bottom: none; }
+  .sim-section-title {
+    font-size: .7rem; text-transform: uppercase; letter-spacing: .1em;
+    color: var(--muted); margin-bottom: 10px; font-weight: 700;
+  }
+  .sim-row {
+    display: flex; gap: 8px; align-items: center; margin-bottom: 10px; flex-wrap: wrap;
+  }
+  .sim-row select, .sim-row input[type=number] {
+    flex: 1; min-width: 0; padding: 9px 10px;
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 10px; color: var(--text); font-size: .88rem;
+  }
+  .sim-btn {
+    padding: 9px 16px; border-radius: 10px; border: none; cursor: pointer;
+    font-size: .85rem; font-weight: 700; white-space: nowrap;
+    background: var(--accent); color: #fff;
+    transition: opacity .15s;
+  }
+  .sim-btn:active { opacity: .75; }
+  .sim-btn.danger { background: #c0392b; }
+  .sim-btn.secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
   ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 
   /* ── Gamification: XP Bar ─────────────────────────── */
@@ -788,7 +837,13 @@
     <!-- SETTINGS -->
     <div class="screen" id="settings-screen">
       <h2>⚙️ Einstellungen</h2>
-      <p style="color:var(--muted);font-size:.8rem;margin-bottom:12px;">Version 3.38 — PlantNet + DeepSeek</p>
+      <p style="color:var(--muted);font-size:.8rem;margin-bottom:12px;">Version 3.40 — PlantNet + DeepSeek</p>
+
+      <!-- Simulations-Button -->
+      <button onclick="openSim()" style="width:100%;padding:14px;background:linear-gradient(135deg,#1e3a2f,#2d5a3d);color:#7ed957;border:1.5px solid #3aaa55;border-radius:14px;font-size:.95rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:16px;letter-spacing:.03em">
+        🔧 <span>Gamification-Test</span>
+        <span style="margin-left:auto;font-size:.75rem;opacity:.7;font-weight:400">nur für Entwickler</span>
+      </button>
 
       <div class="card" style="margin-bottom:16px;">
         <div style="font-weight:600;color:var(--accent2);margin-bottom:8px;">🌿 Pflanzeninfos</div>
@@ -3380,6 +3435,74 @@ document.addEventListener('DOMContentLoaded', () => {
   } catch(e) {}
 });
 
+/* ── Simulation Panel ── */
+function openSim() {
+  // Populate level select
+  const ls = document.getElementById('sim-level-select');
+  ls.innerHTML = LEVELS.map((l,i) => `<option value="${i}">${l.icon} ${l.name} (${l.minXP} XP)</option>`).join('');
+  // Populate badge select
+  const bs = document.getElementById('sim-badge-select');
+  bs.innerHTML = BADGES.map((b,i) => `<option value="${i}">${b.icon||'🏅'} ${b.name}</option>`).join('');
+  const ov = document.getElementById('sim-overlay');
+  ov.style.display = 'flex';
+  setTimeout(() => ov.classList.add('show'), 10);
+}
+function closeSim() {
+  const ov = document.getElementById('sim-overlay');
+  ov.classList.remove('show');
+  setTimeout(() => ov.style.display = 'none', 300);
+}
+function simStatus(msg) {
+  document.getElementById('sim-status').textContent = msg;
+}
+function simLevelUp() {
+  const idx = parseInt(document.getElementById('sim-level-select').value);
+  showLevelUp(LEVELS[idx]);
+  simStatus('Level-Up gezeigt: ' + LEVELS[idx].name);
+}
+function simBadge() {
+  const idx = parseInt(document.getElementById('sim-badge-select').value);
+  showBadgeEarn(BADGES[idx]);
+  simStatus('Badge gezeigt: ' + BADGES[idx].name);
+}
+function simBadgeRandom() {
+  const idx = Math.floor(Math.random() * BADGES.length);
+  showBadgeEarn(BADGES[idx]);
+  simStatus('Badge gezeigt: ' + BADGES[idx].name);
+}
+function simSetStreak() {
+  const n = parseInt(document.getElementById('sim-streak-val').value) || 0;
+  localStorage.setItem('pflanz_streak', n);
+  const today = new Date().toISOString().slice(0,10);
+  localStorage.setItem('pflanz_streak_date', today);
+  renderXPBar();
+  simStatus('Streak auf ' + n + ' Tage gesetzt');
+}
+function simAddXP() {
+  const n = parseInt(document.getElementById('sim-xp-val').value) || 10;
+  awardXP(n);
+  renderXPBar();
+  simStatus('+' + n + ' XP vergeben');
+}
+function simSetXP(v) {
+  setXP(v);
+  renderXPBar();
+  simStatus('XP direkt auf ' + v + ' gesetzt');
+}
+function simResetBadges() {
+  localStorage.setItem('pflanz_badges', '[]');
+  simStatus('Alle Badges zurückgesetzt');
+}
+function simResetAll() {
+  localStorage.setItem('pflanz_badges', '[]');
+  setXP(0);
+  localStorage.setItem('pflanz_streak', '0');
+  localStorage.setItem('pflanz_streak_date', '');
+  localStorage.setItem('pflanz_streak_max', '0');
+  renderXPBar();
+  simStatus('Alles zurückgesetzt ✓');
+}
+
 </script>
 <!-- Zoom Overlay -->
 <div id="zoom-overlay">
@@ -3524,6 +3647,75 @@ document.addEventListener('DOMContentLoaded', () => {
     <div class="dc-note" id="diploma-score-note">10 von 10 Fragen richtig</div>
     <div style="font-size:.75rem;color:var(--muted);margin-bottom:16px" id="diploma-date"></div>
     <button class="btn btn-primary" onclick="document.getElementById('diploma-overlay').classList.remove('show')">Schließen</button>
+  </div>
+</div>
+
+<!-- ══ SIMULATIONS-PANEL ══════════════════════════════════════ -->
+<div id="sim-overlay" onclick="if(event.target===this)closeSim()">
+  <div id="sim-panel">
+    <h3>
+      <span>🔧 Gamification-Test</span>
+      <button onclick="closeSim()" style="background:none;border:none;font-size:1.3rem;cursor:pointer;color:var(--muted)">✕</button>
+    </h3>
+
+    <!-- Level-Up -->
+    <div class="sim-section">
+      <div class="sim-section-title">🏆 Level-Up Overlay testen</div>
+      <div class="sim-row">
+        <select id="sim-level-select"></select>
+        <button class="sim-btn" onclick="simLevelUp()">▶ Zeigen</button>
+      </div>
+    </div>
+
+    <!-- Badge -->
+    <div class="sim-section">
+      <div class="sim-section-title">🏅 Badge-Overlay testen</div>
+      <div class="sim-row">
+        <select id="sim-badge-select" style="flex:1"></select>
+        <button class="sim-btn" onclick="simBadge()">▶ Zeigen</button>
+      </div>
+      <div class="sim-row" style="margin-bottom:14px">
+        <button class="sim-btn secondary" style="flex:1" onclick="simBadgeRandom()">🎲 Zufälliges Badge</button>
+      </div>
+    </div>
+
+    <!-- Streak -->
+    <div class="sim-section">
+      <div class="sim-section-title">🔥 Streak setzen</div>
+      <div class="sim-row">
+        <input type="number" id="sim-streak-val" value="7" min="1" max="400" style="width:80px;flex:none">
+        <span style="color:var(--muted);font-size:.85rem">Tage</span>
+        <button class="sim-btn" style="margin-left:auto" onclick="simSetStreak()">Setzen + Bonus prüfen</button>
+      </div>
+    </div>
+
+    <!-- XP -->
+    <div class="sim-section">
+      <div class="sim-section-title">⭐ XP direkt vergeben</div>
+      <div class="sim-row">
+        <input type="number" id="sim-xp-val" value="100" min="1" style="width:80px;flex:none">
+        <span style="color:var(--muted);font-size:.85rem">XP</span>
+        <button class="sim-btn" style="margin-left:auto" onclick="simAddXP()">+ Vergeben</button>
+      </div>
+      <div class="sim-row" style="margin-bottom:14px">
+        <button class="sim-btn secondary" style="flex:1" onclick="simSetXP(0)">XP auf 0 zurücksetzen</button>
+        <button class="sim-btn secondary" style="flex:1" onclick="simSetXP(42000)">XP auf Max (42000)</button>
+      </div>
+    </div>
+
+    <!-- Badges zurücksetzen -->
+    <div class="sim-section">
+      <div class="sim-section-title">🗑️ Reset</div>
+      <div class="sim-row" style="margin-bottom:14px; flex-direction:column; align-items:stretch; gap:8px">
+        <button class="sim-btn danger" onclick="simResetBadges()">Alle Badges zurücksetzen</button>
+        <button class="sim-btn danger" onclick="simResetAll()">Alles zurücksetzen (XP + Streak + Badges)</button>
+      </div>
+    </div>
+
+    <!-- Status -->
+    <div style="padding:10px 20px;font-size:.8rem;color:var(--muted);text-align:center">
+      <span id="sim-status">Bereit</span>
+    </div>
   </div>
 </div>
 </body>
