@@ -3286,6 +3286,7 @@ function showLevelUp(level) {
 function closeLevelUp() {
   document.getElementById('levelup-overlay').classList.remove('show');
   stopConfetti();
+  _simReturnIfPending();
 }
 
 // ── Badge-Earn Overlay ────────────────────────────────────────
@@ -3317,7 +3318,11 @@ function processNextBadge() {
 
 function closeBadgeEarn() {
   document.getElementById('badgeearn-overlay').classList.remove('show');
-  setTimeout(() => processNextBadge(), 400);
+  setTimeout(() => {
+    processNextBadge();
+    // Nur zurück wenn Queue leer (alle Badges gezeigt)
+    if (!_badgeQueue.length) _simReturnIfPending();
+  }, 400);
 }
 
 // ── Badge-Galerie ─────────────────────────────────────────────
@@ -3436,6 +3441,8 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /* ── Simulation Panel ── */
+let _simReturnPending = false; // reopen panel after overlay closes
+
 function openSim() {
   // Populate level select
   const ls = document.getElementById('sim-level-select');
@@ -3452,23 +3459,38 @@ function closeSim() {
   ov.classList.remove('show');
   setTimeout(() => ov.style.display = 'none', 300);
 }
+// Versteckt Panel sofort, zeigt Overlay, kehrt danach zurück
+function _simHideForOverlay(label, callback) {
+  _simReturnPending = true;
+  simStatus(label);
+  const ov = document.getElementById('sim-overlay');
+  ov.classList.remove('show');
+  ov.style.display = 'none';
+  setTimeout(callback, 80);
+}
+function _simReturnIfPending() {
+  if (_simReturnPending) {
+    _simReturnPending = false;
+    setTimeout(() => openSim(), 200);
+  }
+}
 function simStatus(msg) {
   document.getElementById('sim-status').textContent = msg;
 }
 function simLevelUp() {
   const idx = parseInt(document.getElementById('sim-level-select').value);
-  showLevelUp(LEVELS[idx]);
-  simStatus('Level-Up gezeigt: ' + LEVELS[idx].name);
+  const lv = LEVELS[idx];
+  _simHideForOverlay('▶ Level-Up: ' + lv.name, () => showLevelUp(lv));
 }
 function simBadge() {
   const idx = parseInt(document.getElementById('sim-badge-select').value);
-  showBadgeEarn(BADGES[idx]);
-  simStatus('Badge gezeigt: ' + BADGES[idx].name);
+  const b = BADGES[idx];
+  _simHideForOverlay('▶ Badge: ' + b.name, () => showBadgeEarn(b));
 }
 function simBadgeRandom() {
   const idx = Math.floor(Math.random() * BADGES.length);
-  showBadgeEarn(BADGES[idx]);
-  simStatus('Badge gezeigt: ' + BADGES[idx].name);
+  const b = BADGES[idx];
+  _simHideForOverlay('▶ Zufalls-Badge: ' + b.name, () => showBadgeEarn(b));
 }
 function simSetStreak() {
   const n = parseInt(document.getElementById('sim-streak-val').value) || 0;
