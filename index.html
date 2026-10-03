@@ -748,19 +748,14 @@
 
       <div class="form-group">
         <label>Foto</label>
-        <div style="display:flex;gap:10px">
-          <!-- Linke Hälfte: Kamera -->
-          <div class="photo-area" id="photo-area" onclick="document.getElementById('photo-input').click()" style="flex:1">
+        <div>
+          <!-- Einzelne große Foto-Fläche -->
+          <div class="photo-area" id="photo-area" onclick="document.getElementById('photo-input').click()" style="min-height:260px">
             <span class="big-icon">📷</span>
-            <span style="font-size:.78rem;text-align:center">Foto aufnehmen</span>
+            <span style="font-size:.85rem;text-align:center">Tippen → Foto aufnehmen</span>
             <div class="overlay">Ändern</div>
           </div>
-          <!-- Rechte Hälfte: Datei-Upload -->
-          <div class="photo-area" id="photo-area-upload" onclick="document.getElementById('photo-upload-input').click()" style="flex:1;border-style:dashed;border-color:var(--accent2)">
-            <span class="big-icon">⬆️</span>
-            <span style="font-size:.78rem;text-align:center">Foto hochladen</span>
-            <div class="overlay">Ändern</div>
-          </div>
+          <button type="button" onclick="event.stopPropagation();document.getElementById('photo-upload-input').click()" style="position:absolute;bottom:10px;right:10px;background:rgba(0,0,0,.45);color:#fff;border:none;border-radius:20px;padding:5px 12px;font-size:.75rem;cursor:pointer;z-index:2">⬆️ Datei</button>
         </div>
         <input type="file" id="photo-input" accept="image/*" capture="environment">
         <input type="file" id="photo-upload-input" accept="image/*" style="display:none">
@@ -1330,14 +1325,7 @@ document.getElementById('photo-input').addEventListener('change', async e => {
 document.getElementById('photo-upload-input').addEventListener('change', async e => {
   const file = e.target.files[0]; if (!file) return;
   addPhotoData = await resizeImage(file, 1200, 1200, 0.82);
-  // Beide Hälften mit Foto füllen → zeigt, dass Foto gesetzt ist
   setPhotoArea('photo-area', addPhotoData);
-  // photo-area-upload preview is updated directly below
-  // Upload-Box optisch bestätigen
-  const box = document.getElementById('photo-area-upload');
-  if (box) {
-    box.innerHTML = '<img src="' + addPhotoData + '" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;border-radius:calc(var(--radius) - 2px)"><div class="overlay">Ändern</div>';
-  }
   const ll = document.getElementById('lens-link'); if(ll) ll.style.display = 'none';
   document.getElementById('ai-result').style.display = 'none';
   e.target.value = '';
@@ -1477,9 +1465,7 @@ async function savePlant() {
   // Reset
   addPhotoData = null; addGpsData = null; lastAiName = ''; lastAiLatin = ''; lastAiInfoHtml = null;
   document.getElementById('photo-area').innerHTML =
-    '<span class="big-icon">📷</span><span style="font-size:.78rem;text-align:center">Foto aufnehmen</span><div class="overlay">Ändern</div>';
-  const upBox = document.getElementById('photo-area-upload');
-  if (upBox) upBox.innerHTML = '<span class="big-icon">⬆️</span><span style="font-size:.78rem;text-align:center">Foto hochladen</span><div class="overlay">Ändern</div>';
+    '<span class="big-icon">📷</span><span style="font-size:.85rem;text-align:center">Tippen → Foto aufnehmen</span><div class="overlay">Ändern</div><button type="button" onclick="event.stopPropagation();document.getElementById(\'photo-upload-input\').click()" style="position:absolute;bottom:10px;right:10px;background:rgba(0,0,0,.45);color:#fff;border:none;border-radius:20px;padding:5px 12px;font-size:.75rem;cursor:pointer;z-index:2">⬆️ Datei</button>';
 
   document.getElementById('ai-result').style.display = 'none';
   document.getElementById('gps-hint').textContent = '';
@@ -2674,7 +2660,7 @@ function isGiftpflanze(p) {
 // secret=true badges show as ??? until earned
 const BADGES = [
   // ── 🌱 Entdecker ──────────────────────────────────────────
-  { id:'erster_schritt',    icon:'🌱', name:'Erster Schritt',
+  { id:'erster_schritt',    icon:'🌱', name:'Der Anfang ist gemacht!',
     desc:'Erste Pflanze bestimmt',
     check: async () => { const a = await dbGetAll(); return a.length >= 1; }},
   { id:'kleine_sammlung',   icon:'🌿', name:'Kleine Sammlung',
@@ -3600,10 +3586,12 @@ function showBadgeBanner(badges) {
   if (bar) {
     const b0 = badges[0];
     const b1 = badges[1];
+    const badgeNum = b => { const i = BADGES.findIndex(x => x.id === b.id); return i >= 0 ? i + 1 : ''; };
+    const n0 = badgeNum(b0), n1 = b1 ? badgeNum(b1) : null;
     document.getElementById('add-badge-icon').textContent =
       b1 ? (b0.icon||'🏅') + ' ' + (b1.icon||'🏅') : (b0.icon||'🏅');
     document.getElementById('add-badge-name').textContent =
-      b1 ? b0.name + ' & ' + b1.name : b0.name;
+      b1 ? 'Auszeichnung ' + n0 + ' & ' + n1 : 'Auszeichnung ' + n0;
     badgeInfo.style.display = 'flex';
     bar.style.opacity = '1';
     playBadgeSound();
@@ -3620,10 +3608,11 @@ function _updateAddLevelDisplay() {
   const bar = document.getElementById('add-status-bar');
   if (!bar) return;
   const lv = getCurrentLevel(getXP());
+  const idx = LEVELS.indexOf(lv);
   const el = document.getElementById('add-level-icon');
   const en = document.getElementById('add-level-name');
   if (el) el.textContent = lv.icon;
-  if (en) en.textContent = lv.name;
+  if (en) en.textContent = lv.name + ' · Level ' + (idx + 1);
   bar.style.opacity = '1';
 }
 
