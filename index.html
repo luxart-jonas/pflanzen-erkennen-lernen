@@ -88,7 +88,7 @@
   #screens { flex: 1; overflow: hidden; position: relative; }
   .screen {
     position: absolute; inset: 0;
-    overflow-y: auto; -webkit-overflow-scrolling: touch;
+    overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch;
     padding: 16px;
     display: none;
   }
@@ -677,6 +677,9 @@
 
     <!-- PROFIL -->
     <div class="screen" id="profil-screen">
+      <button onclick="switchTab('add')" style="display:flex;align-items:center;gap:6px;background:none;border:none;color:var(--muted);font-size:.95rem;cursor:pointer;padding:0 0 14px;font-family:inherit">
+        <span style="font-size:1.2rem">←</span> Schließen
+      </button>
       <div id="profil-level-card" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:12px;text-align:center;box-shadow:var(--shadow)">
         <div id="profil-level-icon" style="font-size:3rem;margin-bottom:6px">🌱</div>
         <div id="profil-level-name" style="font-family:var(--ff-head);font-size:1.5rem;font-weight:900;color:var(--accent2);margin-bottom:4px"></div>
@@ -748,14 +751,27 @@
 
       <div class="form-group">
         <label>Foto</label>
-        <div>
-          <!-- Einzelne große Foto-Fläche -->
-          <div class="photo-area" id="photo-area" onclick="document.getElementById('photo-input').click()" style="min-height:260px">
+        <!-- Zwei Optionen (Standard) -->
+        <div id="photo-cols" style="display:flex;gap:10px">
+          <div class="photo-area" onclick="document.getElementById('photo-input').click()" style="flex:1;min-height:130px">
             <span class="big-icon">📷</span>
-            <span style="font-size:.85rem;text-align:center">Tippen → Foto aufnehmen</span>
+            <span style="font-size:.78rem;text-align:center">Foto aufnehmen</span>
             <div class="overlay">Ändern</div>
           </div>
-          <button type="button" onclick="event.stopPropagation();document.getElementById('photo-upload-input').click()" style="position:absolute;bottom:10px;right:10px;background:rgba(0,0,0,.45);color:#fff;border:none;border-radius:20px;padding:5px 12px;font-size:.75rem;cursor:pointer;z-index:2">⬆️ Datei</button>
+          <div class="photo-area" onclick="document.getElementById('photo-upload-input').click()" style="flex:1;min-height:130px;border-style:dashed;border-color:var(--accent2)">
+            <span class="big-icon">⬆️</span>
+            <span style="font-size:.78rem;text-align:center">Foto hochladen</span>
+            <div class="overlay">Ändern</div>
+          </div>
+        </div>
+        <!-- Einzelne große Vorschau nach Auswahl -->
+        <div id="photo-single" style="display:none">
+          <div class="photo-area" id="photo-area" style="min-height:260px" onclick="document.getElementById('photo-input').click()">
+            <div class="overlay" style="opacity:1;display:flex;flex-direction:column;align-items:center;gap:6px">
+              <span>📷 neu aufnehmen</span>
+              <span onclick="event.stopPropagation();document.getElementById('photo-upload-input').click()" style="text-decoration:underline;cursor:pointer;font-size:.85rem">⬆️ hochladen</span>
+            </div>
+          </div>
         </div>
         <input type="file" id="photo-input" accept="image/*" capture="environment">
         <input type="file" id="photo-upload-input" accept="image/*" style="display:none">
@@ -1307,10 +1323,23 @@ function resizeImage(file, maxW, maxH, quality) {
   });
 }
 
+// ── Photo Area: Zwei-Spalten ↔ Einzelvorschau ────────────────
+function _showPhotoPreview() {
+  document.getElementById('photo-cols').style.display = 'none';
+  document.getElementById('photo-single').style.display = 'block';
+}
+function _resetPhotoArea() {
+  document.getElementById('photo-single').style.display = 'none';
+  document.getElementById('photo-cols').style.display = 'flex';
+  const area = document.getElementById('photo-area');
+  if (area) area.innerHTML = '<div class="overlay" style="opacity:1;display:flex;flex-direction:column;align-items:center;gap:6px"><span>📷 neu aufnehmen</span><span onclick="event.stopPropagation();document.getElementById(\'photo-upload-input\').click()" style="text-decoration:underline;cursor:pointer;font-size:.85rem">⬆️ hochladen</span></div>';
+}
+
 // ── Photo Inputs ─────────────────────────────────────────────
 document.getElementById('photo-input').addEventListener('change', async e => {
   const file = e.target.files[0]; if (!file) return;
   addPhotoData = await resizeImage(file, 1200, 1200, 0.82);
+  _showPhotoPreview();
   setPhotoArea('photo-area', addPhotoData);
 
   const ll = document.getElementById('lens-link'); if(ll) ll.style.display = 'none';
@@ -1325,6 +1354,7 @@ document.getElementById('photo-input').addEventListener('change', async e => {
 document.getElementById('photo-upload-input').addEventListener('change', async e => {
   const file = e.target.files[0]; if (!file) return;
   addPhotoData = await resizeImage(file, 1200, 1200, 0.82);
+  _showPhotoPreview();
   setPhotoArea('photo-area', addPhotoData);
   const ll = document.getElementById('lens-link'); if(ll) ll.style.display = 'none';
   document.getElementById('ai-result').style.display = 'none';
@@ -1464,8 +1494,7 @@ async function savePlant() {
   });
   // Reset
   addPhotoData = null; addGpsData = null; lastAiName = ''; lastAiLatin = ''; lastAiInfoHtml = null;
-  document.getElementById('photo-area').innerHTML =
-    '<span class="big-icon">📷</span><span style="font-size:.85rem;text-align:center">Tippen → Foto aufnehmen</span><div class="overlay">Ändern</div><button type="button" onclick="event.stopPropagation();document.getElementById(\'photo-upload-input\').click()" style="position:absolute;bottom:10px;right:10px;background:rgba(0,0,0,.45);color:#fff;border:none;border-radius:20px;padding:5px 12px;font-size:.75rem;cursor:pointer;z-index:2">⬆️ Datei</button>';
+  _resetPhotoArea();
 
   document.getElementById('ai-result').style.display = 'none';
   document.getElementById('gps-hint').textContent = '';
