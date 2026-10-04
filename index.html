@@ -1134,14 +1134,14 @@
           <div style="font-weight:800;font-size:1rem;color:var(--accent2);margin-bottom:4px" id="exam-level-title">Lade…</div>
           <div style="font-size:.85rem;color:var(--muted)" id="exam-level-sub"></div>
         </div>
-        <div id="exam-lock-view" style="display:none">
+        <div id="exam-lock-view">
           <div class="exam-lock-box">
             <div class="lock-icon">🔒</div>
             <div class="lock-text">Prüfung erst ab 10 Pflanzen</div>
-            <div class="lock-sub" id="exam-lock-sub">Noch 10 Pflanzen fehlen</div>
+            <div class="lock-sub" id="exam-lock-sub">Lade…</div>
           </div>
         </div>
-        <div id="exam-unlock-view">
+        <div id="exam-unlock-view" style="display:none">
           <button class="btn btn-primary" style="width:100%;margin-bottom:12px;font-size:1.05rem;padding:16px" onclick="startExam()">🏁 Prüfung starten</button>
           <p style="color:var(--muted);font-size:.82rem;text-align:center;margin-bottom:16px">5 Häppchen · Multiple Choice · Fun Facts · ~2 Minuten</p>
           <div id="exam-history"></div>
@@ -3276,15 +3276,21 @@ function _examExtractFunFact(plant) {
 }
 
 async function renderExamStartView() {
-  const all = await dbGetAll();
-  const locked = all.length < EXAM_MIN_PLANTS;
-  document.getElementById('exam-lock-view').style.display   = locked ? 'block' : 'none';
-  document.getElementById('exam-unlock-view').style.display = locked ? 'none'  : 'block';
-  if (locked) {
+  try {
+    const all = await dbGetAll();
+    const locked = all.length < EXAM_MIN_PLANTS;
+    document.getElementById('exam-lock-view').style.display   = locked ? 'block' : 'none';
+    document.getElementById('exam-unlock-view').style.display = locked ? 'none'  : 'block';
     const need = EXAM_MIN_PLANTS - all.length;
-    document.getElementById('exam-lock-sub').textContent = 'Noch ' + need + ' Pflanze' + (need===1?'':'n') + ' fehlen';
+    document.getElementById('exam-lock-sub').textContent = locked
+      ? 'Noch ' + need + ' Pflanze' + (need===1?'':'n') + ' fehlen'
+      : '';
+    renderExamLevelInfo();
+  } catch(e) {
+    document.getElementById('exam-lock-view').style.display   = 'block';
+    document.getElementById('exam-unlock-view').style.display = 'none';
+    document.getElementById('exam-lock-sub').textContent = 'Datenbank nicht erreichbar';
   }
-  renderExamLevelInfo();
 }
 
 async function startExam() {
