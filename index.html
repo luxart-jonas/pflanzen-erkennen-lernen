@@ -971,7 +971,7 @@
     <!-- SETTINGS -->
     <div class="screen" id="settings-screen">
       <h2>⚙️ Einstellungen</h2>
-      <p style="color:var(--muted);font-size:.8rem;margin-bottom:12px;">Version 3.43 — PlantNet + DeepSeek</p>
+      <p style="color:var(--muted);font-size:.8rem;margin-bottom:12px;">Version 3.44 — PlantNet + DeepSeek</p>
 
       <!-- Simulations-Button -->
       <button onclick="openSim()" style="width:100%;padding:14px;background:linear-gradient(135deg,#1e3a2f,#2d5a3d);color:#7ed957;border:1.5px solid #3aaa55;border-radius:14px;font-size:.95rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:16px;letter-spacing:.03em">
@@ -3285,6 +3285,8 @@ async function renderExamStartView() {
     document.getElementById('exam-lock-sub').textContent = locked
       ? 'Noch ' + need + ' Pflanze' + (need===1?'':'n') + ' fehlen'
       : '';
+    // Debug: show plant count always
+    document.getElementById('exam-level-sub').textContent = all.length + ' Pflanzen archiviert';
     renderExamLevelInfo();
   } catch(e) {
     document.getElementById('exam-lock-view').style.display   = 'block';
