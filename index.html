@@ -334,7 +334,7 @@
     font-size: .75rem; letter-spacing: .12em; text-transform: uppercase;
     color: var(--accent); font-weight: 800; margin-bottom: 8px;
   }
-  #levelup-card .lu-icon { font-size: 3.2rem; line-height: 1; margin-bottom: 6px; }
+  #levelup-card .lu-icon { line-height: 1; margin-bottom: 6px; display:flex; justify-content:center; }
   #levelup-card .lu-name {
     font-family: var(--ff-head); font-size: 1.7rem; font-weight: 900;
     color: var(--accent2); margin-bottom: 4px;
@@ -356,7 +356,7 @@
     box-shadow: 0 12px 40px rgba(58,170,85,.35);
     animation: luPop .4s cubic-bezier(.17,.89,.32,1.35) both;
   }
-  #badgeearn-card .be-icon { font-size: 3.5rem; line-height: 1; margin-bottom: 8px; }
+  #badgeearn-card .be-icon { line-height: 1; margin-bottom: 8px; display:flex; justify-content:center; }
   #badgeearn-card .be-title {
     font-size: .7rem; text-transform: uppercase; letter-spacing: .1em;
     color: var(--accent); font-weight: 800; margin-bottom: 8px;
@@ -462,7 +462,7 @@
   #badge-popup.show {
     opacity: 1; transform: translateX(-50%) translateY(0);
   }
-  #badge-popup .bp-icon { font-size: 2rem; line-height: 1; }
+  #badge-popup .bp-icon { line-height: 1; display:flex; align-items:center; }
   #badge-popup .bp-title { font-weight: 800; font-size: .9rem; color: var(--text); }
   #badge-popup .bp-sub { font-size: .78rem; color: var(--muted); margin-top: 2px; }
 
@@ -597,7 +597,7 @@
     border-color: var(--accent);
     box-shadow: 0 2px 10px rgba(58,170,85,.15);
   }
-  .badge-item .bi-icon { font-size: 2rem; line-height: 1; margin-bottom: 4px; filter: grayscale(1); opacity: .4; }
+  .badge-item .bi-icon { line-height: 1; margin-bottom: 4px; filter: grayscale(1); opacity: .4; display:flex; justify-content:center; }
   .badge-item.earned .bi-icon { filter: none; opacity: 1; }
   .badge-item .bi-name { font-size: .72rem; font-weight: 800; color: var(--text); margin-bottom: 2px; }
   .badge-item .bi-desc { font-size: .65rem; color: var(--muted); line-height: 1.3; }
@@ -623,6 +623,88 @@
   .bb-icon   { font-size: 2rem; line-height: 1; }
   .bb-name   { font-size: .92rem; font-weight: 700; color: var(--text); }
   .bb-desc   { font-size: .76rem; color: var(--muted); }
+
+
+  /* ── Level Hex Shield ──────────────────────────────────── */
+  .lv-hex {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(145deg, #2e8c46 0%, #1a5228 100%);
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+    position: relative;
+    filter: drop-shadow(0 4px 8px rgba(26,82,40,.5));
+    flex-shrink: 0;
+  }
+  .lv-hex::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(160deg, rgba(255,255,255,.2) 0%, transparent 55%);
+    pointer-events: none;
+  }
+  .lh-icon {
+    position: relative;
+    z-index: 1;
+    line-height: 1;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,.3));
+  }
+
+  /* ── Medal Badge ────────────────────────────────────────── */
+  .medal-badge {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
+  }
+  .medal-ring {
+    border-radius: 50%;
+    background: conic-gradient(from 0deg,#a86200,#e8b820,#fff4b0,#e8b820,#a86200,#e8b820,#fff4b0,#e8b820,#a86200);
+    box-shadow: 0 4px 14px rgba(168,98,0,.35), inset 0 1px 0 rgba(255,235,100,.5);
+    flex-shrink: 0;
+  }
+  .medal-inner {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #f5c840 0%, #d48c12 55%, #9a5e00 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    box-shadow: inset 0 2px 5px rgba(0,0,0,.2), inset 0 -1px 3px rgba(255,220,60,.2);
+  }
+  .medal-inner::before {
+    content: '';
+    position: absolute;
+    top: 10%; left: 18%;
+    width: 28%; height: 18%;
+    background: radial-gradient(ellipse, rgba(255,252,200,.55) 0%, transparent 100%);
+    border-radius: 50%;
+  }
+  .mi-icon {
+    position: relative;
+    z-index: 1;
+    line-height: 1;
+    filter: drop-shadow(0 1px 3px rgba(0,0,0,.3));
+  }
+  .medal-ribbon {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: -2px;
+  }
+  .medal-ribbon-tab { width: 5px; background: #7a1515; }
+  .medal-ribbon-body {
+    background: linear-gradient(90deg, #6b1212 0%, #c02020 30%, #c02020 70%, #6b1212 100%);
+    color: #ffd080;
+    font-weight: 900;
+    letter-spacing: .11em;
+    text-transform: uppercase;
+    border-radius: 3px;
+    box-shadow: 0 2px 5px rgba(0,0,0,.2);
+    white-space: nowrap;
+  }
 
   </style>
 </head>
@@ -681,7 +763,7 @@
         <span style="font-size:1.3rem">←</span> Schließen
       </button>
       <div id="profil-level-card" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:12px;text-align:center;box-shadow:var(--shadow)">
-        <div id="profil-level-icon" style="font-size:3rem;margin-bottom:6px">🌱</div>
+        <div id="profil-level-icon" style="margin-bottom:6px;display:flex;justify-content:center">🌱</div>
         <div id="profil-level-name" style="font-family:var(--ff-head);font-size:1.5rem;font-weight:900;color:var(--accent2);margin-bottom:4px"></div>
         <div style="display:flex;align-items:center;gap:8px;margin:10px 0">
           <div style="flex:1;height:12px;background:var(--border);border-radius:6px;overflow:hidden">
@@ -894,7 +976,7 @@
     <!-- SETTINGS -->
     <div class="screen" id="settings-screen">
       <h2>⚙️ Einstellungen</h2>
-      <p style="color:var(--muted);font-size:.8rem;margin-bottom:12px;">Version 3.41 — PlantNet + DeepSeek</p>
+      <p style="color:var(--muted);font-size:.8rem;margin-bottom:12px;">Version 3.42 — PlantNet + DeepSeek</p>
 
       <!-- Simulations-Button -->
       <button onclick="openSim()" style="width:100%;padding:14px;background:linear-gradient(135deg,#1e3a2f,#2d5a3d);color:#7ed957;border:1.5px solid #3aaa55;border-radius:14px;font-size:.95rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:16px;letter-spacing:.03em">
@@ -1249,7 +1331,7 @@ async function renderProfile() {
   const next = LEVELS[lvIdx + 1];
   const pct = next ? Math.min(100, Math.round((xp - lv.minXP) / (next.minXP - lv.minXP) * 100)) : 100;
   const diff = next ? (next.minXP - xp) + ' XP bis ' + next.icon + ' ' + next.name : '✨ Maximalstufe!';
-  document.getElementById('profil-level-icon').textContent = lv.icon;
+  document.getElementById('profil-level-icon').innerHTML = makeLevelHex(lv.icon, 'lg');
   document.getElementById('profil-level-name').textContent = 'Level ' + (lvIdx+1) + ' – ' + lv.name;
   document.getElementById('profil-xp-fill').style.width = pct + '%';
   document.getElementById('profil-xp-pct').textContent = pct + ' %';
@@ -1272,7 +1354,8 @@ async function renderProfile() {
   const nbWrap = document.getElementById('profil-next-badge');
   const nbInner = document.getElementById('profil-next-badge-inner');
   if (nextBadge && nbWrap && nbInner) {
-    nbInner.innerHTML = '<div style="font-size:1.8rem">' + nextBadge.icon + '</div>' +
+    const _pnbIdx = BADGES.indexOf(nextBadge) + 1;
+    nbInner.innerHTML = makeMedalBadge(nextBadge.icon, 'md', _pnbIdx) +
       '<div><div style="font-weight:800;color:var(--text)">' + nextBadge.name + '</div>' +
       '<div style="font-size:.8rem;color:var(--muted)">' + nextBadge.desc + '</div></div>';
     nbWrap.style.display = 'block';
@@ -1284,7 +1367,7 @@ async function renderProfile() {
   if (recentEarned.length && recentWrap && recentEl) {
     recentEl.innerHTML = recentEarned.map(b =>
       '<div style="background:var(--surface2);border:1.5px solid var(--accent);border-radius:12px;padding:8px 12px;display:flex;align-items:center;gap:8px">' +
-      '<span style="font-size:1.4rem">' + b.icon + '</span>' +
+      makeMedalBadge(b.icon, 'sm') +
       '<span style="font-size:.85rem;font-weight:700;color:var(--accent2)">' + b.name + '</span></div>'
     ).join('');
     recentWrap.style.display = 'block';
@@ -3055,7 +3138,7 @@ async function checkBadges() {
 let badgeTimer = null;
 function showBadge(badge) {
   const popup = document.getElementById('badge-popup');
-  document.getElementById('bp-icon').textContent  = badge.icon;
+  document.getElementById('bp-icon').innerHTML = makeMedalBadge(badge.icon, 'sm');
   document.getElementById('bp-title').textContent = badge.name;
   document.getElementById('bp-sub').textContent   = badge.desc;
   popup.classList.add('show');
@@ -3420,10 +3503,33 @@ function stopConfetti() {
 }
 
 // ── Level-Up Overlay ──────────────────────────────────────────
+// ── Visual Badge Helpers ──────────────────────────────────────
+function makeLevelHex(icon, size) {
+  const w  = size === 'lg' ? 100 : size === 'md' ? 72 : 46;
+  const h  = Math.round(w * 1.155);
+  const fs = size === 'lg' ? '2.4rem' : size === 'md' ? '1.75rem' : '1.1rem';
+  return '<div class="lv-hex" style="width:' + w + 'px;height:' + h + 'px"><span class="lh-icon" style="font-size:' + fs + '">' + icon + '</span></div>';
+}
+
+function makeMedalBadge(icon, size, badgeNum) {
+  const dim = size === 'lg' ? 100 : size === 'md' ? 64 : 48;
+  const pad = size === 'lg' ? 5 : 3;
+  const fs  = size === 'lg' ? '2.4rem' : size === 'md' ? '1.55rem' : '1.2rem';
+  let ribbon = '';
+  if (badgeNum && size !== 'sm') {
+    const rfs  = size === 'lg' ? '.5rem' : '.42rem';
+    const rpad = size === 'lg' ? '4px 12px' : '3px 8px';
+    const rh   = size === 'lg' ? '10' : '7';
+    ribbon = '<div class="medal-ribbon"><div class="medal-ribbon-tab" style="height:' + rh + 'px"></div>' +
+             '<div class="medal-ribbon-body" style="font-size:' + rfs + ';padding:' + rpad + '">Badge ' + String(badgeNum).padStart(2,'0') + '</div></div>';
+  }
+  return '<div class="medal-badge"><div class="medal-ring" style="width:' + dim + 'px;height:' + dim + 'px;padding:' + pad + 'px"><div class="medal-inner"><span class="mi-icon" style="font-size:' + fs + '">' + icon + '</span></div></div>' + ribbon + '</div>';
+}
+
 function showLevelUp(level) {
   const idx  = LEVELS.indexOf(level);
   const starCount = idx + 1; // Level 1 = 1 Stern … Level 12 = 12 Sterne
-  document.getElementById('lu-icon').textContent  = level.icon;
+  document.getElementById('lu-icon').innerHTML = makeLevelHex(level.icon, 'lg');
   document.getElementById('lu-name').textContent  = level.name;
   document.getElementById('lu-sub').textContent   = 'Level ' + starCount + ' erreicht! 🎉';
   document.getElementById('lu-stars').textContent = '⭐'.repeat(starCount);
@@ -3451,7 +3557,8 @@ function processNextBadge() {
   if (!_badgeQueue.length) { _badgeShowing = false; return; }
   _badgeShowing = true;
   const b = _badgeQueue.shift();
-  document.getElementById('be-icon').textContent = b.icon;
+  const _beN = BADGES.findIndex(function(x){return x.id===b.id;}) + 1;
+  document.getElementById('be-icon').innerHTML = makeMedalBadge(b.icon, 'lg', _beN);
   document.getElementById('be-name').textContent = b.name;
   document.getElementById('be-desc').textContent = b.desc || '';
   document.getElementById('badgeearn-overlay').classList.add('show');
@@ -3459,7 +3566,7 @@ function processNextBadge() {
   // Auch den kleinen Pop-up setzen (legacy)
   const popup = document.getElementById('badge-popup');
   if (popup) {
-    document.getElementById('bp-icon').textContent  = b.icon;
+    document.getElementById('bp-icon').innerHTML = makeMedalBadge(b.icon, 'sm');
     document.getElementById('bp-title').textContent = b.name;
     document.getElementById('bp-sub').textContent   = b.desc || '';
   }
@@ -3487,7 +3594,7 @@ async function openBadgeGallery(afterSession = false) {
   if (!el) return;
 
   // Level-Info
-  document.getElementById('bg-level-icon').textContent = lv.icon;
+  document.getElementById('bg-level-icon').innerHTML = makeLevelHex(lv.icon, 'md');
   document.getElementById('bg-level-name').textContent = 'Level ' + (lvIdx+1) + ' – ' + lv.name;
   const pct = next ? Math.min(100, Math.round((xp - lv.minXP) / (next.minXP - lv.minXP) * 100)) : 100;
   document.getElementById('bg-xp-fill').style.width = pct + '%';
@@ -3515,7 +3622,8 @@ async function openBadgeGallery(afterSession = false) {
   const nbWrap = document.getElementById('bg-next-badge');
   const nbInner = document.getElementById('bg-next-badge-inner');
   if (nextBadge) {
-    nbInner.innerHTML = '<div style="font-size:1.8rem">' + nextBadge.icon + '</div>' +
+    const _nbIdx = BADGES.indexOf(nextBadge) + 1;
+    nbInner.innerHTML = makeMedalBadge(nextBadge.icon, 'md', _nbIdx) +
       '<div><div style="font-weight:800;color:var(--text)">' + nextBadge.name + '</div>' +
       '<div style="font-size:.8rem;color:var(--muted)">' + nextBadge.desc + '</div></div>';
     nbWrap.style.display = 'block';
@@ -3526,11 +3634,12 @@ async function openBadgeGallery(afterSession = false) {
   const recentEl = document.getElementById('bg-recent-badges');
   const recentEarned = BADGES.filter(b => earned.includes(b.id)).slice(-3).reverse();
   if (recentEarned.length) {
-    recentEl.innerHTML = recentEarned.map(b =>
-      '<div style="background:var(--surface);border:1.5px solid var(--accent);border-radius:12px;padding:8px 12px;display:flex;align-items:center;gap:8px">' +
-      '<span style="font-size:1.4rem">' + b.icon + '</span>' +
-      '<span style="font-size:.8rem;font-weight:700;color:var(--accent2)">' + b.name + '</span></div>'
-    ).join('');
+    recentEl.innerHTML = recentEarned.map(b => {
+      const _ri = BADGES.indexOf(b) + 1;
+      return '<div style="background:var(--surface);border:1.5px solid var(--accent);border-radius:12px;padding:8px 12px;display:flex;align-items:center;gap:8px">' +
+      makeMedalBadge(b.icon, 'sm') +
+      '<span style="font-size:.8rem;font-weight:700;color:var(--accent2)">' + b.name + '</span></div>';
+    }).join('');
     recentWrap.style.display = 'block';
   } else { recentWrap.style.display = 'none'; }
 
@@ -3542,15 +3651,16 @@ async function openBadgeGallery(afterSession = false) {
   const sorted = [...earnedBadges, ...openBadges, ...secretBadges];
   grid.innerHTML = sorted.map(b => {
     const has = earned.includes(b.id);
+    const _bIdx = BADGES.indexOf(b) + 1;
     if (b.secret && !has) {
       return '<div class="badge-item secret-badge">' +
-        '<div class="bi-icon">🔒</div>' +
+        '<div class="bi-icon">' + makeMedalBadge('🔒', 'sm') + '</div>' +
         '<div class="bi-name">???</div>' +
         '<div class="bi-desc" style="font-style:italic;color:#aaa">Versteckter Erfolg – weiter lernen!</div>' +
         '</div>';
     }
     return '<div class="badge-item' + (has ? ' earned' : '') + '">' +
-      '<div class="bi-icon">' + b.icon + '</div>' +
+      '<div class="bi-icon">' + makeMedalBadge(b.icon, 'sm') + '</div>' +
       '<div class="bi-name">' + b.name + '</div>' +
       '<div class="bi-desc">' + b.desc + '</div>' +
       (has ? '<div style="font-size:.6rem;color:var(--accent);margin-top:2px">✓ Verdient</div>' : '') +
@@ -3621,7 +3731,7 @@ function showBadgeBanner(badges) {
   if (bar) {
     const b0 = badges[0];
     const n0 = BADGES.findIndex(x => x.id === b0.id) + 1;
-    document.getElementById('add-badge-icon').textContent = b0.icon || '🏅';
+    document.getElementById('add-badge-icon').innerHTML = makeMedalBadge(b0.icon || '🏅', 'sm');
     document.getElementById('add-badge-name').textContent = b0.name;
     document.getElementById('add-badge-num').textContent = 'Badge ' + String(n0).padStart(2, '0');
     badgeInfo.style.display = 'flex';
@@ -3644,7 +3754,7 @@ function _updateAddLevelDisplay() {
   const el = document.getElementById('add-level-icon');
   const en = document.getElementById('add-level-name');
   const enu = document.getElementById('add-level-num');
-  if (el) el.textContent = lv.icon;
+  if (el) el.innerHTML = makeLevelHex(lv.icon, 'sm');
   if (en) en.textContent = lv.name;
   if (enu) enu.textContent = 'Level ' + String(idx + 1).padStart(2, '0');
   bar.style.opacity = '1';
@@ -3765,7 +3875,7 @@ function simResetAll() {
     <!-- XP / Level Block -->
     <div style="background:var(--surface2);border-radius:16px;padding:16px 18px;margin-bottom:16px;border:1px solid var(--border)">
       <div style="text-align:center">
-        <div id="bg-level-icon" style="font-size:2.4rem;line-height:1;margin-bottom:4px">🌱</div>
+        <div id="bg-level-icon" style="margin-bottom:6px;display:flex;justify-content:center">🌱</div>
         <div id="bg-level-name" style="font-weight:900;font-size:1.3rem;color:var(--accent2);margin-bottom:4px"></div>
         <div style="display:flex;align-items:center;gap:8px;margin:8px 0">
           <div style="flex:1;height:10px;background:var(--border);border-radius:5px;overflow:hidden">
