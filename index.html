@@ -971,7 +971,7 @@
     <!-- SETTINGS -->
     <div class="screen" id="settings-screen">
       <h2>⚙️ Einstellungen</h2>
-      <p style="color:var(--muted);font-size:.8rem;margin-bottom:12px;">Version 3.45 — PlantNet + DeepSeek</p>
+      <p style="color:var(--muted);font-size:.8rem;margin-bottom:12px;">Version 3.46 — PlantNet + DeepSeek</p>
 
       <!-- Simulations-Button -->
       <button onclick="openSim()" style="width:100%;padding:14px;background:linear-gradient(135deg,#1e3a2f,#2d5a3d);color:#7ed957;border:1.5px solid #3aaa55;border-radius:14px;font-size:.95rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:16px;letter-spacing:.03em">
@@ -1138,7 +1138,7 @@
           <div class="exam-lock-box">
             <div class="lock-icon">🔒</div>
             <div class="lock-text">Prüfung erst ab 10 Pflanzen</div>
-            <div class="lock-sub" id="exam-lock-sub"></div>
+            <div class="lock-sub" id="exam-lock-sub">Sammle 10 Pflanzen, um die Prüfung freizuschalten</div>
           </div>
         </div>
         <div id="exam-unlock-view" style="display:none">
@@ -1400,7 +1400,22 @@ function switchTab(tab) {
   if (tab === 'profil')  renderProfile();
   if (tab === 'archive') renderArchive();
   if (tab === 'learn')   initLearn();
-  if (tab === 'exam')    { ['exam-active-view','exam-chunk-view','exam-result-view'].forEach(id=>document.getElementById(id).style.display='none'); document.getElementById('exam-start-view').style.display='block'; renderExamStartView(); }
+  if (tab === 'exam')    {
+    ['exam-active-view','exam-chunk-view','exam-result-view'].forEach(id=>document.getElementById(id).style.display='none');
+    document.getElementById('exam-start-view').style.display='block';
+    // Sofort-Anzeige aus localStorage (synchron, kein Warten auf DB)
+    const _cachedCount = parseInt(localStorage.getItem('pflanz_plant_count') || '0', 10);
+    const _locked = _cachedCount < EXAM_MIN_PLANTS;
+    document.getElementById('exam-lock-view').style.display   = _locked ? 'block' : 'none';
+    document.getElementById('exam-unlock-view').style.display = _locked ? 'none'  : 'block';
+    if (_locked) {
+      const _need = EXAM_MIN_PLANTS - _cachedCount;
+      document.getElementById('exam-lock-sub').textContent =
+        'Du hast ' + _cachedCount + ' von ' + EXAM_MIN_PLANTS + ' Pflanzen — noch ' +
+        _need + ' Pflanze' + (_need === 1 ? '' : 'n') + ' fehlen';
+    }
+    renderExamStartView(); // Async-Aktualisierung aus echter DB
+  }
   updatePlantNetKeyStatus();
   updateGroqKeyStatus();
 }
@@ -1612,6 +1627,9 @@ async function savePlant() {
   try { awardXP(15); } catch(e) {}
   try { checkBadges(); } catch(e) {}
   try { _updateAddLevelDisplay(); } catch(e) {}
+
+  // ── Pflanzenzähler im localStorage aktualisieren ──
+  try { dbGetAll().then(a => localStorage.setItem('pflanz_plant_count', String(a.length))); } catch(e) {}
 
   // ── Foto auf GitHub sichern (fire & forget) ──
   if (savedPhoto) pushPhotoToGithub(name, savedPhoto).catch(() => {});
@@ -1902,6 +1920,8 @@ async function askPlantQuestion(context, plantId) {
 async function deletePlant(id) {
   if (!confirm('Diese Pflanze wirklich löschen?')) return;
   await dbDelete(id);
+  // ── Pflanzenzähler im localStorage aktualisieren ──
+  try { dbGetAll().then(a => localStorage.setItem('pflanz_plant_count', String(a.length))); } catch(e) {}
   closeModal();
   renderArchive();
   updateDueBadge();
@@ -3279,6 +3299,8 @@ async function renderExamStartView() {
   try {
     const all = await dbGetAll();
     const count  = all.length;
+    // Cache für sofortige Anzeige beim nächsten Tab-Wechsel
+    localStorage.setItem('pflanz_plant_count', String(count));
     const locked = count < EXAM_MIN_PLANTS;
     document.getElementById('exam-lock-view').style.display   = locked ? 'block' : 'none';
     document.getElementById('exam-unlock-view').style.display = locked ? 'none'  : 'block';
@@ -3913,6 +3935,46 @@ function _simReturnIfPending() {
 function simStatus(msg) {
   document.getElementById('sim-status').textContent = msg;
 }
+async function simAddPlants(n) {
+  simStatus('Füge ' + n + ' Testpflanzen hinzu…');
+  const fakePlants = [
+    {name:'Gänseblümchen',latin:'Bellis perennis'},
+    {name:'Löwenzahn',latin:'Taraxacum officinale'},
+    {name:'Brennnessel',latin:'Urtica dioica'},
+    {name:'Vergissmeinnicht',latin:'Myosotis sylvatica'},
+    {name:'Kamille',latin:'Matricaria chamomilla'},
+    {name:'Schafgarbe',latin:'Achillea millefolium'},
+    {name:'Johanniskraut',latin:'Hypericum perforatum'},
+    {name:'Holunder',latin:'Sambucus nigra'},
+    {name:'Spitzwegerich',latin:'Plantago lanceolata'},
+    {name:'Bärlauch',latin:'Allium ursinum'},
+  ];
+  for (let i = 0; i < n; i++) {
+    const p = fakePlants[i % fakePlants.length];
+    await dbPut({
+      name: p.name + ' (Test ' + (i+1) + ')',
+      latin: p.latin,
+      notes: 'sim-fake',
+      photo: null,
+      gps: null,
+      level: 0,
+      nextReview: Date.now(),
+      created: Date.now()
+    });
+  }
+  const all = await dbGetAll();
+  localStorage.setItem('pflanz_plant_count', String(all.length));
+  simStatus('✅ ' + n + ' Testpflanzen hinzugefügt. Gesamt: ' + all.length);
+}
+async function simRemoveFakePlants() {
+  simStatus('Entferne Testpflanzen…');
+  const all = await dbGetAll();
+  const fakes = all.filter(p => p.notes === 'sim-fake');
+  for (const p of fakes) await dbDelete(p.id);
+  const remaining = await dbGetAll();
+  localStorage.setItem('pflanz_plant_count', String(remaining.length));
+  simStatus('✅ ' + fakes.length + ' Testpflanzen entfernt. Verbleibend: ' + remaining.length);
+}
 function simLevelUp() {
   const idx = parseInt(document.getElementById('sim-level-select').value);
   const lv = LEVELS[idx];
@@ -4172,6 +4234,22 @@ function simResetAll() {
       <div class="sim-row" style="margin-bottom:14px; flex-direction:column; align-items:stretch; gap:8px">
         <button class="sim-btn danger" onclick="simResetBadges()">Alle Badges zurücksetzen</button>
         <button class="sim-btn danger" onclick="simResetAll()">Alles zurücksetzen (XP + Streak + Badges)</button>
+      </div>
+    </div>
+
+    <!-- Pflanzen hinzufügen -->
+    <div class="sim-section">
+      <div class="sim-section-title">🌿 Prüfungs-Test (Fake-Pflanzen)</div>
+      <div class="sim-row">
+        <button class="sim-btn" style="flex:1" onclick="simAddPlants(10)">+10 Pflanzen</button>
+        <button class="sim-btn" style="flex:1" onclick="simAddPlants(15)">+15 Pflanzen</button>
+      </div>
+      <div class="sim-row" style="margin-top:8px">
+        <button class="sim-btn" style="flex:1" onclick="simAddPlants(20)">+20 Pflanzen</button>
+        <button class="sim-btn" style="flex:1" onclick="simAddPlants(40)">+40 Pflanzen</button>
+      </div>
+      <div class="sim-row" style="margin-top:8px">
+        <button class="sim-btn danger" style="flex:1" onclick="simRemoveFakePlants()">Testpflanzen entfernen</button>
       </div>
     </div>
 
