@@ -513,14 +513,26 @@
     border-radius: 12px; padding: 14px 16px; margin-bottom: 14px;
     font-size: .95rem; line-height: 1.6; color: var(--text); font-style: italic;
   }
+  .exam-name-card {
+    display: flex; align-items: center; gap: 14px; background: var(--surface2);
+    border-radius: 16px; padding: 18px 16px; margin-bottom: 14px; border: 1px solid var(--border);
+  }
+  .exam-name-thumb {
+    width: 60px; height: 60px; border-radius: 12px; overflow: hidden; flex-shrink: 0;
+    background: var(--surface); display: flex; align-items: center; justify-content: center; font-size: 1.7rem;
+  }
+  .exam-name-thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .exam-name-text { font-size: 1.25rem; font-weight: 800; color: var(--text); }
   .exam-q-hint { font-size: .85rem; color: var(--muted); margin-bottom: 12px; text-align: center; }
   .exam-choices { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+  .exam-choices.single { grid-template-columns: 1fr; }
   .exam-choice-btn {
     padding: 12px 8px; border: 2px solid var(--border); border-radius: 14px;
     background: var(--surface); color: var(--text); font: inherit; font-size: .9rem;
     cursor: pointer; text-align: center; transition: border-color .15s, background .15s;
     line-height: 1.3; min-height: 56px;
   }
+  .exam-choice-btn.left { text-align: left; }
   .exam-choice-btn:hover:not(:disabled) { border-color: var(--accent); }
   .exam-choice-btn.correct { border-color: var(--accent2); background: #edfbe8; color: var(--accent2); font-weight: 700; }
   .exam-choice-btn.wrong   { border-color: #c62828; background: #fdeaea; color: #c62828; font-weight: 700; }
@@ -729,7 +741,7 @@
       </div>
       <span id="xp-label" style="white-space:nowrap">0 XP</span>
     </div>
-    <button onclick="switchTab('settings')" id="tab-settings-btn" title="Einstellungen v3.49" style="background:none;border:none;font-size:1.5rem;cursor:pointer;padding:4px 6px;color:var(--accent2);flex-shrink:0">⚙️<span style="font-size:.45rem;color:var(--muted);vertical-align:super;margin-left:1px;font-weight:600;letter-spacing:.01em">3.49</span></button>
+    <button onclick="switchTab('settings')" id="tab-settings-btn" title="Einstellungen v3.50" style="background:none;border:none;font-size:1.5rem;cursor:pointer;padding:4px 6px;color:var(--accent2);flex-shrink:0">⚙️<span style="font-size:.45rem;color:var(--muted);vertical-align:super;margin-left:1px;font-weight:600;letter-spacing:.01em">3.50</span></button>
   </div>
 
   <nav id="nav">
@@ -971,7 +983,7 @@
     <!-- SETTINGS -->
     <div class="screen" id="settings-screen">
       <h2>⚙️ Einstellungen</h2>
-      <p style="color:var(--muted);font-size:.8rem;margin-bottom:12px;">Version 3.49 — PlantNet + DeepSeek</p>
+      <p style="color:var(--muted);font-size:.8rem;margin-bottom:12px;">Version 3.50 — PlantNet + DeepSeek</p>
 
       <!-- Simulations-Button -->
       <button onclick="openSim()" style="width:100%;padding:14px;background:linear-gradient(135deg,#1e3a2f,#2d5a3d);color:#7ed957;border:1.5px solid #3aaa55;border-radius:14px;font-size:.95rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:16px;letter-spacing:.03em">
@@ -1060,7 +1072,7 @@
         </div>
         <div id="exam-unlock-view" style="display:none">
           <button class="btn btn-primary" style="width:100%;margin-bottom:12px;font-size:1.05rem;padding:16px" onclick="startExam()">🏁 Prüfung starten</button>
-          <p style="color:var(--muted);font-size:.82rem;text-align:center;margin-bottom:16px">5 Häppchen · Multiple Choice · Fun Facts · ~2 Minuten</p>
+          <p style="color:var(--muted);font-size:.82rem;text-align:center;margin-bottom:16px">Mehrere Häppchen · Fotos, Fun Facts & Merkmale · wächst mit deiner Sammlung</p>
           <div id="exam-history"></div>
         </div>
       </div>
@@ -1076,6 +1088,10 @@
           <div class="no-photo" id="exam-no-photo" style="display:none">🌿</div>
         </div>
         <div id="exam-fact-wrap" class="exam-fact-card" style="display:none"></div>
+        <div id="exam-name-wrap" class="exam-name-card" style="display:none">
+          <div id="exam-name-thumb" class="exam-name-thumb">🌿</div>
+          <div id="exam-name-text" class="exam-name-text"></div>
+        </div>
         <p class="exam-q-hint" id="exam-q-hint">Welche Pflanze ist das?</p>
         <div class="exam-choices" id="exam-choices"></div>
         <div class="exam-feedback" id="exam-feedback"></div>
@@ -3262,8 +3278,7 @@ function pflanzenStatus(level) {
 
 // ── Exam (Multiple Choice, Häppchen) ─────────────────────────
 let examQuestions = [], examQIndex = 0, examCorrect = 0, examAnswers = [];
-const EXAM_CHUNK_SIZE   = 2;
-const EXAM_TOTAL_CHUNKS = 5;
+let examChunkSize = 2, examTotalChunks = 5;
 const EXAM_MIN_PLANTS   = 10;
 
 function _examShuffle(arr) {
@@ -3272,14 +3287,40 @@ function _examShuffle(arr) {
   return a;
 }
 
+// Liest die echten Fun Facts aus dem gespeicherten infoHtml (bisher wurde
+// fälschlich plant.info im Markdown-Format erwartet, das Feld existiert
+// aber gar nicht — dadurch gab es NIE einen Fun-Fact-Treffer und jede
+// "funfact"-Frage fiel still auf eine weitere Foto-Frage zurück).
 function _examExtractFunFact(plant) {
-  if (!plant.info) return null;
-  const m = plant.info.match(/\*\*\s*Fun\s*Facts?\s*:?\s*\*\*([\s\S]*)/i);
+  if (!plant.infoHtml) return null;
+  const m = plant.infoHtml.match(/<h3>\s*Fun Facts\s*<\/h3>([\s\S]*)/i);
   if (!m) return null;
-  const lines = m[1].split('\n')
-    .map(l => l.replace(/^[-•*\d.]+\s*/,'').replace(/\*\*/g,'').trim())
-    .filter(l => l.length > 15 && l.length < 200);
+  const lines = [...m[1].matchAll(/<p>([\s\S]*?)<\/p>/gi)]
+    .map(mm => mm[1].replace(/<[^>]+>/g,'').trim())
+    .filter(l => l.length > 8 && l.length < 220);
   return lines.length ? lines[Math.floor(Math.random()*lines.length)] : null;
+}
+
+// Liest die Bestimmungsmerkmale (Tabelle) aus infoHtml — neue Fragenquelle,
+// damit nicht nur Namen, sondern auch Merkmale abgefragt werden können.
+function _examExtractMerkmale(plant) {
+  if (!plant.infoHtml) return [];
+  const m = plant.infoHtml.match(/<h3>\s*Bestimmungsmerkmale\s*<\/h3>([\s\S]*?)(?=<h3>\s*Fun Facts|$)/i);
+  if (!m) return [];
+  const rows = [...m[1].matchAll(/<tr>\s*<td class="merkmal-key">([\s\S]*?)<\/td>\s*<td class="merkmal-val">([\s\S]*?)<\/td>\s*<\/tr>/gi)];
+  return rows.map(r => {
+    const key = r[1].replace(/<[^>]+>/g,'').trim();
+    const val = r[2].replace(/<[^>]+>/g,'').trim();
+    return { key, val, text: key + ': ' + val };
+  }).filter(r => r.key && r.val);
+}
+
+// Mehr Pflanzen in der Sammlung → mehr mögliche Fragen pro Prüfung.
+function _examTargetCount(n) {
+  if (n >= 40) return 20;
+  if (n >= 25) return 16;
+  if (n >= 15) return 12;
+  return 10;
 }
 
 async function renderExamStartView() {
@@ -3308,25 +3349,67 @@ async function renderExamStartView() {
 async function startExam() {
   const all = await dbGetAll();
   if (all.length < EXAM_MIN_PLANTS) return;
-  const pool = _examShuffle([...all]);
-  const chosen = pool.slice(0, 5);
-  examQuestions = [];
-  for (const plant of chosen) {
-    const wrongs = _examShuffle(all.filter(p => p.id !== plant.id)).slice(0,3).map(p => p.name);
-    // Q1: Photo → Name
-    examQuestions.push({ type:'photo', plant, choices:_examShuffle([plant.name,...wrongs]), correct:plant.name });
-    // Q2: Fun fact → Name, or fallback photo
+  const target = _examTargetCount(all.length);
+  const names3 = (excludeId) => _examShuffle(all.filter(p => p.id !== excludeId)).slice(0,3).map(p => p.name);
+
+  // Drei Schwierigkeits-Stufen (wie bei "Wer wird Millionär" steigt die
+  // Prüfung von leicht zu schwer): 1=Foto erkennen, 2=Fun-Fact/Merkmal →
+  // Name, 3=Name → passenden Fun-Fact/Merkmal auswählen (schwerer, weil man
+  // das Wissen aktiv erinnern statt nur wiedererkennen muss).
+  const tiers = { 1: [], 2: [], 3: [] };
+  for (const plant of all) {
+    tiers[1].push({ diff:1, type:'photo', plant, choices:_examShuffle([plant.name, ...names3(plant.id)]), correct:plant.name });
+
     const fact = _examExtractFunFact(plant);
     if (fact) {
-      examQuestions.push({ type:'funfact', plant, fact, choices:_examShuffle([plant.name,...wrongs]), correct:plant.name });
-    } else {
-      const alt = _examShuffle(all.filter(p => p.id !== plant.id))[0];
-      if (alt) {
-        const aw = _examShuffle(all.filter(p => p.id !== alt.id)).slice(0,3).map(p => p.name);
-        examQuestions.push({ type:'photo', plant:alt, choices:_examShuffle([alt.name,...aw]), correct:alt.name });
+      tiers[2].push({ diff:2, type:'funfact', plant, fact, choices:_examShuffle([plant.name, ...names3(plant.id)]), correct:plant.name });
+      const otherFacts = _examShuffle(all.filter(p => p.id !== plant.id).map(p => _examExtractFunFact(p)).filter(Boolean)).slice(0,3);
+      if (otherFacts.length === 3) {
+        tiers[3].push({ diff:3, type:'name2fact', plant, choices:_examShuffle([fact, ...otherFacts]), correct:fact });
+      }
+    }
+
+    const merks = _examExtractMerkmale(plant);
+    if (merks.length) {
+      const merk = merks[Math.floor(Math.random()*merks.length)];
+      tiers[2].push({ diff:2, type:'merkmal', plant, merk, choices:_examShuffle([plant.name, ...names3(plant.id)]), correct:plant.name });
+      const otherMerks = _examShuffle(all.filter(p => p.id !== plant.id)).map(p => {
+        const ms = _examExtractMerkmale(p);
+        return ms.length ? ms[Math.floor(Math.random()*ms.length)].text : null;
+      }).filter(Boolean).slice(0,3);
+      if (otherMerks.length === 3) {
+        tiers[3].push({ diff:3, type:'name2merkmal', plant, choices:_examShuffle([merk.text, ...otherMerks]), correct:merk.text });
       }
     }
   }
+  tiers[1] = _examShuffle(tiers[1]);
+  tiers[2] = _examShuffle(tiers[2]);
+  tiers[3] = _examShuffle(tiers[3]);
+
+  const want1 = Math.round(target*0.4), want2 = Math.round(target*0.35);
+  const want3 = target - want1 - want2;
+  let chosen = [...tiers[1].slice(0,want1), ...tiers[2].slice(0,want2), ...tiers[3].slice(0,want3)];
+  if (chosen.length < target) {
+    const leftover = _examShuffle([...tiers[1].slice(want1), ...tiers[2].slice(want2), ...tiers[3].slice(want3)]);
+    chosen = chosen.concat(leftover.slice(0, target - chosen.length));
+  }
+  chosen = chosen.slice(0, target);
+
+  // Gleiche Pflanze nie zwei Fragen direkt hintereinander — das war der
+  // Hauptgrund, warum sich die Prüfung "doppelt" angefühlt hat.
+  for (let i = 1; i < chosen.length; i++) {
+    if (chosen[i].plant.id === chosen[i-1].plant.id) {
+      let swapIdx = -1;
+      for (let j = i+1; j < chosen.length; j++) {
+        if (chosen[j].plant.id !== chosen[i-1].plant.id && chosen[j].plant.id !== chosen[i].plant.id) { swapIdx = j; break; }
+      }
+      if (swapIdx !== -1) { const tmp = chosen[i]; chosen[i] = chosen[swapIdx]; chosen[swapIdx] = tmp; }
+    }
+  }
+
+  examQuestions = chosen;
+  examChunkSize = 2;
+  examTotalChunks = Math.max(1, Math.ceil(examQuestions.length / examChunkSize));
   examQIndex = 0; examCorrect = 0; examAnswers = [];
   ['exam-start-view','exam-chunk-view','exam-result-view'].forEach(id => document.getElementById(id).style.display='none');
   document.getElementById('exam-active-view').style.display = 'block';
@@ -3336,10 +3419,10 @@ async function startExam() {
 function showExamQuestion() {
   if (examQIndex >= examQuestions.length) { finishExam(); return; }
   const q = examQuestions[examQIndex];
-  const chunkNum = Math.floor(examQIndex / EXAM_CHUNK_SIZE) + 1;
-  const posInChunk = (examQIndex % EXAM_CHUNK_SIZE) + 1;
+  const chunkNum = Math.floor(examQIndex / examChunkSize) + 1;
+  const posInChunk = (examQIndex % examChunkSize) + 1;
   document.getElementById('exam-progress-text').textContent =
-    'Häppchen ' + chunkNum + ' von ' + EXAM_TOTAL_CHUNKS + ' · Frage ' + posInChunk + ' von ' + EXAM_CHUNK_SIZE;
+    'Häppchen ' + chunkNum + ' von ' + examTotalChunks + ' · Frage ' + posInChunk + ' von ' + examChunkSize;
 
   const fb = document.getElementById('exam-feedback');
   fb.className = 'exam-feedback';
@@ -3347,11 +3430,29 @@ function showExamQuestion() {
 
   const photoWrap = document.getElementById('exam-photo-wrap');
   const factWrap  = document.getElementById('exam-fact-wrap');
+  const nameWrap  = document.getElementById('exam-name-wrap');
   const hint      = document.getElementById('exam-q-hint');
+  const choicesEl = document.getElementById('exam-choices');
+
+  photoWrap.style.display = 'none';
+  factWrap.style.display  = 'none';
+  nameWrap.style.display  = 'none';
+  choicesEl.classList.remove('single');
+
+  const showNameCard = () => {
+    nameWrap.style.display = 'flex';
+    document.getElementById('exam-name-text').textContent = q.plant.name;
+    const thumb = document.getElementById('exam-name-thumb');
+    if (q.plant.photo) {
+      thumb.innerHTML = '<img src="" alt="">';
+      const img = thumb.querySelector('img');
+      img.onerror = () => { thumb.textContent = '🌿'; };
+      img.src = q.plant.photo;
+    } else { thumb.textContent = '🌿'; }
+  };
 
   if (q.type === 'photo') {
     photoWrap.style.display = 'flex';
-    factWrap.style.display  = 'none';
     const img = document.getElementById('exam-photo');
     const nop = document.getElementById('exam-no-photo');
     if (q.plant.photo) {
@@ -3359,18 +3460,28 @@ function showExamQuestion() {
       img.src = q.plant.photo; img.style.display='block'; nop.style.display='none';
     } else { img.style.display='none'; nop.style.display='block'; }
     hint.textContent = '🌿 Welche Pflanze ist das?';
-  } else {
-    photoWrap.style.display = 'none';
-    factWrap.style.display  = 'block';
-    factWrap.textContent    = '💡 ' + q.fact;
+  } else if (q.type === 'funfact') {
+    factWrap.style.display = 'block';
+    factWrap.textContent   = '💡 ' + q.fact;
     hint.textContent = '🔍 Zu welcher Pflanze gehört dieser Fun Fact?';
+  } else if (q.type === 'merkmal') {
+    factWrap.style.display = 'block';
+    factWrap.textContent   = '🔎 ' + q.merk.text;
+    hint.textContent = 'Welche Pflanze hat dieses Merkmal?';
+  } else if (q.type === 'name2fact') {
+    showNameCard();
+    choicesEl.classList.add('single');
+    hint.textContent = '💡 Welcher Fun Fact passt zu dieser Pflanze?';
+  } else if (q.type === 'name2merkmal') {
+    showNameCard();
+    choicesEl.classList.add('single');
+    hint.textContent = '🔎 Welches Merkmal passt zu dieser Pflanze?';
   }
 
-  const choicesEl = document.getElementById('exam-choices');
   choicesEl.innerHTML = '';
   q.choices.forEach(choice => {
     const btn = document.createElement('button');
-    btn.className = 'exam-choice-btn';
+    btn.className = 'exam-choice-btn' + (choice.length > 26 ? ' left' : '');
     btn.textContent = choice;
     btn.onclick = () => selectExamChoice(choice, q.correct);
     choicesEl.appendChild(btn);
@@ -3380,7 +3491,11 @@ function showExamQuestion() {
 function selectExamChoice(chosen, correct) {
   const q = examQuestions[examQIndex];
   const ok = chosen === correct;
-  if (ok) { examCorrect++; awardXP(5); }
+  if (ok) {
+    // Wer-wird-Millionär-Prinzip: je weiter man kommt, desto mehr XP gibt's.
+    const xp = Math.min(5 + Math.floor(examQIndex / 4) * 2, 15);
+    examCorrect++; awardXP(xp);
+  }
   examAnswers.push({ plant: q.plant, chosen, correct: q.correct, isCorrect: ok });
   document.querySelectorAll('.exam-choice-btn').forEach(btn => {
     btn.disabled = true;
@@ -3389,13 +3504,13 @@ function selectExamChoice(chosen, correct) {
   });
   const fb = document.getElementById('exam-feedback');
   fb.className = 'exam-feedback ' + (ok ? 'correct' : 'wrong');
-  fb.textContent = ok ? '✓ Richtig!' : '✗ Gesuchte Pflanze: ' + correct;
+  fb.textContent = ok ? '✓ Richtig!' : '✗ Richtig wäre: ' + correct;
   document.getElementById('exam-next-btn').style.display = 'block';
 }
 
 function nextExamQuestion() {
   examQIndex++;
-  const chunkDone = examQIndex % EXAM_CHUNK_SIZE === 0;
+  const chunkDone = examQIndex % examChunkSize === 0;
   const allDone   = examQIndex >= examQuestions.length;
   if (allDone)       { showChunkComplete(true); }
   else if (chunkDone){ showChunkComplete(false); }
@@ -3403,18 +3518,18 @@ function nextExamQuestion() {
 }
 
 function showChunkComplete(isLast) {
-  const chunkNum    = examQIndex / EXAM_CHUNK_SIZE;
-  const chunkSlice  = examAnswers.slice(-EXAM_CHUNK_SIZE);
+  const chunkNum    = Math.ceil(examQIndex / examChunkSize);
+  const chunkSlice  = examAnswers.slice(-examChunkSize);
   const chunkRight  = chunkSlice.filter(a => a.isCorrect).length;
   document.getElementById('exam-active-view').style.display = 'none';
   document.getElementById('exam-chunk-view').style.display  = 'block';
-  const emoji = chunkRight === EXAM_CHUNK_SIZE ? '🎉' : chunkRight > 0 ? '👍' : '💪';
+  const emoji = chunkRight === examChunkSize ? '🎉' : chunkRight > 0 ? '👍' : '💪';
   document.getElementById('chunk-emoji').textContent      = emoji;
   document.getElementById('chunk-title').textContent      = 'Häppchen ' + chunkNum + ' geschafft!';
-  document.getElementById('chunk-score-text').textContent = chunkRight + ' von ' + EXAM_CHUNK_SIZE + ' richtig';
+  document.getElementById('chunk-score-text').textContent = chunkRight + ' von ' + examChunkSize + ' richtig';
   const starsEl = document.getElementById('chunk-stars-row');
   starsEl.innerHTML = '';
-  for (let i = 0; i < EXAM_CHUNK_SIZE; i++) {
+  for (let i = 0; i < examChunkSize; i++) {
     const s = document.createElement('span');
     s.className = 'chunk-star'; s.textContent = i < chunkRight ? '⭐' : '☆';
     starsEl.appendChild(s);
@@ -3496,7 +3611,7 @@ function renderExamLevelInfo() {
   const xp = getXP();
   const lv = getCurrentLevel(xp);
   document.getElementById('exam-level-title').textContent = lv.icon + ' ' + lv.name;
-  document.getElementById('exam-level-sub').textContent = '5 Häppchen · Multiple Choice · Fun Facts inklusive';
+  document.getElementById('exam-level-sub').textContent = 'Fotos, Fun Facts & Merkmale · Umfang wächst mit deiner Sammlung';
   renderExamHistory();
 }
 
