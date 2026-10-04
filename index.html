@@ -1059,70 +1059,6 @@
     </div>
 
   </div>
-</div>
-
-<!-- Detail Modal -->
-<div id="modal-overlay" onclick="closeModal(event)">
-  <div id="modal-box">
-    <img id="modal-img" src="" alt="">
-    <div id="modal-title"></div>
-    <div id="modal-location" style="display:none;font-size:.82rem;color:var(--muted);margin:6px 0"></div>
-    <div id="modal-notes"></div>
-    <!-- Botanische Illustration -->
-    <div id="modal-illus-wrap" style="margin-top:14px;display:none">
-      <div style="font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:6px">Botanische Illustration</div>
-      <div class="illus-wrap" id="modal-illus-box">
-        <div class="illus-loading">🔍 Lade Illustration …</div>
-      </div>
-      <div class="illus-controls">
-        <button class="illus-btn" onclick="illusPrev('modal')">← Vorherige</button>
-        <button class="illus-btn" onclick="illusNext('modal')">Nächste →</button>
-        <button class="illus-btn" onclick="illusUpload('modal')">📤 Eigenes</button>
-        <button class="illus-btn" onclick="illusDelete('modal')" style="color:#e88">🗑 Löschen</button>
-      </div>
-      <div class="illus-source" id="modal-illus-source"></div>
-    </div>
-    <div id="modal-info-content" style="display:none;margin-top:12px;font-size:.9rem"></div>
-    <button class="btn btn-secondary" id="modal-info-btn" style="margin-top:12px;width:100%" onclick="loadModalInfo()">ℹ️ Bestimmung & Fun Facts</button>
-    <div class="modal-actions" style="margin-top:10px">
-      <button class="btn btn-secondary" onclick="openEdit(currentDetailId)">Bearbeiten</button>
-      <button class="btn btn-danger" onclick="deletePlant(currentDetailId)">Löschen</button>
-    </div>
-    <button class="btn btn-secondary" style="margin-top:10px" onclick="closeModal()">Schließen</button>
-  </div>
-</div>
-
-<!-- Edit Modal -->
-<div id="edit-modal-overlay" onclick="closeEditModal(event)">
-  <div id="edit-modal-box">
-    <h2>Pflanze bearbeiten</h2>
-    <div class="form-group">
-      <label>Foto</label>
-      <div class="photo-area" id="edit-photo-area" onclick="document.getElementById('edit-photo-input').click()">
-        <span class="big-icon">📷</span>
-        <span>Tippen um Foto zu ändern</span>
-        <div class="overlay">Ändern</div>
-      </div>
-      <input type="file" id="edit-photo-input" accept="image/*" capture="environment">
-    </div>
-    <div class="form-group">
-      <label>Pflanzenname</label>
-      <input type="text" id="edit-name" autocomplete="off">
-    </div>
-    <div class="form-group">
-      <label>Lateinischer Name</label>
-      <input type="text" id="edit-latin" autocomplete="off" placeholder="z.B. Valeriana officinalis">
-    </div>
-    <div class="form-group">
-      <label>Sonstiges</label>
-      <textarea id="edit-notes"></textarea>
-    </div>
-    <button class="btn btn-primary" onclick="saveEdit()">Speichern</button>
-    <button class="btn btn-secondary" style="margin-top:10px" onclick="closeEditModal()">Abbrechen</button>
-  </div>
-
-    <!-- PILZ -->
-
 
     <!-- EXAM -->
     <div class="screen" id="exam-screen">
@@ -1186,6 +1122,68 @@
         <div id="exam-result-review" style="margin-top:16px"></div>
       </div>
     </div>
+
+</div>
+
+<!-- Detail Modal -->
+<div id="modal-overlay" onclick="closeModal(event)">
+  <div id="modal-box">
+    <img id="modal-img" src="" alt="">
+    <div id="modal-title"></div>
+    <div id="modal-location" style="display:none;font-size:.82rem;color:var(--muted);margin:6px 0"></div>
+    <div id="modal-notes"></div>
+    <!-- Botanische Illustration -->
+    <div id="modal-illus-wrap" style="margin-top:14px;display:none">
+      <div style="font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:6px">Botanische Illustration</div>
+      <div class="illus-wrap" id="modal-illus-box">
+        <div class="illus-loading">🔍 Lade Illustration …</div>
+      </div>
+      <div class="illus-controls">
+        <button class="illus-btn" onclick="illusPrev('modal')">← Vorherige</button>
+        <button class="illus-btn" onclick="illusNext('modal')">Nächste →</button>
+        <button class="illus-btn" onclick="illusUpload('modal')">📤 Eigenes</button>
+        <button class="illus-btn" onclick="illusDelete('modal')" style="color:#e88">🗑 Löschen</button>
+      </div>
+      <div class="illus-source" id="modal-illus-source"></div>
+    </div>
+    <div id="modal-info-content" style="display:none;margin-top:12px;font-size:.9rem"></div>
+    <button class="btn btn-secondary" id="modal-info-btn" style="margin-top:12px;width:100%" onclick="loadModalInfo()">ℹ️ Bestimmung & Fun Facts</button>
+    <div class="modal-actions" style="margin-top:10px">
+      <button class="btn btn-secondary" onclick="openEdit(currentDetailId)">Bearbeiten</button>
+      <button class="btn btn-danger" onclick="deletePlant(currentDetailId)">Löschen</button>
+    </div>
+    <button class="btn btn-secondary" style="margin-top:10px" onclick="closeModal()">Schließen</button>
+  </div>
+</div>
+
+<!-- Edit Modal -->
+<div id="edit-modal-overlay" onclick="closeEditModal(event)">
+  <div id="edit-modal-box">
+    <h2>Pflanze bearbeiten</h2>
+    <div class="form-group">
+      <label>Foto</label>
+      <div class="photo-area" id="edit-photo-area" onclick="document.getElementById('edit-photo-input').click()">
+        <span class="big-icon">📷</span>
+        <span>Tippen um Foto zu ändern</span>
+        <div class="overlay">Ändern</div>
+      </div>
+      <input type="file" id="edit-photo-input" accept="image/*" capture="environment">
+    </div>
+    <div class="form-group">
+      <label>Pflanzenname</label>
+      <input type="text" id="edit-name" autocomplete="off">
+    </div>
+    <div class="form-group">
+      <label>Lateinischer Name</label>
+      <input type="text" id="edit-latin" autocomplete="off" placeholder="z.B. Valeriana officinalis">
+    </div>
+    <div class="form-group">
+      <label>Sonstiges</label>
+      <textarea id="edit-notes"></textarea>
+    </div>
+    <button class="btn btn-primary" onclick="saveEdit()">Speichern</button>
+    <button class="btn btn-secondary" style="margin-top:10px" onclick="closeEditModal()">Abbrechen</button>
+  </div>
 </div>
 
 <script>
