@@ -1130,6 +1130,7 @@
       <!-- Start View -->
       <div id="exam-start-view">
         <h2>🎓 Botanik-Prüfung</h2>
+        <div id="exam-debug-banner" style="background:#ffeb3b;color:#333;padding:10px;border-radius:8px;margin-bottom:12px;font-weight:700;font-size:1rem;text-align:center">⏳ Zähle Pflanzen…</div>
         <div id="exam-level-info" style="background:var(--surface2);border-radius:14px;padding:14px;margin-bottom:16px;border:1px solid var(--border)">
           <div style="font-weight:800;font-size:1rem;color:var(--accent2);margin-bottom:4px" id="exam-level-title">Lade…</div>
           <div style="font-size:.85rem;color:var(--muted)" id="exam-level-sub"></div>
@@ -3279,16 +3280,16 @@ async function renderExamStartView() {
   try {
     const all = await dbGetAll();
     const locked = all.length < EXAM_MIN_PLANTS;
+    document.getElementById('exam-debug-banner').textContent = '🌿 ' + all.length + ' Pflanzen archiviert — ' + (locked ? 'gesperrt' : 'freigeschalten');
     document.getElementById('exam-lock-view').style.display   = locked ? 'block' : 'none';
     document.getElementById('exam-unlock-view').style.display = locked ? 'none'  : 'block';
     const need = EXAM_MIN_PLANTS - all.length;
     document.getElementById('exam-lock-sub').textContent = locked
       ? 'Noch ' + need + ' Pflanze' + (need===1?'':'n') + ' fehlen'
       : '';
-    // Debug: show plant count always
-    document.getElementById('exam-level-sub').textContent = all.length + ' Pflanzen archiviert';
     renderExamLevelInfo();
   } catch(e) {
+    document.getElementById('exam-debug-banner').textContent = '❌ DB-Fehler: ' + e;
     document.getElementById('exam-lock-view').style.display   = 'block';
     document.getElementById('exam-unlock-view').style.display = 'none';
     document.getElementById('exam-lock-sub').textContent = 'Datenbank nicht erreichbar';
