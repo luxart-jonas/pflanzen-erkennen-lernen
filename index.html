@@ -729,7 +729,7 @@
       </div>
       <span id="xp-label" style="white-space:nowrap">0 XP</span>
     </div>
-    <button onclick="switchTab('settings')" id="tab-settings-btn" title="Einstellungen" style="background:none;border:none;font-size:1.5rem;cursor:pointer;padding:4px 6px;color:var(--accent2);flex-shrink:0">⚙️</button>
+    <button onclick="switchTab('settings')" id="tab-settings-btn" title="Einstellungen v3.47" style="background:none;border:none;font-size:1.5rem;cursor:pointer;padding:4px 6px;color:var(--accent2);flex-shrink:0">⚙️<span style="font-size:.45rem;color:var(--muted);vertical-align:super;margin-left:1px;font-weight:600;letter-spacing:.01em">3.47</span></button>
   </div>
 
   <nav id="nav">
@@ -971,7 +971,7 @@
     <!-- SETTINGS -->
     <div class="screen" id="settings-screen">
       <h2>⚙️ Einstellungen</h2>
-      <p style="color:var(--muted);font-size:.8rem;margin-bottom:12px;">Version 3.46 — PlantNet + DeepSeek</p>
+      <p style="color:var(--muted);font-size:.8rem;margin-bottom:12px;">Version 3.47 — PlantNet + DeepSeek</p>
 
       <!-- Simulations-Button -->
       <button onclick="openSim()" style="width:100%;padding:14px;background:linear-gradient(135deg,#1e3a2f,#2d5a3d);color:#7ed957;border:1.5px solid #3aaa55;border-radius:14px;font-size:.95rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:16px;letter-spacing:.03em">
@@ -3931,16 +3931,26 @@ function simStatus(msg) {
 async function simAddPlants(n) {
   simStatus('Füge ' + n + ' Testpflanzen hinzu…');
   const fakePlants = [
-    {name:'Gänseblümchen',latin:'Bellis perennis'},
-    {name:'Löwenzahn',latin:'Taraxacum officinale'},
-    {name:'Brennnessel',latin:'Urtica dioica'},
-    {name:'Vergissmeinnicht',latin:'Myosotis sylvatica'},
-    {name:'Kamille',latin:'Matricaria chamomilla'},
-    {name:'Schafgarbe',latin:'Achillea millefolium'},
-    {name:'Johanniskraut',latin:'Hypericum perforatum'},
-    {name:'Holunder',latin:'Sambucus nigra'},
-    {name:'Spitzwegerich',latin:'Plantago lanceolata'},
-    {name:'Bärlauch',latin:'Allium ursinum'},
+    {name:'Gänseblümchen',latin:'Bellis perennis',photo:'https://upload.wikimedia.org/wikipedia/commons/thumb/7/73/Bellis_perennis_single_Macro.jpg/400px-Bellis_perennis_single_Macro.jpg'},
+    {name:'Löwenzahn',latin:'Taraxacum officinale',photo:'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e6/Dandelion_%28Taraxacum_officinale%29.jpg/400px-Dandelion_%28Taraxacum_officinale%29.jpg'},
+    {name:'Brennnessel',latin:'Urtica dioica',photo:'https://upload.wikimedia.org/wikipedia/commons/thumb/b/bd/Urtica_dioica_L.jpg/400px-Urtica_dioica_L.jpg'},
+    {name:'Vergissmeinnicht',latin:'Myosotis sylvatica',photo:'https://upload.wikimedia.org/wikipedia/commons/thumb/d/df/Myosotis_sylvatica_%28blue%29.jpg/400px-Myosotis_sylvatica_%28blue%29.jpg'},
+    {name:'Kamille',latin:'Matricaria chamomilla',photo:'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/Matricaria_chamomilla.jpg/400px-Matricaria_chamomilla.jpg'},
+    {name:'Schafgarbe',latin:'Achillea millefolium',photo:'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9d/Achillea_millefolium_20070601.jpg/400px-Achillea_millefolium_20070601.jpg'},
+    {name:'Johanniskraut',latin:'Hypericum perforatum',photo:'https://upload.wikimedia.org/wikipedia/commons/thumb/4/40/Hypericum_perforatum_-_flowering.jpg/400px-Hypericum_perforatum_-_flowering.jpg'},
+    {name:'Holunder',latin:'Sambucus nigra',photo:'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/Elderflower_closeup.jpg/400px-Elderflower_closeup.jpg'},
+    {name:'Spitzwegerich',latin:'Plantago lanceolata',photo:'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0a/Plantago_lanceolata.jpg/400px-Plantago_lanceolata.jpg'},
+    {name:'Bärlauch',latin:'Allium ursinum',photo:'https://upload.wikimedia.org/wikipedia/commons/thumb/d/dd/Allium_ursinum_-_Keukenhof.jpg/400px-Allium_ursinum_-_Keukenhof.jpg'},
+    {name:'Klatschmohn',latin:'Papaver rhoeas',photo:'https://upload.wikimedia.org/wikipedia/commons/thumb/8/80/Papaver_rhoeas_002.JPG/400px-Papaver_rhoeas_002.JPG'},
+    {name:'Kornblume',latin:'Centaurea cyanus',photo:'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Centaurea_cyanus_001.JPG/400px-Centaurea_cyanus_001.JPG'},
+    {name:'Wilde Möhre',latin:'Daucus carota',photo:'https://upload.wikimedia.org/wikipedia/commons/thumb/2/27/Daucus_carota_subsp._carota_eF.jpg/400px-Daucus_carota_subsp._carota_eF.jpg'},
+    {name:'Wiesenschaumkraut',latin:'Cardamine pratensis',photo:'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Cardamine_pratensis_Brno.jpg/400px-Cardamine_pratensis_Brno.jpg'},
+    {name:'Rotklee',latin:'Trifolium pratense',photo:'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Trifolium_pratense_-_clover.jpg/400px-Trifolium_pratense_-_clover.jpg'},
+    {name:'Glockenblume',latin:'Campanula rotundifolia',photo:'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7c/Campanula_rotundifolia_02.jpg/400px-Campanula_rotundifolia_02.jpg'},
+    {name:'Sauerklee',latin:'Oxalis acetosella',photo:'https://upload.wikimedia.org/wikipedia/commons/thumb/0/09/Oxalis_acetosella1.jpg/400px-Oxalis_acetosella1.jpg'},
+    {name:'Weißklee',latin:'Trifolium repens',photo:'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0e/Trifolium_repens_-_clover.jpg/400px-Trifolium_repens_-_clover.jpg'},
+    {name:'Wiesenknopf',latin:'Sanguisorba officinalis',photo:'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/Sanguisorba_officinalis.jpg/400px-Sanguisorba_officinalis.jpg'},
+    {name:'Goldrutea',latin:'Solidago virgaurea',photo:'https://upload.wikimedia.org/wikipedia/commons/thumb/9/99/Solidago_virgaurea_3.jpg/400px-Solidago_virgaurea_3.jpg'},
   ];
   for (let i = 0; i < n; i++) {
     const p = fakePlants[i % fakePlants.length];
@@ -3948,7 +3958,7 @@ async function simAddPlants(n) {
       name: p.name,
       latin: p.latin,
       notes: 'sim-fake',
-      photo: null,
+      photo: p.photo || null,
       gps: null,
       level: 0,
       nextReview: Date.now(),
