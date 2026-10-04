@@ -499,65 +499,60 @@
 
   /* ── Exam Screen ─────────────────────────────────── */
   #exam-screen .exam-progress {
-    text-align: center; color: var(--muted); font-size: .85rem; margin-bottom: 8px;
+    text-align: center; color: var(--muted); font-size: .82rem; margin-bottom: 10px; letter-spacing: .03em;
   }
-  #exam-screen .exam-photo-wrap {
-    width: 100%; border-radius: 16px; overflow: hidden;
-    aspect-ratio: 1; background: var(--surface2);
-    display: flex; align-items: center; justify-content: center;
-    margin-bottom: 16px; border: 1px solid var(--border);
+  .exam-photo-wrap {
+    width: 100%; border-radius: 16px; overflow: hidden; aspect-ratio: 4/3;
+    background: var(--surface2); display: flex; align-items: center; justify-content: center;
+    margin-bottom: 14px; border: 1px solid var(--border);
   }
-  #exam-screen .exam-photo-wrap img {
-    width: 100%; height: 100%; object-fit: cover;
+  .exam-photo-wrap img  { width: 100%; height: 100%; object-fit: cover; }
+  .exam-photo-wrap .no-photo { font-size: 4rem; opacity: .3; }
+  .exam-fact-card {
+    background: var(--surface2); border-left: 4px solid var(--accent);
+    border-radius: 12px; padding: 14px 16px; margin-bottom: 14px;
+    font-size: .95rem; line-height: 1.6; color: var(--text); font-style: italic;
   }
-  #exam-screen .exam-photo-wrap .no-photo {
-    font-size: 4rem; opacity: .3;
+  .exam-q-hint { font-size: .85rem; color: var(--muted); margin-bottom: 12px; text-align: center; }
+  .exam-choices { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+  .exam-choice-btn {
+    padding: 12px 8px; border: 2px solid var(--border); border-radius: 14px;
+    background: var(--surface); color: var(--text); font: inherit; font-size: .9rem;
+    cursor: pointer; text-align: center; transition: border-color .15s, background .15s;
+    line-height: 1.3; min-height: 56px;
   }
-  #exam-screen .exam-answer-row {
-    display: flex; gap: 8px; margin-bottom: 14px;
-  }
-  #exam-screen .exam-answer-row input {
-    flex: 1; padding: 10px 14px; border: 2px solid var(--border);
-    border-radius: 12px; font: inherit; font-size: 1rem;
-    background: var(--surface); color: var(--text);
-    outline: none; transition: border-color .2s;
-  }
-  #exam-screen .exam-answer-row input:focus { border-color: var(--accent); }
+  .exam-choice-btn:hover:not(:disabled) { border-color: var(--accent); }
+  .exam-choice-btn.correct { border-color: var(--accent2); background: #edfbe8; color: var(--accent2); font-weight: 700; }
+  .exam-choice-btn.wrong   { border-color: #c62828; background: #fdeaea; color: #c62828; font-weight: 700; }
+  .exam-choice-btn:disabled { cursor: default; }
   #exam-screen .exam-feedback {
-    border-radius: 12px; padding: 10px 14px;
-    font-size: .9rem; margin-bottom: 14px; display: none;
-    font-weight: 700;
+    border-radius: 12px; padding: 10px 14px; font-size: .9rem; margin-bottom: 14px; display: none; font-weight: 700;
   }
-  #exam-screen .exam-feedback.correct {
-    background: #edfbe8; color: var(--accent2); display: block;
+  #exam-screen .exam-feedback.correct { background: #edfbe8; color: var(--accent2); display: block; }
+  #exam-screen .exam-feedback.wrong   { background: #fdeaea; color: #c62828; display: block; }
+  .exam-lock-box {
+    background: var(--surface2); border: 2px dashed var(--border); border-radius: 16px;
+    padding: 32px 20px; text-align: center; margin-bottom: 20px;
   }
-  #exam-screen .exam-feedback.wrong {
-    background: #fdeaea; color: #c62828; display: block;
-  }
+  .exam-lock-box .lock-icon { font-size: 2.5rem; margin-bottom: 8px; }
+  .exam-lock-box .lock-text { font-size: 1rem; font-weight: 700; margin-bottom: 4px; }
+  .exam-lock-box .lock-sub  { font-size: .85rem; color: var(--muted); }
+  .chunk-stars-row { display: flex; gap: 10px; justify-content: center; margin: 16px 0 8px; }
+  .chunk-star { font-size: 2.5rem; display: inline-block; transition: transform .2s; }
   #exam-screen .exam-result-box {
-    background: var(--surface2); border-radius: 16px; padding: 20px;
+    background: var(--surface2); border-radius: 16px; padding: 24px;
     text-align: center; border: 1px solid var(--border);
   }
-  #exam-screen .exam-result-box .er-grade {
-    font-size: 3.5rem; font-weight: 900; color: var(--accent2); line-height: 1;
-  }
-  #exam-screen .exam-result-box .er-label {
-    font-size: 1.1rem; font-weight: 700; margin: 8px 0 4px;
-  }
-  #exam-screen .exam-result-box .er-note {
-    font-size: .85rem; color: var(--muted); margin-bottom: 16px;
-  }
+  #exam-screen .exam-result-box .er-grade { font-size: 3rem; font-weight: 900; color: var(--accent2); line-height: 1; }
+  #exam-screen .exam-result-box .er-label { font-size: 1.1rem; font-weight: 700; margin: 8px 0 4px; }
+  #exam-screen .exam-result-box .er-note  { font-size: .85rem; color: var(--muted); margin-bottom: 16px; }
   #exam-history { margin-top: 18px; }
   #exam-history h3 { font-size: .95rem; color: var(--muted); margin-bottom: 8px; }
   .exam-hist-row {
     display: flex; justify-content: space-between; align-items: center;
-    padding: 8px 12px; background: var(--surface);
-    border: 1px solid var(--border); border-radius: 10px; margin-bottom: 6px;
-    font-size: .85rem;
+    padding: 8px 0; border-bottom: 1px solid var(--border); font-size: .85rem;
   }
-  .exam-hist-row .ehr-grade {
-    font-weight: 800; color: var(--accent2); font-size: 1.1rem;
-  }
+  .ehr-grade { font-weight: 700; color: var(--accent2); }
 
 
   /* ── XP Bar next-label ───────────────────────────── */
@@ -976,7 +971,7 @@
     <!-- SETTINGS -->
     <div class="screen" id="settings-screen">
       <h2>⚙️ Einstellungen</h2>
-      <p style="color:var(--muted);font-size:.8rem;margin-bottom:12px;">Version 3.42 — PlantNet + DeepSeek</p>
+      <p style="color:var(--muted);font-size:.8rem;margin-bottom:12px;">Version 3.43 — PlantNet + DeepSeek</p>
 
       <!-- Simulations-Button -->
       <button onclick="openSim()" style="width:100%;padding:14px;background:linear-gradient(135deg,#1e3a2f,#2d5a3d);color:#7ed957;border:1.5px solid #3aaa55;border-radius:14px;font-size:.95rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:16px;letter-spacing:.03em">
@@ -1131,39 +1126,60 @@
 
     <!-- EXAM -->
     <div class="screen" id="exam-screen">
+
+      <!-- Start View -->
       <div id="exam-start-view">
         <h2>🎓 Botanik-Prüfung</h2>
-        <p style="color:var(--muted);margin-bottom:16px;line-height:1.5">
-          Erkennst du 10 Pflanzen allein am Foto?<br>Tippe den deutschen oder lateinischen Namen ein.
-        </p>
-        <div id="exam-level-info" style="background:var(--surface2);border-radius:14px;padding:14px;margin-bottom:20px;border:1px solid var(--border)">
+        <div id="exam-level-info" style="background:var(--surface2);border-radius:14px;padding:14px;margin-bottom:16px;border:1px solid var(--border)">
           <div style="font-weight:800;font-size:1rem;color:var(--accent2);margin-bottom:4px" id="exam-level-title">Lade…</div>
           <div style="font-size:.85rem;color:var(--muted)" id="exam-level-sub"></div>
         </div>
-        <button class="btn btn-primary" style="width:100%;margin-bottom:12px" onclick="startExam()">🏁 Prüfung starten</button>
-        <div id="exam-history"></div>
+        <div id="exam-lock-view" style="display:none">
+          <div class="exam-lock-box">
+            <div class="lock-icon">🔒</div>
+            <div class="lock-text">Prüfung erst ab 10 Pflanzen</div>
+            <div class="lock-sub" id="exam-lock-sub">Noch 10 Pflanzen fehlen</div>
+          </div>
+        </div>
+        <div id="exam-unlock-view">
+          <button class="btn btn-primary" style="width:100%;margin-bottom:12px;font-size:1.05rem;padding:16px" onclick="startExam()">🏁 Prüfung starten</button>
+          <p style="color:var(--muted);font-size:.82rem;text-align:center;margin-bottom:16px">5 Häppchen · Multiple Choice · Fun Facts · ~2 Minuten</p>
+          <div id="exam-history"></div>
+        </div>
       </div>
 
+      <!-- Active Question View -->
       <div id="exam-active-view" style="display:none">
-        <div class="exam-progress" id="exam-progress-text">Frage 1 von 10</div>
-        <div class="exam-photo-wrap">
-          <img id="exam-photo" src="" alt="" style="display:none">
-          <div class="no-photo" id="exam-no-photo">🌿</div>
+        <div class="exam-progress" id="exam-progress-text">Häppchen 1 von 5 · Frage 1 von 2</div>
+        <div id="exam-photo-wrap" class="exam-photo-wrap">
+          <img id="exam-photo" src="" alt="">
+          <div class="no-photo" id="exam-no-photo" style="display:none">🌿</div>
         </div>
-        <div class="exam-answer-row">
-          <input type="text" id="exam-input" placeholder="Pflanzennamen eingeben…"
-            onkeydown="if(event.key==='Enter')submitExamAnswer()">
-          <button class="btn btn-primary" onclick="submitExamAnswer()">✓</button>
-        </div>
+        <div id="exam-fact-wrap" class="exam-fact-card" style="display:none"></div>
+        <p class="exam-q-hint" id="exam-q-hint">Welche Pflanze ist das?</p>
+        <div class="exam-choices" id="exam-choices"></div>
         <div class="exam-feedback" id="exam-feedback"></div>
-        <button class="btn" id="exam-next-btn" style="display:none;width:100%;background:var(--accent);color:#fff" onclick="nextExamQuestion()">Weiter →</button>
+        <button class="btn btn-primary" id="exam-next-btn" style="display:none;width:100%;padding:14px" onclick="nextExamQuestion()">Weiter →</button>
       </div>
 
+      <!-- Chunk Complete View -->
+      <div id="exam-chunk-view" style="display:none">
+        <div style="text-align:center;padding:40px 16px 20px">
+          <div style="font-size:4rem;margin-bottom:10px" id="chunk-emoji">🎉</div>
+          <h2 style="font-size:1.4rem;font-weight:900;margin-bottom:6px" id="chunk-title">Häppchen 1 geschafft!</h2>
+          <div style="color:var(--muted);font-size:.9rem;margin-bottom:4px" id="chunk-score-text">2 von 2 richtig</div>
+          <div class="chunk-stars-row" id="chunk-stars-row"></div>
+          <button class="btn btn-primary" id="chunk-next-btn" style="width:100%;font-size:1.05rem;padding:16px;margin-top:20px" onclick="nextChunk()">Häppchen 2 starten →</button>
+        </div>
+      </div>
+
+      <!-- Final Result View -->
       <div id="exam-result-view" style="display:none">
         <div class="exam-result-box">
-          <div class="er-grade" id="exam-result-grade">1</div>
+          <div style="font-size:3rem;margin-bottom:8px" id="exam-result-emoji">🌟</div>
+          <div class="er-grade" id="exam-result-grade">10/10</div>
           <div class="er-label" id="exam-result-label">Ausgezeichnet!</div>
-          <div class="er-note" id="exam-result-note">10 von 10 richtig</div>
+          <div class="er-note" id="exam-result-note">100% richtig</div>
           <button class="btn btn-primary" style="margin-right:8px" onclick="showDiploma()">🎓 Urkunde</button>
           <button class="btn" onclick="switchTab('exam')">Neue Prüfung</button>
         </div>
@@ -1384,7 +1400,7 @@ function switchTab(tab) {
   if (tab === 'profil')  renderProfile();
   if (tab === 'archive') renderArchive();
   if (tab === 'learn')   initLearn();
-  if (tab === 'exam')    { renderExamLevelInfo(); document.getElementById('exam-start-view').style.display='block'; document.getElementById('exam-active-view').style.display='none'; document.getElementById('exam-result-view').style.display='none'; }
+  if (tab === 'exam')    { ['exam-active-view','exam-chunk-view','exam-result-view'].forEach(id=>document.getElementById(id).style.display='none'); document.getElementById('exam-start-view').style.display='block'; renderExamStartView(); }
   updatePlantNetKeyStatus();
   updateGroqKeyStatus();
 }
@@ -3237,105 +3253,196 @@ function pflanzenStatus(level) {
   return                            { label:'🌟 Meisterhaft', color:'#f59f00' };
 }
 
-// ── Exam ──────────────────────────────────────────────────────
-let examPlants = [], examIndex = 0, examCorrect = 0, examAnswers = [];
+// ── Exam (Multiple Choice, Häppchen) ─────────────────────────
+let examQuestions = [], examQIndex = 0, examCorrect = 0, examAnswers = [];
+const EXAM_CHUNK_SIZE   = 2;
+const EXAM_TOTAL_CHUNKS = 5;
+const EXAM_MIN_PLANTS   = 10;
+
+function _examShuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+  return a;
+}
+
+function _examExtractFunFact(plant) {
+  if (!plant.info) return null;
+  const m = plant.info.match(/\*\*\s*Fun\s*Facts?\s*:?\s*\*\*([\s\S]*)/i);
+  if (!m) return null;
+  const lines = m[1].split('\n')
+    .map(l => l.replace(/^[-•*\d.]+\s*/,'').replace(/\*\*/g,'').trim())
+    .filter(l => l.length > 15 && l.length < 200);
+  return lines.length ? lines[Math.floor(Math.random()*lines.length)] : null;
+}
+
+async function renderExamStartView() {
+  const all = await dbGetAll();
+  const locked = all.length < EXAM_MIN_PLANTS;
+  document.getElementById('exam-lock-view').style.display   = locked ? 'block' : 'none';
+  document.getElementById('exam-unlock-view').style.display = locked ? 'none'  : 'block';
+  if (locked) {
+    const need = EXAM_MIN_PLANTS - all.length;
+    document.getElementById('exam-lock-sub').textContent = 'Noch ' + need + ' Pflanze' + (need===1?'':'n') + ' fehlen';
+  }
+  renderExamLevelInfo();
+}
 
 async function startExam() {
   const all = await dbGetAll();
-  if (all.length < 5) { alert('Du brauchst mindestens 5 Pflanzen im Archiv für die Prüfung.'); return; }
-  const count = Math.min(10, all.length);
-  examPlants = all.sort(() => Math.random() - 0.5).slice(0, count);
-  examIndex = 0; examCorrect = 0; examAnswers = [];
-  document.getElementById('exam-start-view').style.display  = 'none';
-  document.getElementById('exam-result-view').style.display = 'none';
+  if (all.length < EXAM_MIN_PLANTS) return;
+  const pool = _examShuffle([...all]);
+  const chosen = pool.slice(0, 5);
+  examQuestions = [];
+  for (const plant of chosen) {
+    const wrongs = _examShuffle(all.filter(p => p.id !== plant.id)).slice(0,3).map(p => p.name);
+    // Q1: Photo → Name
+    examQuestions.push({ type:'photo', plant, choices:_examShuffle([plant.name,...wrongs]), correct:plant.name });
+    // Q2: Fun fact → Name, or fallback photo
+    const fact = _examExtractFunFact(plant);
+    if (fact) {
+      examQuestions.push({ type:'funfact', plant, fact, choices:_examShuffle([plant.name,...wrongs]), correct:plant.name });
+    } else {
+      const alt = _examShuffle(all.filter(p => p.id !== plant.id))[0];
+      if (alt) {
+        const aw = _examShuffle(all.filter(p => p.id !== alt.id)).slice(0,3).map(p => p.name);
+        examQuestions.push({ type:'photo', plant:alt, choices:_examShuffle([alt.name,...aw]), correct:alt.name });
+      }
+    }
+  }
+  examQIndex = 0; examCorrect = 0; examAnswers = [];
+  ['exam-start-view','exam-chunk-view','exam-result-view'].forEach(id => document.getElementById(id).style.display='none');
   document.getElementById('exam-active-view').style.display = 'block';
   showExamQuestion();
 }
 
 function showExamQuestion() {
-  if (examIndex >= examPlants.length) { finishExam(); return; }
-  const p = examPlants[examIndex];
-  const pct = examIndex + 1;
-  document.getElementById('exam-progress-text').textContent = 'Frage ' + pct + ' von ' + examPlants.length;
-  const photo = document.getElementById('exam-photo');
-  const noPhoto = document.getElementById('exam-no-photo');
-  if (p.photo) {
-    photo.src = p.photo; photo.style.display = 'block'; noPhoto.style.display = 'none';
-  } else {
-    photo.style.display = 'none'; noPhoto.style.display = 'block';
-  }
-  document.getElementById('exam-input').value = '';
-  document.getElementById('exam-input').disabled = false;
-  document.getElementById('exam-feedback').className = 'exam-feedback';
+  if (examQIndex >= examQuestions.length) { finishExam(); return; }
+  const q = examQuestions[examQIndex];
+  const chunkNum = Math.floor(examQIndex / EXAM_CHUNK_SIZE) + 1;
+  const posInChunk = (examQIndex % EXAM_CHUNK_SIZE) + 1;
+  document.getElementById('exam-progress-text').textContent =
+    'Häppchen ' + chunkNum + ' von ' + EXAM_TOTAL_CHUNKS + ' · Frage ' + posInChunk + ' von ' + EXAM_CHUNK_SIZE;
+
+  const fb = document.getElementById('exam-feedback');
+  fb.className = 'exam-feedback';
   document.getElementById('exam-next-btn').style.display = 'none';
-  setTimeout(() => document.getElementById('exam-input').focus(), 100);
+
+  const photoWrap = document.getElementById('exam-photo-wrap');
+  const factWrap  = document.getElementById('exam-fact-wrap');
+  const hint      = document.getElementById('exam-q-hint');
+
+  if (q.type === 'photo') {
+    photoWrap.style.display = 'flex';
+    factWrap.style.display  = 'none';
+    const img = document.getElementById('exam-photo');
+    const nop = document.getElementById('exam-no-photo');
+    if (q.plant.photo) { img.src = q.plant.photo; img.style.display='block'; nop.style.display='none'; }
+    else               { img.style.display='none'; nop.style.display='block'; }
+    hint.textContent = '🌿 Welche Pflanze ist das?';
+  } else {
+    photoWrap.style.display = 'none';
+    factWrap.style.display  = 'block';
+    factWrap.textContent    = '💡 ' + q.fact;
+    hint.textContent = '🔍 Zu welcher Pflanze gehört dieser Fun Fact?';
+  }
+
+  const choicesEl = document.getElementById('exam-choices');
+  choicesEl.innerHTML = '';
+  q.choices.forEach(choice => {
+    const btn = document.createElement('button');
+    btn.className = 'exam-choice-btn';
+    btn.textContent = choice;
+    btn.onclick = () => selectExamChoice(choice, q.correct);
+    choicesEl.appendChild(btn);
+  });
 }
 
-function submitExamAnswer() {
-  const input = document.getElementById('exam-input');
-  const answer = input.value.trim();
-  if (!answer) return;
-  const p = examPlants[examIndex];
-  const norm = s => (s||'').toLowerCase().replace(/[^a-zäöüß]/g,'');
-  const correct = norm(answer) === norm(p.name) ||
-                  (p.latin && norm(answer) === norm(p.latin)) ||
-                  (p.name && norm(p.name).includes(norm(answer)) && norm(answer).length > 3);
-  examAnswers.push({ plant: p, answer, correct });
-  if (correct) { examCorrect++; awardXP(5); }
+function selectExamChoice(chosen, correct) {
+  const q = examQuestions[examQIndex];
+  const ok = chosen === correct;
+  if (ok) { examCorrect++; awardXP(5); }
+  examAnswers.push({ plant: q.plant, chosen, correct: q.correct, isCorrect: ok });
+  document.querySelectorAll('.exam-choice-btn').forEach(btn => {
+    btn.disabled = true;
+    if (btn.textContent === correct)       btn.classList.add('correct');
+    else if (btn.textContent === chosen && !ok) btn.classList.add('wrong');
+  });
   const fb = document.getElementById('exam-feedback');
-  fb.className = 'exam-feedback ' + (correct ? 'correct' : 'wrong');
-  fb.textContent = correct
-    ? '✓ Richtig! ' + p.name
-    : '✗ Falsch. Gesuchte Pflanze: ' + p.name + (p.latin ? ' (' + p.latin + ')' : '');
-  input.disabled = true;
+  fb.className = 'exam-feedback ' + (ok ? 'correct' : 'wrong');
+  fb.textContent = ok ? '✓ Richtig!' : '✗ Gesuchte Pflanze: ' + correct;
   document.getElementById('exam-next-btn').style.display = 'block';
 }
 
 function nextExamQuestion() {
-  examIndex++;
-  showExamQuestion();
+  examQIndex++;
+  const chunkDone = examQIndex % EXAM_CHUNK_SIZE === 0;
+  const allDone   = examQIndex >= examQuestions.length;
+  if (allDone)       { showChunkComplete(true); }
+  else if (chunkDone){ showChunkComplete(false); }
+  else               { showExamQuestion(); }
+}
+
+function showChunkComplete(isLast) {
+  const chunkNum    = examQIndex / EXAM_CHUNK_SIZE;
+  const chunkSlice  = examAnswers.slice(-EXAM_CHUNK_SIZE);
+  const chunkRight  = chunkSlice.filter(a => a.isCorrect).length;
+  document.getElementById('exam-active-view').style.display = 'none';
+  document.getElementById('exam-chunk-view').style.display  = 'block';
+  const emoji = chunkRight === EXAM_CHUNK_SIZE ? '🎉' : chunkRight > 0 ? '👍' : '💪';
+  document.getElementById('chunk-emoji').textContent      = emoji;
+  document.getElementById('chunk-title').textContent      = 'Häppchen ' + chunkNum + ' geschafft!';
+  document.getElementById('chunk-score-text').textContent = chunkRight + ' von ' + EXAM_CHUNK_SIZE + ' richtig';
+  const starsEl = document.getElementById('chunk-stars-row');
+  starsEl.innerHTML = '';
+  for (let i = 0; i < EXAM_CHUNK_SIZE; i++) {
+    const s = document.createElement('span');
+    s.className = 'chunk-star'; s.textContent = i < chunkRight ? '⭐' : '☆';
+    starsEl.appendChild(s);
+  }
+  setTimeout(() => {
+    starsEl.querySelectorAll('.chunk-star').forEach((s,i) => {
+      if (i < chunkRight) setTimeout(() => { s.style.transform='scale(1.4)'; setTimeout(()=>s.style.transform='',220); }, i*160);
+    });
+  }, 100);
+  const nb = document.getElementById('chunk-next-btn');
+  nb.textContent = isLast ? '🏁 Ergebnis ansehen' : 'Häppchen ' + (chunkNum+1) + ' starten →';
+}
+
+function nextChunk() {
+  document.getElementById('exam-chunk-view').style.display = 'none';
+  if (examQIndex >= examQuestions.length) finishExam();
+  else { document.getElementById('exam-active-view').style.display='block'; showExamQuestion(); }
 }
 
 function finishExam() {
-  const total = examPlants.length;
-  const pct = examCorrect / total;
-  const grade = pct >= .95 ? 1 : pct >= .85 ? 2 : pct >= .70 ? 3 : pct >= .50 ? 4 : 5;
+  const total = examAnswers.length;
+  const pct   = examCorrect / Math.max(total,1);
+  const grade = pct>=.95?1:pct>=.85?2:pct>=.70?3:pct>=.50?4:5;
   const gradeLabel = ['','Sehr gut','Gut','Befriedigend','Ausreichend','Nicht bestanden'][grade];
   const gradeNote  = ['','1 – Sehr gut','2 – Gut','3 – Befriedigend','4 – Ausreichend','5 – Nicht bestanden'][grade];
-  const acadTitle  = ['','Dr. rer. nat.','Master of Plants','Bachelor of Botany','Botanik-Praktikant','Praktikant (weiter üben!)'][grade];
-
-  // Save exam result
   const exams = JSON.parse(localStorage.getItem('pflanz_exams') || '[]');
   exams.unshift({ date: Date.now(), grade, correct: examCorrect, total, gradeNote });
   if (exams.length > 20) exams.length = 20;
   localStorage.setItem('pflanz_exams', JSON.stringify(exams));
-
-  document.getElementById('exam-active-view').style.display = 'none';
+  ['exam-chunk-view','exam-active-view'].forEach(id => document.getElementById(id).style.display='none');
   document.getElementById('exam-result-view').style.display = 'block';
-  document.getElementById('exam-result-grade').textContent = grade;
+  const emojis = ['','🏆','🌟','🎓','👍','💪'];
+  document.getElementById('exam-result-emoji').textContent = emojis[grade]||'🌱';
+  document.getElementById('exam-result-grade').textContent = examCorrect+'/'+total;
   document.getElementById('exam-result-label').textContent = gradeLabel;
-  document.getElementById('exam-result-note').textContent  = examCorrect + ' von ' + total + ' richtig';
-
-  // Review list
+  document.getElementById('exam-result-note').textContent  = Math.round(pct*100)+'% richtig';
   let rv = '<h3 style="margin-bottom:10px;font-size:.95rem;color:var(--muted)">Alle Antworten:</h3>';
   for (const a of examAnswers) {
     rv += '<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:.85rem">' +
           '<span>' + esc(a.plant.name) + '</span>' +
-          '<span style="color:' + (a.correct ? 'var(--accent)' : 'var(--danger)') + '">' +
-          (a.correct ? '✓' : '✗ ' + esc(a.answer)) + '</span></div>';
+          '<span style="color:' + (a.isCorrect?'var(--accent)':'var(--danger)') + '">' +
+          (a.isCorrect ? '✓' : '✗ '+esc(a.chosen)) + '</span></div>';
   }
   document.getElementById('exam-result-review').innerHTML = rv;
-
-  // XP for exam
   if (grade <= 3) { awardXP(30); checkBadges(); }
   else if (grade === 4) { awardXP(10); }
-
-  // Auto-show diploma if passed
   if (grade <= 3) {
-    setTimeout(() => {
-      prepDiploma(grade, gradeNote, examCorrect, total);
-      document.getElementById('diploma-overlay').classList.add('show');
-    }, 800);
+    setTimeout(() => { prepDiploma(grade,gradeNote,examCorrect,total); document.getElementById('diploma-overlay').classList.add('show'); }, 800);
   }
 }
 
@@ -3351,8 +3458,8 @@ function prepDiploma(grade, gradeNote, correct, total) {
 }
 
 function showDiploma() {
-  const total = examPlants.length;
-  const pct = examCorrect / total;
+  const total = examAnswers.length;
+  const pct = examCorrect / Math.max(total,1);
   const grade = pct >= .95 ? 1 : pct >= .85 ? 2 : pct >= .70 ? 3 : pct >= .50 ? 4 : 5;
   const gradeNote = ['','1 – Sehr gut','2 – Gut','3 – Befriedigend','4 – Ausreichend','5 – Nicht bestanden'][grade];
   prepDiploma(grade, gradeNote, examCorrect, total);
@@ -3363,8 +3470,7 @@ function renderExamLevelInfo() {
   const xp = getXP();
   const lv = getCurrentLevel(xp);
   document.getElementById('exam-level-title').textContent = lv.icon + ' ' + lv.name;
-  document.getElementById('exam-level-sub').textContent =
-    'Prüfe dein Wissen und sammle XP für deinen botanischen Aufstieg!';
+  document.getElementById('exam-level-sub').textContent = '5 Häppchen · Multiple Choice · Fun Facts inklusive';
   renderExamHistory();
 }
 
@@ -3375,8 +3481,9 @@ function renderExamHistory() {
   let h = '<h3>Letzte Prüfungen</h3>';
   for (const e of exams.slice(0, 5)) {
     const d = new Date(e.date).toLocaleDateString('de-DE',{day:'2-digit',month:'short'});
+    const pctStr = e.total ? Math.round(e.correct/e.total*100)+'%' : '';
     h += '<div class="exam-hist-row"><span>' + d + ' · ' + e.correct + '/' + e.total + '</span>' +
-         '<span class="ehr-grade">Note ' + e.grade + '</span></div>';
+         '<span class="ehr-grade">' + pctStr + '</span></div>';
   }
   el.innerHTML = h;
 }
