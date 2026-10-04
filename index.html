@@ -1029,22 +1029,6 @@
 
       <hr style="border:none;border-top:1px solid var(--border);margin:24px 0">
 
-      <h2 style="margin-bottom:6px">🐙 GitHub Foto-Upload</h2>
-      <p class="settings-note" style="margin-bottom:12px">
-        Fotos werden automatisch in dein GitHub-Repository hochgeladen.<br>
-        Repository: <span style="color:var(--accent)">luxart-jonas/pflanzen-erkennen-lernen</span><br>
-        Token unter <span style="color:var(--accent)">github.com → Settings → Developer settings → Personal access tokens</span> erstellen (Scope: <code>repo</code>).
-      </p>
-      <label>GitHub Personal Access Token</label>
-      <div class="api-key-row">
-        <input type="text" id="github-token-input" placeholder="ghp_…" autocomplete="new-password" autocorrect="off" autocapitalize="off" spellcheck="false" style="-webkit-text-security:disc">
-        <button class="btn btn-primary btn-sm" onclick="saveGithubToken()">Speichern</button>
-      </div>
-      <div id="github-token-status" class="key-none">Kein GitHub Token gespeichert</div>
-      <button class="btn btn-danger" style="margin-top:12px" onclick="deleteGithubToken()">Token löschen</button>
-
-      <hr style="border:none;border-top:1px solid var(--border);margin:24px 0">
-
       <h2 style="margin-bottom:6px">📦 Daten sichern</h2>
       <p class="settings-note">Exportiere alle Pflanzen als Datei – z. B. zum Umzug auf ein neues Gerät oder nach Netlify.</p>
 
@@ -1082,9 +1066,9 @@
       </div>
 
       <!-- Active Question View -->
-      <div id="exam-active-view" style="display:none">
-        <div style="display:flex;justify-content:flex-end;margin-bottom:4px">
-          <button onclick="exitExam()" style="background:none;border:none;color:var(--muted);font-size:.82rem;cursor:pointer;padding:4px 8px;border-radius:8px;font-family:inherit">✕ Prüfung beenden</button>
+      <div id="exam-active-view" style="display:none;padding-bottom:env(safe-area-inset-bottom,16px)">
+        <div style="display:flex;justify-content:flex-end;margin-bottom:8px">
+          <button onclick="exitExam()" style="background:rgba(0,0,0,.06);border:1px solid var(--border);color:var(--muted);font-size:.85rem;cursor:pointer;padding:7px 14px;border-radius:20px;font-family:inherit;font-weight:600">✕ Beenden</button>
         </div>
         <div class="exam-progress" id="exam-progress-text">Häppchen 1 von 5 · Frage 1 von 2</div>
         <div id="exam-photo-wrap" class="exam-photo-wrap">
@@ -1095,13 +1079,13 @@
         <p class="exam-q-hint" id="exam-q-hint">Welche Pflanze ist das?</p>
         <div class="exam-choices" id="exam-choices"></div>
         <div class="exam-feedback" id="exam-feedback"></div>
-        <button class="btn btn-primary" id="exam-next-btn" style="display:none;width:100%;padding:14px" onclick="nextExamQuestion()">Weiter →</button>
+        <button class="btn btn-primary" id="exam-next-btn" style="display:none;width:100%;padding:14px;margin-bottom:16px" onclick="nextExamQuestion()">Weiter →</button>
       </div>
 
       <!-- Chunk Complete View -->
-      <div id="exam-chunk-view" style="display:none">
-        <div style="display:flex;justify-content:flex-end;margin-bottom:4px">
-          <button onclick="exitExam()" style="background:none;border:none;color:var(--muted);font-size:.82rem;cursor:pointer;padding:4px 8px;border-radius:8px;font-family:inherit">✕ Prüfung beenden</button>
+      <div id="exam-chunk-view" style="display:none;padding-bottom:env(safe-area-inset-bottom,16px)">
+        <div style="display:flex;justify-content:flex-end;margin-bottom:8px">
+          <button onclick="exitExam()" style="background:rgba(0,0,0,.06);border:1px solid var(--border);color:var(--muted);font-size:.85rem;cursor:pointer;padding:7px 14px;border-radius:20px;font-family:inherit;font-weight:600">✕ Beenden</button>
         </div>
         <div style="text-align:center;padding:20px 16px 20px">
           <div style="font-size:4rem;margin-bottom:10px" id="chunk-emoji">🎉</div>
