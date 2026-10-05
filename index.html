@@ -265,9 +265,10 @@
   #learn-name-area {
     background: var(--surface); border: 1.5px solid var(--border);
     border-radius: var(--radius); padding: 18px; text-align: center;
-    min-height: 70px; display: flex; align-items: center; justify-content: center;
+    min-height: 70px; display: flex; flex-direction: column; align-items: center; justify-content: center;
   }
   #learn-name-revealed { font-family: var(--ff-head); font-size: 1.6rem; color: var(--accent2); display: none; }
+  #learn-latin-revealed { font-size: .85rem; font-style: italic; color: var(--muted); display: none; margin-top: 2px; }
   .learn-grade-row { display: flex; gap: 12px; }
   .learn-grade-row .btn { flex: 1; }
 
@@ -741,7 +742,7 @@
       </div>
       <span id="xp-label" style="white-space:nowrap">0 XP</span>
     </div>
-    <button onclick="switchTab('settings')" id="tab-settings-btn" title="Einstellungen v3.51" style="background:none;border:none;font-size:1.5rem;cursor:pointer;padding:4px 6px;color:var(--accent2);flex-shrink:0">⚙️<span style="font-size:.45rem;color:var(--muted);vertical-align:super;margin-left:1px;font-weight:600;letter-spacing:.01em">3.51</span></button>
+    <button onclick="switchTab('settings')" id="tab-settings-btn" title="Einstellungen v3.52" style="background:none;border:none;font-size:1.5rem;cursor:pointer;padding:4px 6px;color:var(--accent2);flex-shrink:0">⚙️<span style="font-size:.45rem;color:var(--muted);vertical-align:super;margin-left:1px;font-weight:600;letter-spacing:.01em">3.52</span></button>
   </div>
 
   <nav id="nav">
@@ -936,6 +937,7 @@
         </div>
         <div id="learn-name-area">
           <span id="learn-name-revealed"></span>
+          <span id="learn-latin-revealed"></span>
         </div>
         <button class="btn btn-secondary" id="btn-reveal" onclick="revealName()" style="width:100%;margin-top:4px">🔍 Auflösen</button>
         <div class="learn-grade-row" id="grade-row" style="display:none">
@@ -983,7 +985,7 @@
     <!-- SETTINGS -->
     <div class="screen" id="settings-screen">
       <h2>⚙️ Einstellungen</h2>
-      <p style="color:var(--muted);font-size:.8rem;margin-bottom:12px;">Version 3.51 — PlantNet + DeepSeek</p>
+      <p style="color:var(--muted);font-size:.8rem;margin-bottom:12px;">Version 3.52 — PlantNet + DeepSeek</p>
 
       <!-- Simulations-Button -->
       <button onclick="openSim()" style="width:100%;padding:14px;background:linear-gradient(135deg,#1e3a2f,#2d5a3d);color:#7ed957;border:1.5px solid #3aaa55;border-radius:14px;font-size:.95rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:16px;letter-spacing:.03em">
@@ -1728,7 +1730,7 @@ async function _loadAiEnrichment(germanName, latinName) {
   try {
     const res = await aiChat([{ role: 'user', content:
       'Gib mir Informationen zur Pflanze "' + germanName + '"' + (latinName ? ' (' + latinName + ')' : '') +
-      ' auf Deutsch.\n\n**Bestimmungsmerkmale:**\nListe NUR die zutreffenden Merkmale tabellarisch im Format "Punkt: Wert" auf — eine Zeile pro Merkmal. Prüfe folgende Punkte und nenne nur die, die für diese Pflanze relevant sind (z.B. Milchsaft nur wenn vorhanden, sonst weglassen):\nPflanzenfamilie (deutscher Trivialname, z.B. Korbblütler, Lippenblütler, Kreuzblütler, Doldenblütler, Hahnenfußgewächse), Blütenfarbe, Blütenform, Anzahl der Kronblätter, Blattstellung, Blattform, Blattrand, Behaarung, Geruch/Geschmack, Milchsaft, Standort.\nKurz und stichwortartig, kein Fließtext.\n\n**Fun Facts:**\n3-4 kurze Fun Facts auf Deutsch. Schreibe: modern, lebendig, seriös und historisch korrekt. Keine trockenen Kunstgeschichte-Vorlesungen, sondern überraschende Details die im Gedächtnis bleiben. Kurz und prägnant.\n\nWICHTIG: Verwende **ausschließlich** für die beiden Überschriften "**Bestimmungsmerkmale:**" und "**Fun Facts:**". Markiere innerhalb der Inhalte KEIN einziges Wort fett.'
+      ' auf Deutsch.\n\n**Bestimmungsmerkmale:**\nListe NUR die zutreffenden Merkmale tabellarisch im Format "Punkt: Wert" auf — eine Zeile pro Merkmal. Prüfe folgende Punkte und nenne nur die, die für diese Pflanze relevant sind (z.B. Milchsaft nur wenn vorhanden, sonst weglassen):\nPflanzenfamilie (deutscher Trivialname, z.B. Korbblütler, Lippenblütler, Kreuzblütler, Doldenblütler, Hahnenfußgewächse), Blütenfarbe, Blütenform, Anzahl der Kronblätter, Blattstellung, Blattform, Blattrand, Behaarung, Geruch/Geschmack, Milchsaft, Standort.\nKurz und stichwortartig, kein Fließtext.\n\n**Fun Facts:**\n3-4 kurze Fun Facts auf Deutsch. Schreibe: modern, lebendig, seriös und historisch korrekt. Keine trockenen Kunstgeschichte-Vorlesungen, sondern überraschende Details die im Gedächtnis bleiben. Kurz und prägnant.\nSEHR WICHTIG: Diese Fun Facts werden später als Rate-Frage verwendet ("Zu welcher Pflanze passt dieser Fun Fact?"). Nenne deshalb in JEDEM Fun Fact NIEMALS den deutschen oder lateinischen Namen der Pflanze — auch nicht als Wortteil (z.B. nicht "Kamillentee", "Löwenzahnwurzel" o.ä.). Formuliere jeden Fakt so, dass er ohne den Namen funktioniert, z.B. "Ihr Tee wirkt entzündungshemmend" statt "Kamillentee wirkt entzündungshemmend". Verwende statt des Namens notfalls "Diese Pflanze" oder ein Pronomen.\n\nWICHTIG: Verwende **ausschließlich** für die beiden Überschriften "**Bestimmungsmerkmale:**" und "**Fun Facts:**". Markiere innerhalb der Inhalte KEIN einziges Wort fett.'
     }], 1536);
     const data = await res.json();
     if (!res.ok) throw new Error(data.error?.message);
@@ -1778,7 +1780,7 @@ async function generatePlantInfo(plantId) {
   const p = await dbGet(plantId); if (!p) return null;
 
   try {
-    const res = await aiChat([{ role: 'user', content: 'Gib mir Informationen zur Pflanze "' + p.name + '"' + (p.latin ? ' (' + p.latin + ')' : '') + ' auf Deutsch.\n\n**Bestimmungsmerkmale:**\nListe NUR die zutreffenden Merkmale tabellarisch im Format "Punkt: Wert" auf — eine Zeile pro Merkmal. Prüfe folgende Punkte und nenne nur die, die für diese Pflanze relevant sind (z.B. Milchsaft nur wenn vorhanden, sonst weglassen):\nPflanzenfamilie (deutscher Trivialname, z.B. Korbblütler, Lippenblütler, Kreuzblütler, Doldenblütler, Hahnenfußgewächse), Blütenfarbe, Blütenform, Anzahl der Kronblätter, Blattstellung, Blattform, Blattrand, Behaarung, Geruch/Geschmack, Milchsaft, Standort.\nKurz und stichwortartig, kein Fließtext.\n\n**Fun Facts:**\n3-4 kurze Fun Facts auf Deutsch. Schreibe: modern, lebendig, seriös und historisch korrekt. Keine trockenen Kunstgeschichte-Vorlesungen, sondern überraschende Details die im Gedächtnis bleiben. Kurz und prägnant.\n\nWICHTIG: Verwende **ausschließlich** für die beiden Überschriften "**Bestimmungsmerkmale:**" und "**Fun Facts:**". Markiere innerhalb der Inhalte KEIN einziges Wort, keine Jahreszahl und keinen Begriff fett — auch nicht zur Betonung.' }], 1536);
+    const res = await aiChat([{ role: 'user', content: 'Gib mir Informationen zur Pflanze "' + p.name + '"' + (p.latin ? ' (' + p.latin + ')' : '') + ' auf Deutsch.\n\n**Bestimmungsmerkmale:**\nListe NUR die zutreffenden Merkmale tabellarisch im Format "Punkt: Wert" auf — eine Zeile pro Merkmal. Prüfe folgende Punkte und nenne nur die, die für diese Pflanze relevant sind (z.B. Milchsaft nur wenn vorhanden, sonst weglassen):\nPflanzenfamilie (deutscher Trivialname, z.B. Korbblütler, Lippenblütler, Kreuzblütler, Doldenblütler, Hahnenfußgewächse), Blütenfarbe, Blütenform, Anzahl der Kronblätter, Blattstellung, Blattform, Blattrand, Behaarung, Geruch/Geschmack, Milchsaft, Standort.\nKurz und stichwortartig, kein Fließtext.\n\n**Fun Facts:**\n3-4 kurze Fun Facts auf Deutsch. Schreibe: modern, lebendig, seriös und historisch korrekt. Keine trockenen Kunstgeschichte-Vorlesungen, sondern überraschende Details die im Gedächtnis bleiben. Kurz und prägnant.\nSEHR WICHTIG: Diese Fun Facts werden später als Rate-Frage verwendet ("Zu welcher Pflanze passt dieser Fun Fact?"). Nenne deshalb in JEDEM Fun Fact NIEMALS den deutschen oder lateinischen Namen der Pflanze — auch nicht als Wortteil (z.B. nicht "Kamillentee", "Löwenzahnwurzel" o.ä.). Formuliere jeden Fakt so, dass er ohne den Namen funktioniert, z.B. "Ihr Tee wirkt entzündungshemmend" statt "Kamillentee wirkt entzündungshemmend". Verwende statt des Namens notfalls "Diese Pflanze" oder ein Pronomen.\n\nWICHTIG: Verwende **ausschließlich** für die beiden Überschriften "**Bestimmungsmerkmale:**" und "**Fun Facts:**". Markiere innerhalb der Inhalte KEIN einziges Wort, keine Jahreszahl und keinen Begriff fett — auch nicht zur Betonung.' }], 1536);
     const data = await res.json();
     if (!res.ok) throw new Error(data.error?.message);
     const choice = data.choices?.[0];
@@ -1993,6 +1995,8 @@ function showLearnCard() {
   document.getElementById('learn-img-wrap').style.display = p.photo ? 'block' : 'none';
   document.getElementById('learn-name-revealed').style.display = 'none';
   document.getElementById('learn-name-revealed').textContent = p.name;
+  document.getElementById('learn-latin-revealed').style.display = 'none';
+  document.getElementById('learn-latin-revealed').textContent = p.latin || '';
   document.getElementById('btn-reveal').style.display = 'block';
   document.getElementById('grade-row').style.display = 'none';
   document.getElementById('delete-row').style.display = 'none';
@@ -2000,6 +2004,9 @@ function showLearnCard() {
 }
 function revealName() {
   document.getElementById('learn-name-revealed').style.display = 'block';
+  if (document.getElementById('learn-latin-revealed').textContent) {
+    document.getElementById('learn-latin-revealed').style.display = 'block';
+  }
   document.getElementById('btn-reveal').style.display = 'none';
   document.getElementById('grade-row').style.display = 'flex';
   document.getElementById('delete-row').style.display = 'block';
@@ -3387,12 +3394,13 @@ async function startExam() {
   const names3 = plant => _examDistinctWrong(plant.name, all.filter(p => p.id !== plant.id), p => p.name);
 
   // Drei Kategorien mit fester Gewichtung (Vorgabe: 30% reines Namen-
-  // Abfragen per Foto, 50% Fun Facts in beide Richtungen, 20% schwerere
-  // botanische Fragen — Merkmale/Pflanzenfamilie & lateinischer Name).
-  // Innerhalb jeder Kategorie wird gemischt, die Kategorien selbst sind
-  // nach Schwierigkeit sortiert (leicht → schwer), nach dem Prinzip von
-  // "Wer wird Millionär".
-  const catName = [], catFact = [], catHard = [];
+  // Abfragen per Foto, 10% lateinischer Name, 60% Wissen — Fun Facts in
+  // beide Richtungen + Merkmale/Pflanzenfamilie). Die Reihenfolge der
+  // fertigen Prüfung wird komplett gewürfelt (siehe unten) statt in
+  // Blöcken nach Kategorie, damit es nicht "erst alle Namen, dann erst
+  // alle Fun Facts" abläuft. Die steigende XP pro Frage (siehe
+  // selectExamChoice) sorgt trotzdem für den Wer-wird-Millionär-Ansporn.
+  const catName = [], catLatin = [], catWissen = [];
   for (const plant of all) {
     catName.push({ type:'photo', plant, choices:_examShuffle([plant.name, ...names3(plant)]), correct:plant.name });
 
@@ -3400,56 +3408,76 @@ async function startExam() {
     // für die Richtung Fakt→Name; für Name→Fakt ist jeder Fakt ok.
     const safeFact = _examExtractFunFact(plant, true);
     if (safeFact) {
-      catFact.push({ type:'funfact', plant, fact:safeFact, choices:_examShuffle([plant.name, ...names3(plant)]), correct:plant.name });
+      catWissen.push({ type:'funfact', plant, fact:safeFact, choices:_examShuffle([plant.name, ...names3(plant)]), correct:plant.name });
     }
     const anyFact = _examExtractFunFact(plant, false);
     if (anyFact) {
       const otherFacts = _examDistinctWrong(anyFact, all.filter(p => p.id !== plant.id), p => _examExtractFunFact(p, false));
       if (otherFacts.length === 3) {
-        catFact.push({ type:'name2fact', plant, choices:_examShuffle([anyFact, ...otherFacts]), correct:anyFact });
+        catWissen.push({ type:'name2fact', plant, choices:_examShuffle([anyFact, ...otherFacts]), correct:anyFact });
       }
     }
 
-    // Schwerere botanische Fragen: Merkmale (inkl. Pflanzenfamilie) & Latein
+    // Merkmale (inkl. Pflanzenfamilie, z.B. "Korbblütler") — zählt mit zu
+    // "Wissen", nicht zu den Namens- oder Latein-Fragen.
     const merks = _examExtractMerkmale(plant);
     if (merks.length) {
       const merk = merks[Math.floor(Math.random()*merks.length)];
-      catHard.push({ type:'merkmal', plant, merk, choices:_examShuffle([plant.name, ...names3(plant)]), correct:plant.name });
+      catWissen.push({ type:'merkmal', plant, merk, choices:_examShuffle([plant.name, ...names3(plant)]), correct:plant.name });
       const otherMerks = _examDistinctWrong(merk.text, all.filter(p => p.id !== plant.id), p => {
         const ms = _examExtractMerkmale(p);
         return ms.length ? ms[Math.floor(Math.random()*ms.length)].text : null;
       });
       if (otherMerks.length === 3) {
-        catHard.push({ type:'name2merkmal', plant, choices:_examShuffle([merk.text, ...otherMerks]), correct:merk.text });
+        catWissen.push({ type:'name2merkmal', plant, choices:_examShuffle([merk.text, ...otherMerks]), correct:merk.text });
       }
     }
+    // Lateinischer Name — eigene, kleine Kategorie (10%), nicht Teil von "Wissen".
     if (plant.latin) {
       const otherLatins = _examDistinctWrong(plant.latin, all.filter(p => p.id !== plant.id && p.latin), p => p.latin);
       if (otherLatins.length === 3) {
-        catHard.push({ type:'latin2name', plant, choices:_examShuffle([plant.name, ...names3(plant)]), correct:plant.name });
-        catHard.push({ type:'name2latin', plant, choices:_examShuffle([plant.latin, ...otherLatins]), correct:plant.latin });
+        catLatin.push({ type:'latin2name', plant, choices:_examShuffle([plant.name, ...names3(plant)]), correct:plant.name });
+        catLatin.push({ type:'name2latin', plant, choices:_examShuffle([plant.latin, ...otherLatins]), correct:plant.latin });
       }
     }
   }
-  const nameArr = _examShuffle(catName), factArr = _examShuffle(catFact), hardArr = _examShuffle(catHard);
+  const nameArr = _examShuffle(catName), latinArr = _examShuffle(catLatin), wissenArr = _examShuffle(catWissen);
 
-  const wantName = Math.round(target*0.30), wantFact = Math.round(target*0.50);
-  const wantHard = target - wantName - wantFact;
-  let chosen = [...nameArr.slice(0,wantName), ...factArr.slice(0,wantFact), ...hardArr.slice(0,wantHard)];
-  if (chosen.length < target) {
-    const leftover = _examShuffle([...nameArr.slice(wantName), ...factArr.slice(wantFact), ...hardArr.slice(wantHard)]);
-    chosen = chosen.concat(leftover.slice(0, target - chosen.length));
+  // Vorgabe: 30% Name, 10% Latein, 60% Wissen (Fun Facts + Merkmale) — mit
+  // "größter-Rest"-Verfahren exakt aufgeteilt. Fehlt einer Kategorie
+  // Material (z.B. noch keine Fun Facts generiert), wird der Fehlbetrag aus
+  // einem gemeinsamen Rest-Pool aller Kategorien aufgefüllt, statt dass
+  // eine einzelne Kategorie (meist Latein, weil es 2 Fragen pro Pflanze
+  // erzeugt) die ganze Prüfung flutet.
+  const groups = [
+    { key:'name',   arr:nameArr,   weight:0.30 },
+    { key:'latin',  arr:latinArr,  weight:0.10 },
+    { key:'wissen', arr:wissenArr, weight:0.60 },
+  ];
+  const rawWants = groups.map(g => target * g.weight);
+  const want = {};
+  let used = 0;
+  groups.forEach((g,i) => { want[g.key] = Math.floor(rawWants[i]); used += want[g.key]; });
+  const byFrac = groups.map((g,i) => ({ key:g.key, frac: rawWants[i] - Math.floor(rawWants[i]) })).sort((a,b)=>b.frac-a.frac);
+  for (let i = 0; i < target - used; i++) want[byFrac[i % byFrac.length].key]++;
+
+  let chosen = [];
+  let deficit = 0;
+  groups.forEach(g => {
+    const take = Math.min(want[g.key], g.arr.length);
+    chosen.push(...g.arr.slice(0, take));
+    deficit += want[g.key] - take;
+  });
+  if (deficit > 0) {
+    const pool = _examShuffle(groups.flatMap(g => g.arr.slice(Math.min(want[g.key], g.arr.length))));
+    chosen = chosen.concat(pool.slice(0, deficit));
   }
   chosen = chosen.slice(0, target);
 
-  // Innerhalb der Kategorien ist schon leicht→schwer sortiert (Name-Fragen
-  // zuerst, dann Fun Facts, dann die harten Fragen zum Schluss) — das
-  // ergibt den Wer-wird-Millionär-Verlauf. Nur die Reihenfolge INNERHALB
-  // jeder Kategorie wird zusätzlich gemischt, damit es nicht stur 3x
-  // Foto-Fragen in Folge gibt:
-  const n1 = Math.min(wantName, chosen.length);
-  const n2 = Math.min(wantFact, Math.max(0, chosen.length - n1));
-  chosen = [..._examShuffle(chosen.slice(0,n1)), ..._examShuffle(chosen.slice(n1,n1+n2)), ..._examShuffle(chosen.slice(n1+n2))];
+  // Komplett durchmischen — keine Blöcke mehr ("erst alle Namen, dann erst
+  // die Fun Facts"), sondern Namen/Latein/Wissen über die ganze Prüfung
+  // verteilt zufällig gewürfelt.
+  chosen = _examShuffle(chosen);
 
   // Gleiche Pflanze nie zwei Fragen direkt hintereinander — das war der
   // Hauptgrund, warum sich die Prüfung "doppelt" angefühlt hat.
