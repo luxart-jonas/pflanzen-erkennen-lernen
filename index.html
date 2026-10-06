@@ -742,7 +742,7 @@
       </div>
       <span id="xp-label" style="white-space:nowrap">0 XP</span>
     </div>
-    <button onclick="switchTab('settings')" id="tab-settings-btn" title="Einstellungen v3.56" style="background:none;border:none;font-size:1.5rem;cursor:pointer;padding:4px 6px;color:var(--accent2);flex-shrink:0">⚙️<span style="font-size:.45rem;color:var(--muted);vertical-align:super;margin-left:1px;font-weight:600;letter-spacing:.01em">3.56</span></button>
+    <button onclick="switchTab('settings')" id="tab-settings-btn" title="Einstellungen v3.57" style="background:none;border:none;font-size:1.5rem;cursor:pointer;padding:4px 6px;color:var(--accent2);flex-shrink:0">⚙️<span style="font-size:.45rem;color:var(--muted);vertical-align:super;margin-left:1px;font-weight:600;letter-spacing:.01em">3.57</span></button>
   </div>
 
   <nav id="nav">
@@ -991,7 +991,7 @@
     <!-- SETTINGS -->
     <div class="screen" id="settings-screen">
       <h2>⚙️ Einstellungen</h2>
-      <p style="color:var(--muted);font-size:.8rem;margin-bottom:12px;">Version 3.56 — PlantNet + DeepSeek</p>
+      <p style="color:var(--muted);font-size:.8rem;margin-bottom:12px;">Version 3.57 — PlantNet + DeepSeek</p>
 
       <!-- Simulations-Button -->
       <button onclick="openSim()" style="width:100%;padding:14px;background:linear-gradient(135deg,#1e3a2f,#2d5a3d);color:#7ed957;border:1.5px solid #3aaa55;border-radius:14px;font-size:.95rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:16px;letter-spacing:.03em">
@@ -1778,6 +1778,13 @@ async function _loadAiEnrichment(germanName, latinName) {
     const funfactsMatch = text.match(/\*\*\s*Fun\s*Facts\s*:?\s*\*\*([\s\S]*)/i);
     let html = '';
     const merkmaleBody = merkmaleMatch ? stripBold(merkmaleMatch[1]) : '';
+    const funfactsBody = funfactsMatch ? stripBold(funfactsMatch[1]) : '';
+    if (funfactsBody) {
+      html += '<h3>Fun Facts</h3>';
+      funfactsBody.split('\n').filter(l => l.trim()).forEach(l => {
+        html += '<p>' + l.replace(/^[-•*\d.]+\s*/,'') + '</p>';
+      });
+    }
     if (merkmaleBody) {
       html += '<h3>Bestimmungsmerkmale</h3><table class="merkmale-table">';
       merkmaleBody.split('\n').filter(l => l.trim() && l.includes(':')).forEach(row => {
@@ -1785,13 +1792,6 @@ async function _loadAiEnrichment(germanName, latinName) {
         html += '<tr><td class="merkmal-key">' + k.trim().replace(/^[-•*]\s*/,'') + '</td><td class="merkmal-val">' + rest.join(':').trim() + '</td></tr>';
       });
       html += '</table>';
-    }
-    const funfactsBody = funfactsMatch ? stripBold(funfactsMatch[1]) : '';
-    if (funfactsBody) {
-      html += '<h3>Fun Facts</h3>';
-      funfactsBody.split('\n').filter(l => l.trim()).forEach(l => {
-        html += '<p>' + l.replace(/^[-•*\d.]+\s*/,'') + '</p>';
-      });
     }
     if (html) infoHtml = html;
   } catch(e) { console.warn('Enrichment error:', e.message); }
@@ -1836,8 +1836,17 @@ async function generatePlantInfo(plantId) {
     const merkmaleMatch = text.match(/\*\*\s*Bestimmungsmerkmale\s*:?\s*\*\*([\s\S]*?)(?=\*\*\s*Fun\s*Facts|$)/i);
     const funfactsMatch = text.match(/\*\*\s*Fun\s*Facts\s*:?\s*\*\*([\s\S]*)/i);
 
+    // Anzeige-Reihenfolge (auf Nutzerwunsch): zuerst Fun Facts, dann die
+    // Bestimmungsmerkmale-Tabelle. Die Prüfungs-Extraktoren (_examExtractFunFact /
+    // _examExtractMerkmale) greifen auf die jeweilige Überschrift bis zur
+    // nächsten bzw. bis zum Ende zu und funktionieren in beiden Reihenfolgen.
     let html = '';
     const merkmaleBody = merkmaleMatch ? stripBold(merkmaleMatch[1]) : '';
+    const funfactsBody = funfactsMatch ? stripBold(funfactsMatch[1]) : '';
+    if (funfactsBody) {
+      html += '<h3>Fun Facts</h3>';
+      funfactsBody.split('\n').filter(l => l.trim()).forEach(l => { html += '<p>' + l.replace(/^[-•*\d.]+\s*/, '') + '</p>'; });
+    }
     if (merkmaleBody) {
       html += '<h3>Bestimmungsmerkmale</h3>';
       const rows = merkmaleBody.split('\n').filter(l => l.trim() && l.includes(':'));
@@ -1847,11 +1856,6 @@ async function generatePlantInfo(plantId) {
         html += '<tr><td class="merkmal-key">' + k.trim().replace(/^[-•*]\s*/, '') + '</td><td class="merkmal-val">' + rest.join(':').trim() + '</td></tr>';
       });
       html += '</table>';
-    }
-    const funfactsBody = funfactsMatch ? stripBold(funfactsMatch[1]) : '';
-    if (funfactsBody) {
-      html += '<h3>Fun Facts</h3>';
-      funfactsBody.split('\n').filter(l => l.trim()).forEach(l => { html += '<p>' + l.replace(/^[-•*\d.]+\s*/, '') + '</p>'; });
     }
 
     if (!merkmaleBody && !funfactsBody) {
@@ -3742,8 +3746,21 @@ function finishExam() {
   const total = examAnswers.length;
   const pct   = examCorrect / Math.max(total,1);
   const tier  = _examTier(pct);
-  const exams = JSON.parse(localStorage.getItem('pflanz_exams') || '[]');
-  exams.unshift({ date: Date.now(), emoji: tier.emoji, tier: tier.title, stars: tier.stars, correct: examCorrect, total });
+  // Bei mehreren Prüfungen am selben Tag (z.B. per Entwickler-Schalter) wird
+  // nur das beste Ergebnis des Tages in der Liste behalten, damit Historie
+  // und Urkunden-Galerie nicht mit Wiederholungsversuchen zuwachsen.
+  let exams = JSON.parse(localStorage.getItem('pflanz_exams') || '[]');
+  const newEntry = { date: Date.now(), emoji: tier.emoji, tier: tier.title, stars: tier.stars, correct: examCorrect, total };
+  const todayStr = new Date().toDateString();
+  const todayIdx = exams.findIndex(e => new Date(e.date).toDateString() === todayStr);
+  if (todayIdx >= 0) {
+    const old = exams[todayIdx];
+    const oldPct = old.total ? old.correct / old.total : 0;
+    exams.splice(todayIdx, 1);
+    exams.unshift(oldPct > pct ? old : newEntry);
+  } else {
+    exams.unshift(newEntry);
+  }
   if (exams.length > 20) exams.length = 20;
   localStorage.setItem('pflanz_exams', JSON.stringify(exams));
   ['exam-chunk-view','exam-active-view'].forEach(id => document.getElementById(id).style.display='none');
