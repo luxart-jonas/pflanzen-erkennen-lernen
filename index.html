@@ -742,7 +742,7 @@
       </div>
       <span id="xp-label" style="white-space:nowrap">0 XP</span>
     </div>
-    <button onclick="switchTab('settings')" id="tab-settings-btn" title="Einstellungen v3.52" style="background:none;border:none;font-size:1.5rem;cursor:pointer;padding:4px 6px;color:var(--accent2);flex-shrink:0">⚙️<span style="font-size:.45rem;color:var(--muted);vertical-align:super;margin-left:1px;font-weight:600;letter-spacing:.01em">3.52</span></button>
+    <button onclick="switchTab('settings')" id="tab-settings-btn" title="Einstellungen v3.53" style="background:none;border:none;font-size:1.5rem;cursor:pointer;padding:4px 6px;color:var(--accent2);flex-shrink:0">⚙️<span style="font-size:.45rem;color:var(--muted);vertical-align:super;margin-left:1px;font-weight:600;letter-spacing:.01em">3.53</span></button>
   </div>
 
   <nav id="nav">
@@ -985,7 +985,7 @@
     <!-- SETTINGS -->
     <div class="screen" id="settings-screen">
       <h2>⚙️ Einstellungen</h2>
-      <p style="color:var(--muted);font-size:.8rem;margin-bottom:12px;">Version 3.52 — PlantNet + DeepSeek</p>
+      <p style="color:var(--muted);font-size:.8rem;margin-bottom:12px;">Version 3.53 — PlantNet + DeepSeek</p>
 
       <!-- Simulations-Button -->
       <button onclick="openSim()" style="width:100%;padding:14px;background:linear-gradient(135deg,#1e3a2f,#2d5a3d);color:#7ed957;border:1.5px solid #3aaa55;border-radius:14px;font-size:.95rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:16px;letter-spacing:.03em">
@@ -1730,7 +1730,7 @@ async function _loadAiEnrichment(germanName, latinName) {
   try {
     const res = await aiChat([{ role: 'user', content:
       'Gib mir Informationen zur Pflanze "' + germanName + '"' + (latinName ? ' (' + latinName + ')' : '') +
-      ' auf Deutsch.\n\n**Bestimmungsmerkmale:**\nListe NUR die zutreffenden Merkmale tabellarisch im Format "Punkt: Wert" auf — eine Zeile pro Merkmal. Prüfe folgende Punkte und nenne nur die, die für diese Pflanze relevant sind (z.B. Milchsaft nur wenn vorhanden, sonst weglassen):\nPflanzenfamilie (deutscher Trivialname, z.B. Korbblütler, Lippenblütler, Kreuzblütler, Doldenblütler, Hahnenfußgewächse), Blütenfarbe, Blütenform, Anzahl der Kronblätter, Blattstellung, Blattform, Blattrand, Behaarung, Geruch/Geschmack, Milchsaft, Standort.\nKurz und stichwortartig, kein Fließtext.\n\n**Fun Facts:**\n3-4 kurze Fun Facts auf Deutsch. Schreibe: modern, lebendig, seriös und historisch korrekt. Keine trockenen Kunstgeschichte-Vorlesungen, sondern überraschende Details die im Gedächtnis bleiben. Kurz und prägnant.\nSEHR WICHTIG: Diese Fun Facts werden später als Rate-Frage verwendet ("Zu welcher Pflanze passt dieser Fun Fact?"). Nenne deshalb in JEDEM Fun Fact NIEMALS den deutschen oder lateinischen Namen der Pflanze — auch nicht als Wortteil (z.B. nicht "Kamillentee", "Löwenzahnwurzel" o.ä.). Formuliere jeden Fakt so, dass er ohne den Namen funktioniert, z.B. "Ihr Tee wirkt entzündungshemmend" statt "Kamillentee wirkt entzündungshemmend". Verwende statt des Namens notfalls "Diese Pflanze" oder ein Pronomen.\n\nWICHTIG: Verwende **ausschließlich** für die beiden Überschriften "**Bestimmungsmerkmale:**" und "**Fun Facts:**". Markiere innerhalb der Inhalte KEIN einziges Wort fett.'
+      ' auf Deutsch.\n\n**Bestimmungsmerkmale:**\nListe NUR die zutreffenden Merkmale tabellarisch im Format "Punkt: Wert" auf — eine Zeile pro Merkmal. Prüfe folgende Punkte und nenne nur die, die für diese Pflanze relevant sind (z.B. Milchsaft nur wenn vorhanden, sonst weglassen):\nPflanzenfamilie (deutscher Trivialname, z.B. Korbblütler, Lippenblütler, Kreuzblütler, Doldenblütler, Hahnenfußgewächse), Blütenfarbe, Blütenform, Anzahl der Kronblätter, Blattstellung, Blattform, Blattrand, Behaarung, Geruch/Geschmack, Milchsaft, Standort.\nKurz und stichwortartig, kein Fließtext.\n\n**Fun Facts:**\n3-4 kurze Fun Facts auf Deutsch. Schreibe: modern, lebendig, seriös und historisch korrekt. Keine trockenen Kunstgeschichte-Vorlesungen, sondern überraschende Details die im Gedächtnis bleiben. Kurz und prägnant. Wenn es leicht möglich ist, ohne den Satz zu verbiegen, vermeide den Namen der Pflanze im Fun Fact selbst zu nennen.\n\nWICHTIG: Verwende **ausschließlich** für die beiden Überschriften "**Bestimmungsmerkmale:**" und "**Fun Facts:**". Markiere innerhalb der Inhalte KEIN einziges Wort fett.'
     }], 1536);
     const data = await res.json();
     if (!res.ok) throw new Error(data.error?.message);
@@ -1780,7 +1780,7 @@ async function generatePlantInfo(plantId) {
   const p = await dbGet(plantId); if (!p) return null;
 
   try {
-    const res = await aiChat([{ role: 'user', content: 'Gib mir Informationen zur Pflanze "' + p.name + '"' + (p.latin ? ' (' + p.latin + ')' : '') + ' auf Deutsch.\n\n**Bestimmungsmerkmale:**\nListe NUR die zutreffenden Merkmale tabellarisch im Format "Punkt: Wert" auf — eine Zeile pro Merkmal. Prüfe folgende Punkte und nenne nur die, die für diese Pflanze relevant sind (z.B. Milchsaft nur wenn vorhanden, sonst weglassen):\nPflanzenfamilie (deutscher Trivialname, z.B. Korbblütler, Lippenblütler, Kreuzblütler, Doldenblütler, Hahnenfußgewächse), Blütenfarbe, Blütenform, Anzahl der Kronblätter, Blattstellung, Blattform, Blattrand, Behaarung, Geruch/Geschmack, Milchsaft, Standort.\nKurz und stichwortartig, kein Fließtext.\n\n**Fun Facts:**\n3-4 kurze Fun Facts auf Deutsch. Schreibe: modern, lebendig, seriös und historisch korrekt. Keine trockenen Kunstgeschichte-Vorlesungen, sondern überraschende Details die im Gedächtnis bleiben. Kurz und prägnant.\nSEHR WICHTIG: Diese Fun Facts werden später als Rate-Frage verwendet ("Zu welcher Pflanze passt dieser Fun Fact?"). Nenne deshalb in JEDEM Fun Fact NIEMALS den deutschen oder lateinischen Namen der Pflanze — auch nicht als Wortteil (z.B. nicht "Kamillentee", "Löwenzahnwurzel" o.ä.). Formuliere jeden Fakt so, dass er ohne den Namen funktioniert, z.B. "Ihr Tee wirkt entzündungshemmend" statt "Kamillentee wirkt entzündungshemmend". Verwende statt des Namens notfalls "Diese Pflanze" oder ein Pronomen.\n\nWICHTIG: Verwende **ausschließlich** für die beiden Überschriften "**Bestimmungsmerkmale:**" und "**Fun Facts:**". Markiere innerhalb der Inhalte KEIN einziges Wort, keine Jahreszahl und keinen Begriff fett — auch nicht zur Betonung.' }], 1536);
+    const res = await aiChat([{ role: 'user', content: 'Gib mir Informationen zur Pflanze "' + p.name + '"' + (p.latin ? ' (' + p.latin + ')' : '') + ' auf Deutsch.\n\n**Bestimmungsmerkmale:**\nListe NUR die zutreffenden Merkmale tabellarisch im Format "Punkt: Wert" auf — eine Zeile pro Merkmal. Prüfe folgende Punkte und nenne nur die, die für diese Pflanze relevant sind (z.B. Milchsaft nur wenn vorhanden, sonst weglassen):\nPflanzenfamilie (deutscher Trivialname, z.B. Korbblütler, Lippenblütler, Kreuzblütler, Doldenblütler, Hahnenfußgewächse), Blütenfarbe, Blütenform, Anzahl der Kronblätter, Blattstellung, Blattform, Blattrand, Behaarung, Geruch/Geschmack, Milchsaft, Standort.\nKurz und stichwortartig, kein Fließtext.\n\n**Fun Facts:**\n3-4 kurze Fun Facts auf Deutsch. Schreibe: modern, lebendig, seriös und historisch korrekt. Keine trockenen Kunstgeschichte-Vorlesungen, sondern überraschende Details die im Gedächtnis bleiben. Kurz und prägnant. Wenn es leicht möglich ist, ohne den Satz zu verbiegen, vermeide den Namen der Pflanze im Fun Fact selbst zu nennen.\n\nWICHTIG: Verwende **ausschließlich** für die beiden Überschriften "**Bestimmungsmerkmale:**" und "**Fun Facts:**". Markiere innerhalb der Inhalte KEIN einziges Wort, keine Jahreszahl und keinen Begriff fett — auch nicht zur Betonung.' }], 1536);
     const data = await res.json();
     if (!res.ok) throw new Error(data.error?.message);
     const choice = data.choices?.[0];
@@ -3296,34 +3296,33 @@ function _examShuffle(arr) {
 
 // Namens-"Stämme" (Deutsch + Latein) einer Pflanze, zum Erkennen, ob ein
 // Fun Fact den Namen bereits verrät (z.B. "Kamillentee" verrät "Kamille").
-function _examNameStems(plant) {
-  const stems = [];
-  const clean = s => (s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z]/g,'');
-  const addStem = s => { const c = clean(s); if (c.length >= 3) stems.push(c.length > 6 ? c.slice(0,6) : c); };
-  (plant.name||'').split(/[\s\-]+/).forEach(addStem);
-  (plant.latin||'').split(/[\s\-]+/).forEach(addStem);
-  return stems;
-}
-function _examTextRevealsName(plant, text) {
-  const clean = (text||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z]/g,' ');
-  return _examNameStems(plant).some(s => clean.includes(s));
+// Alle Wortformen (Deutsch + Latein) einer Pflanze, >=3 Buchstaben, als
+// Basis fürs Schwärzen — nicht fürs Verwerfen. Verwerfen hätte bei vielen
+// Pflanzen ALLE Fun Facts gekostet, weil die KI den Namen trotz Anweisung
+// oft doch nennt; Schwärzen garantiert, dass immer ein Fakt übrig bleibt.
+function _examRedactName(plant, text) {
+  let out = text || '';
+  const forms = new Set();
+  const addForms = s => (s||'').split(/[\s\-]+/).forEach(w => { if (w.replace(/[^a-zA-ZäöüÄÖÜß]/g,'').length >= 3) forms.add(w); });
+  addForms(plant.name); addForms(plant.latin);
+  [...forms].sort((a,b) => b.length - a.length).forEach(w => {
+    const esc = w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    out = out.replace(new RegExp(esc + '[a-zäöüß]*', 'gi'), 'Diese Pflanze');
+  });
+  return out.replace(/\s{2,}/g, ' ').trim();
 }
 
 // Liest die echten Fun Facts aus dem gespeicherten infoHtml (bisher wurde
 // fälschlich plant.info im Markdown-Format erwartet, das Feld existiert
 // aber gar nicht — dadurch gab es NIE einen Fun-Fact-Treffer und jede
 // "funfact"-Frage fiel still auf eine weitere Foto-Frage zurück).
-// requireSafe=true: nur Fakten, die den Pflanzennamen NICHT selbst verraten
-// (für die Richtung "Fun Fact → welche Pflanze?"). Für die umgekehrte
-// Richtung (Name ist ja schon bekannt) ist jeder Fakt ok.
-function _examExtractFunFact(plant, requireSafe) {
+function _examExtractFunFact(plant) {
   if (!plant.infoHtml) return null;
   const m = plant.infoHtml.match(/<h3>\s*Fun Facts\s*<\/h3>([\s\S]*)/i);
   if (!m) return null;
-  let lines = [...m[1].matchAll(/<p>([\s\S]*?)<\/p>/gi)]
+  const lines = [...m[1].matchAll(/<p>([\s\S]*?)<\/p>/gi)]
     .map(mm => mm[1].replace(/<[^>]+>/g,'').trim())
     .filter(l => l.length > 8 && l.length < 220);
-  if (requireSafe) lines = lines.filter(l => !_examTextRevealsName(plant, l));
   return lines.length ? lines[Math.floor(Math.random()*lines.length)] : null;
 }
 
@@ -3404,17 +3403,17 @@ async function startExam() {
   for (const plant of all) {
     catName.push({ type:'photo', plant, choices:_examShuffle([plant.name, ...names3(plant)]), correct:plant.name });
 
-    // Fun Facts — "sichere" Fakten (die den Namen nicht selbst verraten)
-    // für die Richtung Fakt→Name; für Name→Fakt ist jeder Fakt ok.
-    const safeFact = _examExtractFunFact(plant, true);
-    if (safeFact) {
-      catWissen.push({ type:'funfact', plant, fact:safeFact, choices:_examShuffle([plant.name, ...names3(plant)]), correct:plant.name });
-    }
-    const anyFact = _examExtractFunFact(plant, false);
-    if (anyFact) {
-      const otherFacts = _examDistinctWrong(anyFact, all.filter(p => p.id !== plant.id), p => _examExtractFunFact(p, false));
+    // Fun Facts — für die Richtung Fakt→Name wird der Name im Text
+    // geschwärzt (siehe _examRedactName), damit er die Antwort nie selbst
+    // verrät — unabhängig davon, ob die KI ihn im Text erwähnt hat oder
+    // nicht. Für Name→Fakt (Name ist ja schon bekannt) bleibt der Text
+    // unverändert, das liest sich natürlicher.
+    const fact = _examExtractFunFact(plant);
+    if (fact) {
+      catWissen.push({ type:'funfact', plant, fact:_examRedactName(plant, fact), choices:_examShuffle([plant.name, ...names3(plant)]), correct:plant.name });
+      const otherFacts = _examDistinctWrong(fact, all.filter(p => p.id !== plant.id), p => _examExtractFunFact(p));
       if (otherFacts.length === 3) {
-        catWissen.push({ type:'name2fact', plant, choices:_examShuffle([anyFact, ...otherFacts]), correct:anyFact });
+        catWissen.push({ type:'name2fact', plant, choices:_examShuffle([fact, ...otherFacts]), correct:fact });
       }
     }
 
