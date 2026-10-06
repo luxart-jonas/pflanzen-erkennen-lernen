@@ -742,7 +742,7 @@
       </div>
       <span id="xp-label" style="white-space:nowrap">0 XP</span>
     </div>
-    <button onclick="switchTab('settings')" id="tab-settings-btn" title="Einstellungen v3.53" style="background:none;border:none;font-size:1.5rem;cursor:pointer;padding:4px 6px;color:var(--accent2);flex-shrink:0">⚙️<span style="font-size:.45rem;color:var(--muted);vertical-align:super;margin-left:1px;font-weight:600;letter-spacing:.01em">3.53</span></button>
+    <button onclick="switchTab('settings')" id="tab-settings-btn" title="Einstellungen v3.54" style="background:none;border:none;font-size:1.5rem;cursor:pointer;padding:4px 6px;color:var(--accent2);flex-shrink:0">⚙️<span style="font-size:.45rem;color:var(--muted);vertical-align:super;margin-left:1px;font-weight:600;letter-spacing:.01em">3.54</span></button>
   </div>
 
   <nav id="nav">
@@ -985,7 +985,7 @@
     <!-- SETTINGS -->
     <div class="screen" id="settings-screen">
       <h2>⚙️ Einstellungen</h2>
-      <p style="color:var(--muted);font-size:.8rem;margin-bottom:12px;">Version 3.53 — PlantNet + DeepSeek</p>
+      <p style="color:var(--muted);font-size:.8rem;margin-bottom:12px;">Version 3.54 — PlantNet + DeepSeek</p>
 
       <!-- Simulations-Button -->
       <button onclick="openSim()" style="width:100%;padding:14px;background:linear-gradient(135deg,#1e3a2f,#2d5a3d);color:#7ed957;border:1.5px solid #3aaa55;border-radius:14px;font-size:.95rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:16px;letter-spacing:.03em">
@@ -2708,6 +2708,7 @@ async function loadAllInfos(forceReload=false) {
 
   const all = await dbGetAll();
   const toProcess = all.filter(p => (forceReload || !p.infoHtml) && p.name);
+  status.style.color = 'var(--muted)';
 
   if (!toProcess.length) {
     status.textContent = '✓ Alle Pflanzen haben bereits Infos!';
@@ -2717,9 +2718,17 @@ async function loadAllInfos(forceReload=false) {
 
   status.textContent = `0 / ${toProcess.length} geladen …`;
 
+  // Erfolge/Fehler sichtbar mitzählen — bisher wurde JEDER Fehler (z.B.
+  // Rate-Limit beim KI-Proxy) nur in die Browser-Konsole geschrieben und am
+  // Ende trotzdem "✓ Fertig!" angezeigt, egal ob tatsächlich etwas
+  // geklappt hat. Dadurch wirkte ein kompletter Fehlschlag (z.B. weil der
+  // geteilte Standard-Key gerade ausgelastet ist) wie ein Erfolg.
+  let okCount = 0, failCount = 0, firstError = '';
+
   for (let i = 0; i < toProcess.length; i++) {
     const p = toProcess[i];
     status.textContent = `${i+1} / ${toProcess.length}: ${p.name} …`;
+    let thisOk = true;
 
     try {
       // ── Lateinischen Namen via PlantNet holen falls fehlend ──
@@ -2765,13 +2774,28 @@ async function loadAllInfos(forceReload=false) {
       // ── Fun Facts + Bestimmungsmerkmale via zentrale Funktion ──
       await generatePlantInfo(p.id);
     } catch(err) {
+      thisOk = false;
+      failCount++;
+      if (!firstError) firstError = err.message || String(err);
       console.warn('Fehler bei', p.name, err.message);
     }
+    if (thisOk) okCount++;
 
-    await new Promise(r => setTimeout(r, 600));
+    // Nach einem Fehler (oft Rate-Limit) etwas länger pausieren, damit der
+    // geteilte KI-Proxy sich erholen kann, statt im selben Tempo weiter
+    // gegen das Limit zu laufen.
+    await new Promise(r => setTimeout(r, thisOk ? 600 : 2500));
   }
 
-  status.textContent = `✓ Fertig! ${toProcess.length} Pflanzen aktualisiert.`;
+  if (failCount === 0) {
+    status.textContent = `✓ Fertig! ${okCount} Pflanze(n) aktualisiert.`;
+  } else if (okCount === 0) {
+    status.style.color = 'var(--danger)';
+    status.textContent = `⚠️ Alle ${failCount} fehlgeschlagen — z.B.: "${firstError}". Oft Rate-Limit des geteilten KI-Zugangs; in den Einstellungen einen eigenen Groq- oder DeepSeek-Key eintragen hilft, oder es später erneut versuchen.`;
+  } else {
+    status.style.color = 'var(--danger)';
+    status.textContent = `⚠️ ${okCount} geladen, ${failCount} fehlgeschlagen (z.B.: "${firstError}"). "Infos neu laden" erneut ausführen, um die fehlenden nachzuholen.`;
+  }
   btn.disabled = false;
 }
 
@@ -3443,15 +3467,17 @@ async function startExam() {
   const nameArr = _examShuffle(catName), latinArr = _examShuffle(catLatin), wissenArr = _examShuffle(catWissen);
 
   // Vorgabe: 30% Name, 10% Latein, 60% Wissen (Fun Facts + Merkmale) — mit
-  // "größter-Rest"-Verfahren exakt aufgeteilt. Fehlt einer Kategorie
-  // Material (z.B. noch keine Fun Facts generiert), wird der Fehlbetrag aus
-  // einem gemeinsamen Rest-Pool aller Kategorien aufgefüllt, statt dass
-  // eine einzelne Kategorie (meist Latein, weil es 2 Fragen pro Pflanze
-  // erzeugt) die ganze Prüfung flutet.
+  // "größter-Rest"-Verfahren exakt aufgeteilt. WICHTIG: Fehlt einer
+  // Kategorie Material (z.B. noch keine Fun Facts generiert), wird der
+  // Fehlbetrag NUR in dieser festen Reihenfolge aufgefüllt: erst Wissen-
+  // Rest, dann Namen-Rest, erst ganz zuletzt Latein-Rest. Latein hat sonst
+  // IMMER reichlich Material (2 Fragen pro Pflanze mit lateinischem Namen)
+  // und würde bei fehlenden Fun Facts sofort die ganze Prüfung fluten,
+  // obwohl es nur 10% sein soll — genau das war der gemeldete Bug.
   const groups = [
+    { key:'wissen', arr:wissenArr, weight:0.60 },
     { key:'name',   arr:nameArr,   weight:0.30 },
     { key:'latin',  arr:latinArr,  weight:0.10 },
-    { key:'wissen', arr:wissenArr, weight:0.60 },
   ];
   const rawWants = groups.map(g => target * g.weight);
   const want = {};
@@ -3461,15 +3487,19 @@ async function startExam() {
   for (let i = 0; i < target - used; i++) want[byFrac[i % byFrac.length].key]++;
 
   let chosen = [];
-  let deficit = 0;
+  const leftover = {};
   groups.forEach(g => {
     const take = Math.min(want[g.key], g.arr.length);
     chosen.push(...g.arr.slice(0, take));
-    deficit += want[g.key] - take;
+    leftover[g.key] = g.arr.slice(take);
   });
+  let deficit = target - chosen.length;
   if (deficit > 0) {
-    const pool = _examShuffle(groups.flatMap(g => g.arr.slice(Math.min(want[g.key], g.arr.length))));
-    chosen = chosen.concat(pool.slice(0, deficit));
+    for (const g of groups) { // Reihenfolge = Priorität: Wissen, dann Name, zuletzt Latein
+      if (deficit <= 0) break;
+      const take = Math.min(deficit, leftover[g.key].length);
+      if (take > 0) { chosen.push(..._examShuffle(leftover[g.key]).slice(0, take)); deficit -= take; }
+    }
   }
   chosen = chosen.slice(0, target);
 
