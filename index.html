@@ -742,7 +742,7 @@
       </div>
       <span id="xp-label" style="white-space:nowrap">0 XP</span>
     </div>
-    <button onclick="switchTab('settings')" id="tab-settings-btn" title="Einstellungen v3.54" style="background:none;border:none;font-size:1.5rem;cursor:pointer;padding:4px 6px;color:var(--accent2);flex-shrink:0">⚙️<span style="font-size:.45rem;color:var(--muted);vertical-align:super;margin-left:1px;font-weight:600;letter-spacing:.01em">3.54</span></button>
+    <button onclick="switchTab('settings')" id="tab-settings-btn" title="Einstellungen v3.56" style="background:none;border:none;font-size:1.5rem;cursor:pointer;padding:4px 6px;color:var(--accent2);flex-shrink:0">⚙️<span style="font-size:.45rem;color:var(--muted);vertical-align:super;margin-left:1px;font-weight:600;letter-spacing:.01em">3.56</span></button>
   </div>
 
   <nav id="nav">
@@ -832,7 +832,13 @@
         <div id="profil-recent-badges" style="display:flex;gap:8px;flex-wrap:wrap"></div>
       </div>
 
-      <button class="btn btn-secondary" onclick="openBadgeGallery()" style="width:100%">🏅 Alle Abzeichen ansehen</button>
+      <button class="btn btn-secondary" onclick="openBadgeGallery()" style="width:100%;margin-bottom:12px">🏅 Alle Abzeichen ansehen</button>
+
+      <!-- Meine Urkunden -->
+      <div id="profil-diplomas-wrap" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;box-shadow:var(--shadow);display:none">
+        <div style="font-size:.7rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:10px">🎓 Meine Urkunden</div>
+        <div id="profil-diplomas-list"></div>
+      </div>
     </div>
 
     <!-- ADD -->
@@ -985,7 +991,7 @@
     <!-- SETTINGS -->
     <div class="screen" id="settings-screen">
       <h2>⚙️ Einstellungen</h2>
-      <p style="color:var(--muted);font-size:.8rem;margin-bottom:12px;">Version 3.54 — PlantNet + DeepSeek</p>
+      <p style="color:var(--muted);font-size:.8rem;margin-bottom:12px;">Version 3.56 — PlantNet + DeepSeek</p>
 
       <!-- Simulations-Button -->
       <button onclick="openSim()" style="width:100%;padding:14px;background:linear-gradient(135deg,#1e3a2f,#2d5a3d);color:#7ed957;border:1.5px solid #3aaa55;border-radius:14px;font-size:.95rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:16px;letter-spacing:.03em">
@@ -1073,8 +1079,17 @@
           </div>
         </div>
         <div id="exam-unlock-view" style="display:none">
-          <button class="btn btn-primary" style="width:100%;margin-bottom:12px;font-size:1.05rem;padding:16px" onclick="startExam()">🏁 Prüfung starten</button>
-          <p style="color:var(--muted);font-size:.82rem;text-align:center;margin-bottom:16px">Mehrere Häppchen · Fotos, Fun Facts & Merkmale · wächst mit deiner Sammlung</p>
+          <div id="exam-cooldown-box" style="display:none">
+            <div class="exam-lock-box">
+              <div class="lock-icon">⏳</div>
+              <div class="lock-text">Nächste Prüfung ab morgen</div>
+              <div class="lock-sub" id="exam-cooldown-sub">Du hast heute schon eine Prüfung gemacht — komm morgen wieder, dann kannst du erneut zeigen, was du draufhast!</div>
+            </div>
+          </div>
+          <div id="exam-ready-box">
+            <button class="btn btn-primary" style="width:100%;margin-bottom:12px;font-size:1.05rem;padding:16px" onclick="startExam()">🏁 Prüfung starten</button>
+            <p style="color:var(--muted);font-size:.82rem;text-align:center;margin-bottom:16px">Mehrere Häppchen · Fotos, Fun Facts & Merkmale · wächst mit deiner Sammlung · 1× pro Tag</p>
+          </div>
           <div id="exam-history"></div>
         </div>
       </div>
@@ -1393,6 +1408,24 @@ async function renderProfile() {
     ).join('');
     recentWrap.style.display = 'block';
   } else if (recentWrap) { recentWrap.style.display = 'none'; }
+  renderProfilDiplomas();
+}
+
+// "Meine Urkunden" — zeigt die letzten Prüfungs-Urkunden im Profil, damit
+// man sie auch nachträglich noch ansehen kann (nicht nur direkt nach der Prüfung).
+function renderProfilDiplomas() {
+  const exams = JSON.parse(localStorage.getItem('pflanz_exams') || '[]');
+  window._profilDiplomaCache = exams;
+  const wrap = document.getElementById('profil-diplomas-wrap');
+  const el = document.getElementById('profil-diplomas-list');
+  if (!exams.length) { wrap.style.display = 'none'; return; }
+  wrap.style.display = 'block';
+  el.innerHTML = exams.slice(0, 8).map((e, i) => {
+    const d = new Date(e.date).toLocaleDateString('de-DE', { day:'2-digit', month:'short', year:'numeric' });
+    return '<div class="exam-hist-row" style="cursor:pointer" onclick="showDiplomaFor(window._profilDiplomaCache[' + i + '])">' +
+           '<span>' + d + ' · ' + e.correct + '/' + e.total + '</span>' +
+           '<span class="ehr-grade">' + (e.emoji||'🌱') + ' ' + esc(e.tier||'') + '</span></div>';
+  }).join('');
 }
 
 // ── Tab Switching ────────────────────────────────────────────
@@ -1418,6 +1451,10 @@ function switchTab(tab) {
       document.getElementById('exam-lock-sub').textContent =
         'Du hast ' + _cachedCount + ' von ' + EXAM_MIN_PLANTS + ' Pflanzen — noch ' +
         _need + ' Pflanze' + (_need === 1 ? '' : 'n') + ' fehlen';
+    } else {
+      const _onCooldown = _examDoneToday();
+      document.getElementById('exam-cooldown-box').style.display = _onCooldown ? 'block' : 'none';
+      document.getElementById('exam-ready-box').style.display    = _onCooldown ? 'none'  : 'block';
     }
     renderExamStartView(); // Async-Aktualisierung aus echter DB
   }
@@ -3386,6 +3423,10 @@ async function renderExamStartView() {
       document.getElementById('exam-lock-sub').textContent =
         'Du hast ' + count + ' von ' + EXAM_MIN_PLANTS + ' Pflanzen — noch ' +
         need + ' Pflanze' + (need === 1 ? '' : 'n') + ' fehlen';
+    } else {
+      const onCooldown = _examDoneToday();
+      document.getElementById('exam-cooldown-box').style.display = onCooldown ? 'block' : 'none';
+      document.getElementById('exam-ready-box').style.display    = onCooldown ? 'none'  : 'block';
     }
     renderExamLevelInfo();
   } catch(e) {
@@ -3410,7 +3451,17 @@ function _examDistinctWrong(correctText, pool, pickText) {
   return out;
 }
 
+// Spielregel: maximal 1 Prüfung pro Kalendertag (lokale Zeit). Prüft das
+// Datum des zuletzt abgelegten Prüfungseintrags gegen heute.
+function _examDoneToday() {
+  if (localStorage.getItem('pflanz_dev_unlimited_exams') === '1') return false; // Entwickler-Schalter
+  const exams = JSON.parse(localStorage.getItem('pflanz_exams') || '[]');
+  if (!exams.length) return false;
+  return new Date(exams[0].date).toDateString() === new Date().toDateString();
+}
+
 async function startExam() {
+  if (_examDoneToday()) return;
   const all = await dbGetAll();
   if (all.length < EXAM_MIN_PLANTS) return;
   const target = _examTargetCount(all.length);
@@ -3676,22 +3727,30 @@ function exitExam() {
   renderExamStartView();
 }
 
+// Motivierende Stufen statt Schulnoten — es gibt bewusst keine "durchgefallen"-
+// Stufe. Jede Prüfung bringt etwas XP und eine Urkunde, der Unterschied liegt
+// nur in Titel/Sternen/Bonus-XP.
+function _examTier(pct) {
+  if (pct >= .95) return { emoji:'🏆', title:'Pflanzen-Genie',        stars:'⭐⭐⭐', xp:30 };
+  if (pct >= .85) return { emoji:'🌟', title:'Botanik-Ass',           stars:'⭐⭐⭐', xp:25 };
+  if (pct >= .70) return { emoji:'🎓', title:'Kraut-Kenner:in',       stars:'⭐⭐',  xp:20 };
+  if (pct >= .50) return { emoji:'🌱', title:'Wachsende:r Experte:in', stars:'⭐',   xp:15 };
+  return             { emoji:'💪', title:'Mutige:r Entdecker:in',     stars:'⭐',   xp:10 };
+}
+
 function finishExam() {
   const total = examAnswers.length;
   const pct   = examCorrect / Math.max(total,1);
-  const grade = pct>=.95?1:pct>=.85?2:pct>=.70?3:pct>=.50?4:5;
-  const gradeLabel = ['','Sehr gut','Gut','Befriedigend','Ausreichend','Nicht bestanden'][grade];
-  const gradeNote  = ['','1 – Sehr gut','2 – Gut','3 – Befriedigend','4 – Ausreichend','5 – Nicht bestanden'][grade];
+  const tier  = _examTier(pct);
   const exams = JSON.parse(localStorage.getItem('pflanz_exams') || '[]');
-  exams.unshift({ date: Date.now(), grade, correct: examCorrect, total, gradeNote });
+  exams.unshift({ date: Date.now(), emoji: tier.emoji, tier: tier.title, stars: tier.stars, correct: examCorrect, total });
   if (exams.length > 20) exams.length = 20;
   localStorage.setItem('pflanz_exams', JSON.stringify(exams));
   ['exam-chunk-view','exam-active-view'].forEach(id => document.getElementById(id).style.display='none');
   document.getElementById('exam-result-view').style.display = 'block';
-  const emojis = ['','🏆','🌟','🎓','👍','💪'];
-  document.getElementById('exam-result-emoji').textContent = emojis[grade]||'🌱';
+  document.getElementById('exam-result-emoji').textContent = tier.emoji;
   document.getElementById('exam-result-grade').textContent = examCorrect+'/'+total;
-  document.getElementById('exam-result-label').textContent = gradeLabel;
+  document.getElementById('exam-result-label').textContent = tier.title;
   document.getElementById('exam-result-note').textContent  = Math.round(pct*100)+'% richtig';
   let rv = '<h3 style="margin-bottom:10px;font-size:.95rem;color:var(--muted)">Alle Antworten:</h3>';
   for (const a of examAnswers) {
@@ -3701,30 +3760,33 @@ function finishExam() {
           (a.isCorrect ? '✓' : '✗ '+esc(a.chosen)) + '</span></div>';
   }
   document.getElementById('exam-result-review').innerHTML = rv;
-  if (grade <= 3) { awardXP(30); checkBadges(); }
-  else if (grade === 4) { awardXP(10); }
-  if (grade <= 3) {
-    setTimeout(() => { prepDiploma(grade,gradeNote,examCorrect,total); document.getElementById('diploma-overlay').classList.add('show'); }, 800);
-  }
+  awardXP(tier.xp);
+  checkBadges();
+  setTimeout(() => { prepDiploma(tier, examCorrect, total); document.getElementById('diploma-overlay').classList.add('show'); }, 800);
 }
 
-function prepDiploma(grade, gradeNote, correct, total) {
-  const stars = grade === 1 ? '⭐⭐⭐' : grade === 2 ? '⭐⭐' : '⭐';
-  const acadTitles = ['','Dr. rer. nat.','Master of Plants','Bachelor of Botany','Botanik-Praktikant','Praktikant'];
-  document.querySelector('#diploma-card .dc-title').textContent = acadTitles[grade] || 'Botanik-Urkunde';
-  document.querySelector('#diploma-card .dc-stars').textContent = stars;
-  document.getElementById('diploma-grade-display').textContent = 'Note ' + gradeNote;
+function prepDiploma(tier, correct, total, dateMs) {
+  document.querySelector('#diploma-card .dc-title').textContent = tier.title;
+  document.querySelector('#diploma-card .dc-stars').textContent = tier.stars;
+  document.getElementById('diploma-grade-display').textContent = tier.emoji + ' ' + tier.title;
   document.getElementById('diploma-score-note').textContent = correct + ' von ' + total + ' Fragen richtig';
   document.getElementById('diploma-date').textContent =
-    'ausgestellt am ' + new Date().toLocaleDateString('de-DE', { day:'2-digit', month:'long', year:'numeric' });
+    'ausgestellt am ' + new Date(dateMs || Date.now()).toLocaleDateString('de-DE', { day:'2-digit', month:'long', year:'numeric' });
 }
 
 function showDiploma() {
   const total = examAnswers.length;
   const pct = examCorrect / Math.max(total,1);
-  const grade = pct >= .95 ? 1 : pct >= .85 ? 2 : pct >= .70 ? 3 : pct >= .50 ? 4 : 5;
-  const gradeNote = ['','1 – Sehr gut','2 – Gut','3 – Befriedigend','4 – Ausreichend','5 – Nicht bestanden'][grade];
-  prepDiploma(grade, gradeNote, examCorrect, total);
+  const tier = _examTier(pct);
+  prepDiploma(tier, examCorrect, total);
+  document.getElementById('diploma-overlay').classList.add('show');
+}
+
+// Öffnet die Urkunde zu einem früheren, bereits gespeicherten Prüfungs-
+// Eintrag (aus der Historie im Prüfungs-Tab oder der Galerie im Profil).
+function showDiplomaFor(record) {
+  const tier = { emoji: record.emoji || '🌱', title: record.tier || 'Botanik-Urkunde', stars: record.stars || '⭐' };
+  prepDiploma(tier, record.correct, record.total, record.date);
   document.getElementById('diploma-overlay').classList.add('show');
 }
 
@@ -3738,15 +3800,16 @@ function renderExamLevelInfo() {
 
 function renderExamHistory() {
   const exams = JSON.parse(localStorage.getItem('pflanz_exams') || '[]');
+  window._examHistoryCache = exams;
   const el = document.getElementById('exam-history');
   if (!exams.length) { el.innerHTML = ''; return; }
   let h = '<h3>Letzte Prüfungen</h3>';
-  for (const e of exams.slice(0, 5)) {
+  exams.slice(0, 5).forEach((e, i) => {
     const d = new Date(e.date).toLocaleDateString('de-DE',{day:'2-digit',month:'short'});
-    const pctStr = e.total ? Math.round(e.correct/e.total*100)+'%' : '';
-    h += '<div class="exam-hist-row"><span>' + d + ' · ' + e.correct + '/' + e.total + '</span>' +
-         '<span class="ehr-grade">' + pctStr + '</span></div>';
-  }
+    h += '<div class="exam-hist-row" style="cursor:pointer" onclick="showDiplomaFor(window._examHistoryCache[' + i + '])">' +
+         '<span>' + d + ' · ' + e.correct + '/' + e.total + '</span>' +
+         '<span class="ehr-grade">' + (e.emoji||'🌱') + ' ' + esc(e.tier||'') + '</span></div>';
+  });
   el.innerHTML = h;
 }
 
@@ -4139,6 +4202,8 @@ function openSim() {
   // Populate badge select
   const bs = document.getElementById('sim-badge-select');
   bs.innerHTML = BADGES.map((b,i) => `<option value="${i}">${b.icon||'🏅'} ${b.name}</option>`).join('');
+  const ue = document.getElementById('sim-unlimited-exams');
+  if (ue) ue.checked = localStorage.getItem('pflanz_dev_unlimited_exams') === '1';
   const ov = document.getElementById('sim-overlay');
   ov.style.display = 'flex';
   setTimeout(() => ov.classList.add('show'), 10);
@@ -4165,6 +4230,24 @@ function _simReturnIfPending() {
 }
 function simStatus(msg) {
   document.getElementById('sim-status').textContent = msg;
+}
+// Entwickler-Schalter: ignoriert das 1x-pro-Tag-Limit komplett, solange
+// aktiv — bleibt bis zum erneuten Ausschalten bestehen (localStorage).
+function simToggleUnlimitedExams(on) {
+  localStorage.setItem('pflanz_dev_unlimited_exams', on ? '1' : '0');
+  simStatus(on ? '🔓 Prüfungs-Tageslimit deaktiviert' : '🔒 Prüfungs-Tageslimit wieder aktiv');
+  renderExamStartView();
+}
+// Hebt nur die heutige Sperre einmalig auf, indem der jüngste Prüfungs-
+// Eintrag auf "gestern" zurückdatiert wird — Historie/Urkunden bleiben erhalten.
+function simResetExamLock() {
+  const exams = JSON.parse(localStorage.getItem('pflanz_exams') || '[]');
+  if (exams.length) {
+    exams[0].date = Date.now() - 24*60*60*1000 - 1000;
+    localStorage.setItem('pflanz_exams', JSON.stringify(exams));
+  }
+  simStatus('🔓 Heutige Prüfungssperre zurückgesetzt');
+  renderExamStartView();
 }
 async function _fetchWikiThumb(latinName) {
   try {
@@ -4512,6 +4595,18 @@ function simResetAll() {
       </div>
       <div class="sim-row" style="margin-top:8px">
         <button class="sim-btn danger" style="flex:1" onclick="simRemoveFakePlants()">Testpflanzen entfernen</button>
+      </div>
+    </div>
+
+    <!-- Prüfungs-Sperre (Entwickler) -->
+    <div class="sim-section">
+      <div class="sim-section-title">🔓 Prüfungs-Sperre (Entwickler)</div>
+      <label class="sim-row" style="cursor:pointer;gap:10px">
+        <input type="checkbox" id="sim-unlimited-exams" onchange="simToggleUnlimitedExams(this.checked)" style="width:18px;height:18px;flex:none">
+        <span style="font-size:.85rem">Tageslimit ignorieren — Prüfung beliebig oft starten</span>
+      </label>
+      <div class="sim-row" style="margin-top:8px">
+        <button class="sim-btn secondary" style="flex:1" onclick="simResetExamLock()">Nur heutige Sperre einmalig zurücksetzen</button>
       </div>
     </div>
 
