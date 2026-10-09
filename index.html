@@ -742,7 +742,7 @@
       </div>
       <span id="xp-label" style="white-space:nowrap">0 XP</span>
     </div>
-    <button onclick="switchTab('settings')" id="tab-settings-btn" title="Einstellungen v3.60" style="background:none;border:none;font-size:1.5rem;cursor:pointer;padding:4px 6px;color:var(--accent2);flex-shrink:0">⚙️<span style="font-size:.45rem;color:var(--muted);vertical-align:super;margin-left:1px;font-weight:600;letter-spacing:.01em">3.60</span></button>
+    <button onclick="switchTab('settings')" id="tab-settings-btn" title="Einstellungen v3.61" style="background:none;border:none;font-size:1.5rem;cursor:pointer;padding:4px 6px;color:var(--accent2);flex-shrink:0">⚙️<span style="font-size:.45rem;color:var(--muted);vertical-align:super;margin-left:1px;font-weight:600;letter-spacing:.01em">3.61</span></button>
   </div>
 
   <nav id="nav">
@@ -890,12 +890,12 @@
             <div id="ai-illus-credit" style="font-size:.68rem;color:var(--muted);text-align:right;margin-top:3px"></div>
           </div>
           <div id="ai-enrichment"></div>
+          <div id="add-ask-container"></div>
         </div>
       </div>
       <div id="gps-hint" style="font-size:.78rem;color:var(--muted);margin-bottom:6px;min-height:18px"></div>
 
       <div id="add-save-bar" style="position:sticky;bottom:-16px;z-index:5;margin:20px -16px -16px;padding:14px 16px calc(14px + env(safe-area-inset-bottom));background:var(--surface);border-top:1px solid var(--border);box-shadow:0 -6px 16px rgba(40,100,40,.12);">
-        <button class="btn btn-primary" onclick="savePlant()">Pflanze speichern</button>
         <!-- Level + Badge Statuszeile -->
         <div id="add-status-bar" style="display:flex;align-items:center;gap:14px;margin-top:14px;min-height:56px;opacity:0;transition:opacity .4s">
           <div id="add-level-info" style="display:flex;align-items:center;gap:10px;color:var(--accent2);font-weight:700">
@@ -991,7 +991,7 @@
     <!-- SETTINGS -->
     <div class="screen" id="settings-screen">
       <h2>⚙️ Einstellungen</h2>
-      <p style="color:var(--muted);font-size:.8rem;margin-bottom:12px;">Version 3.60 — Plant.id + DeepSeek</p>
+      <p style="color:var(--muted);font-size:.8rem;margin-bottom:12px;">Version 3.61 — Plant.id + DeepSeek</p>
 
       <!-- Simulations-Button -->
       <button onclick="openSim()" style="width:100%;padding:14px;background:linear-gradient(135deg,#1e3a2f,#2d5a3d);color:#7ed957;border:1.5px solid #3aaa55;border-radius:14px;font-size:.95rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:16px;letter-spacing:.03em">
@@ -1506,10 +1506,14 @@ document.getElementById('photo-input').addEventListener('change', async e => {
 
   const ll = document.getElementById('lens-link'); if(ll) ll.style.display = 'none';
   document.getElementById('ai-result').style.display = 'none';
+  document.getElementById('ai-enrichment').innerHTML = '';
+  document.getElementById('add-ask-container').innerHTML = '';
+  lastAiName = ''; lastAiLatin = ''; lastAiInfoHtml = null;
   e.target.value = '';
-  // GPS + Erkennung automatisch
+  // GPS automatisch (aktualisiert bei Bedarf die bereits gespeicherte Pflanze)
   getGPSAuto();
-  if (getPlantIdKey()) recognizePlant();
+  // Pflanze sofort automatisch ins Archiv speichern — kein manueller Button mehr
+  await _autoSaveAndRecognize();
 });
 
 // Foto-Upload (aus Galerie/Datei, kein capture)
@@ -1520,10 +1524,29 @@ document.getElementById('photo-upload-input').addEventListener('change', async e
   setPhotoArea('photo-area', addPhotoData);
   const ll = document.getElementById('lens-link'); if(ll) ll.style.display = 'none';
   document.getElementById('ai-result').style.display = 'none';
+  document.getElementById('ai-enrichment').innerHTML = '';
+  document.getElementById('add-ask-container').innerHTML = '';
+  lastAiName = ''; lastAiLatin = ''; lastAiInfoHtml = null;
   e.target.value = '';
   getGPSAuto();
-  if (getPlantIdKey()) recognizePlant();
+  await _autoSaveAndRecognize();
 });
+
+// Legt die Pflanze sofort im Archiv an (ohne "Speichern"-Button) und
+// stößt danach — falls ein Plant.id-Key hinterlegt ist — die Erkennung an.
+async function _autoSaveAndRecognize() {
+  const newId = await _autoSaveNewPlant();
+  if (getPlantIdKey()) {
+    recognizePlant(newId);
+  } else {
+    // Keine Erkennung möglich, aber Chat zur (noch unbestimmten) Pflanze
+    // trotzdem sofort anbieten.
+    document.getElementById('ai-enrichment').innerHTML =
+      '<p style="color:var(--muted);font-size:.82rem">Kein Plant.id API-Key hinterlegt — Fun Facts &amp; Bestimmungsmerkmale können nicht automatisch geladen werden. Du kannst die Pflanze trotzdem im Archiv bearbeiten.</p>';
+    document.getElementById('ai-result').style.display = 'block';
+    _renderAddAskBlock(newId);
+  }
+}
 
 document.getElementById('edit-photo-input').addEventListener('change', async e => {
   const file = e.target.files[0]; if (!file) return;
@@ -1546,7 +1569,7 @@ function _dataUrlToBase64(dataUrl) {
   // nach dem Komma ist genau das Base64, das Plant.id erwartet.
   return dataUrl.split(',')[1] || '';
 }
-async function recognizePlant() {
+async function recognizePlant(plantId) {
   const plantidKey = getPlantIdKey();
   if (!plantidKey) { alert('Bitte zuerst einen Plant.id API-Key in den Einstellungen eintragen.'); return; }
   if (!addPhotoData) { alert('Bitte zuerst ein Foto aufnehmen.'); return; }
@@ -1606,11 +1629,21 @@ async function recognizePlant() {
     document.getElementById('ai-illustration').style.display = 'none';
     resultBox.style.display = 'block';
     document.getElementById('lens-link').style.display = 'inline-block';
-    // Auto-load enrichment (non-blocking)
-    _loadAiEnrichment(germanName, latinName);
+
+    // Die bereits automatisch gespeicherte Pflanze mit dem erkannten Namen aktualisieren
+    if (plantId) await _updateSavedPlant(plantId, { name: germanName, latin: latinName });
+    // Chat zur Pflanze sofort anbieten
+    _renderAddAskBlock(plantId);
+    // Auto-load enrichment (non-blocking), Ergebnis wird anschließend im Archiv gespeichert
+    _loadAiEnrichment(germanName, latinName, plantId);
 
   } catch (err) {
-    alert('Fehler bei der Pflanzenerkennung:\n' + err.message);
+    // Trotz Fehler bei der Erkennung bleibt die Pflanze im Archiv — nur
+    // Fun Facts/Bestimmungsmerkmale können dann nicht angezeigt werden.
+    document.getElementById('ai-enrichment').innerHTML =
+      '<p style="color:var(--danger)">Fehler bei der Pflanzenerkennung: ' + esc(err.message) + '</p>';
+    document.getElementById('ai-result').style.display = 'block';
+    if (plantId) _renderAddAskBlock(plantId);
   } finally {
     spinner.style.display = 'none';
   }
@@ -1653,16 +1686,24 @@ async function getGPSAuto() {
       } catch {
         hint.textContent = `✓ ${addGpsData.lat}, ${addGpsData.lon}`;
       }
+      // Die bereits automatisch gespeicherte Pflanze mit dem Standort ergänzen
+      if (currentAddPlantId) _updateSavedPlant(currentAddPlantId, { gps: addGpsData, notes: addGpsData.label || '' });
     },
     () => { document.getElementById('gps-hint').textContent = ''; },
     { enableHighAccuracy: true, timeout: 10000 }
   );
 }
 
-// ── Save New Plant ────────────────────────────────────────────
-async function savePlant() {
+// ── Automatisches Speichern einer neuen Pflanze ─────────────────
+// Kein "Pflanze speichern"-Button mehr: Sobald ein Foto aufgenommen/
+// hochgeladen wurde, landet die Pflanze sofort im Archiv. Name/Lateinischer
+// Name werden nachträglich (via _updateSavedPlant) ergänzt, sobald die
+// Plant.id-Erkennung ein Ergebnis liefert.
+let currentAddPlantId = null;
+
+async function _autoSaveNewPlant() {
   const name = lastAiName || ('Pflanze ' + new Date().toLocaleDateString('de-DE'));
-  const savedPhoto = addPhotoData; // capture before reset
+  const savedPhoto = addPhotoData;
   const newId = await dbPut({
     name,
     latin: lastAiLatin || '',
@@ -1674,15 +1715,12 @@ async function savePlant() {
     nextReview: Date.now(),
     created: Date.now()
   });
-  // Reset
-  addPhotoData = null; addGpsData = null; lastAiName = ''; lastAiLatin = ''; lastAiInfoHtml = null;
-  _resetPhotoArea();
+  currentAddPlantId = newId;
 
-  document.getElementById('ai-result').style.display = 'none';
-  document.getElementById('gps-hint').textContent = '';
   const msg = document.getElementById('add-msg');
+  msg.textContent = '✅ Automatisch im Archiv gespeichert';
   msg.style.display = 'block';
-  setTimeout(() => msg.style.display = 'none', 2000);
+  setTimeout(() => msg.style.display = 'none', 2500);
   updateDueBadge();
   // +10 erstmals bestimmt, +5 zur Sammlung hinzugefügt
   hideBadgeBanner();
@@ -1696,8 +1734,26 @@ async function savePlant() {
   // ── Foto auf GitHub sichern (fire & forget) ──
   if (savedPhoto) pushPhotoToGithub(name, savedPhoto).catch(() => {});
 
-  // ── Infos im Hintergrund laden (nicht blockierend) ──
-  generatePlantInfo(newId).catch(() => {});
+  return newId;
+}
+
+// Aktualisiert eine bereits automatisch gespeicherte Archiv-Pflanze
+// (z.B. sobald die Plant.id-Erkennung Name/Latein liefert, oder die
+// GPS-Position nachträglich ermittelt wurde).
+async function _updateSavedPlant(id, fields) {
+  if (!id) return;
+  try {
+    const p = await dbGet(id);
+    if (!p) return;
+    Object.assign(p, fields);
+    await dbPut(p);
+  } catch (e) { console.warn('Konnte gespeicherte Pflanze nicht aktualisieren:', e); }
+}
+
+// Rendert den "Frage zur Pflanze"-Chat sofort im Erfassen-Bildschirm.
+function _renderAddAskBlock(plantId) {
+  const box = document.getElementById('add-ask-container');
+  if (box && plantId) box.innerHTML = askQuestionBlockHtml('add', plantId);
 }
 
 // ── Archive ───────────────────────────────────────────────────
@@ -1778,7 +1834,7 @@ async function _fetchWikiImage(latinName) {
   } catch { return null; }
 }
 
-async function _loadAiEnrichment(germanName, latinName) {
+async function _loadAiEnrichment(germanName, latinName, plantId) {
   // Wikipedia image (parallel with AI)
   const wikiPromise = latinName ? _fetchWikiImage(latinName) : Promise.resolve(null);
 
@@ -1819,7 +1875,12 @@ async function _loadAiEnrichment(germanName, latinName) {
   // Update enrichment div
   const enrichDiv = document.getElementById('ai-enrichment');
   if (enrichDiv) enrichDiv.innerHTML = infoHtml || '<p style="color:var(--muted);font-size:.82rem">Details nicht verfügbar.</p>';
-  if (infoHtml) lastAiInfoHtml = infoHtml;
+  if (infoHtml) {
+    lastAiInfoHtml = infoHtml;
+    // Fun Facts/Bestimmungsmerkmale auch in der bereits automatisch
+    // gespeicherten Archiv-Pflanze hinterlegen, damit sie dort sofort da sind.
+    if (plantId) _updateSavedPlant(plantId, { infoHtml });
+  }
 
   // Wikipedia illustration
   const wikiImg = await wikiPromise;
