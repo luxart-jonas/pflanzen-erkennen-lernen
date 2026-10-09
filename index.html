@@ -742,7 +742,7 @@
       </div>
       <span id="xp-label" style="white-space:nowrap">0 XP</span>
     </div>
-    <button onclick="switchTab('settings')" id="tab-settings-btn" title="Einstellungen v3.59" style="background:none;border:none;font-size:1.5rem;cursor:pointer;padding:4px 6px;color:var(--accent2);flex-shrink:0">⚙️<span style="font-size:.45rem;color:var(--muted);vertical-align:super;margin-left:1px;font-weight:600;letter-spacing:.01em">3.59</span></button>
+    <button onclick="switchTab('settings')" id="tab-settings-btn" title="Einstellungen v3.60" style="background:none;border:none;font-size:1.5rem;cursor:pointer;padding:4px 6px;color:var(--accent2);flex-shrink:0">⚙️<span style="font-size:.45rem;color:var(--muted);vertical-align:super;margin-left:1px;font-weight:600;letter-spacing:.01em">3.60</span></button>
   </div>
 
   <nav id="nav">
@@ -991,7 +991,7 @@
     <!-- SETTINGS -->
     <div class="screen" id="settings-screen">
       <h2>⚙️ Einstellungen</h2>
-      <p style="color:var(--muted);font-size:.8rem;margin-bottom:12px;">Version 3.59 — Plant.id + DeepSeek</p>
+      <p style="color:var(--muted);font-size:.8rem;margin-bottom:12px;">Version 3.60 — Plant.id + DeepSeek</p>
 
       <!-- Simulations-Button -->
       <button onclick="openSim()" style="width:100%;padding:14px;background:linear-gradient(135deg,#1e3a2f,#2d5a3d);color:#7ed957;border:1.5px solid #3aaa55;border-radius:14px;font-size:.95rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:16px;letter-spacing:.03em">
@@ -2001,7 +2001,7 @@ async function askPlantQuestion(context, plantId) {
   try {
     const res = await aiChat([{
           role: 'user',
-          content: 'Du bist ein botanischer Experte. Beantworte folgende Frage zur Pflanze "' + p.name + '"' + (p.latin ? ' (' + p.latin + ')' : '') + ' auf Deutsch, kurz und präzise (max. 4-5 Sätze):\n\n' + question
+          content: 'Du bist ein botanischer Experte in einer Pflanzen-App. Beantworte AUSSCHLIESSLICH Fragen, die sich auf die Pflanze "' + p.name + '"' + (p.latin ? ' (' + p.latin + ')' : '') + ' beziehen oder direkt mit Botanik/Pflanzenkunde zu dieser Pflanze zusammenhängen (z.B. Pflege, Giftigkeit, Verwendung, Merkmale, Herkunft). Falls die Frage NICHT zu diesem Themenbereich gehört (z.B. allgemeines Weltwissen, andere Themen wie Technik, Geschichte fernab der Pflanze, Mathe, Programmieren etc.), antworte NUR mit einem kurzen, freundlichen Hinweis, dass du nur Fragen zu dieser Pflanze beantwortest, ohne die eigentliche Frage zu beantworten.\n\nAuf Deutsch, kurz und präzise antworten (max. 4-5 Sätze), falls die Frage zulässig ist.\n\nFrage: ' + question
         }], 400);
     const data = await res.json();
     if (!res.ok) throw new Error(data.error?.message || 'Fehler ' + res.status);
