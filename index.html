@@ -1567,7 +1567,17 @@ async function recognizePlant() {
       },
       body: JSON.stringify({ images: [base64] })
     });
-    const data = await response.json();
+    // Erst als Text lesen statt direkt .json() — wenn der Server (oder ein
+    // vorgelagertes Gateway) mal kein JSON liefert (z.B. ein Fehlertext oder
+    // eine HTML-Fehlerseite), bekommen wir so trotzdem eine lesbare
+    // Fehlermeldung statt eines kryptischen "Unexpected token"-Absturzes.
+    const rawText = await response.text();
+    let data;
+    try {
+      data = JSON.parse(rawText);
+    } catch (parseErr) {
+      throw new Error('Unerwartete Antwort vom Server (Status ' + response.status + '): ' + rawText.slice(0, 200));
+    }
 
     if (!response.ok) throw new Error(data.message || data.error || 'Plant.id Fehler ' + response.status);
     if (data.result?.is_plant && data.result.is_plant.probability < 0.3) {
