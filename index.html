@@ -121,13 +121,17 @@
     display:flex; align-items:center; gap:10px; width:100%; text-align:left;
     padding:12px 14px; border-radius:10px; border:1.5px solid var(--border);
     background:var(--surface); cursor:pointer; font-size:.95rem; color:var(--text);
-    transition:border-color .15s, background .15s;
+    transition:border-color .15s, background .15s, color .15s;
   }
   .mode-btn .mode-icon { font-size:1.3rem; flex-shrink:0; }
   .mode-btn .mode-label { flex:1; font-weight:600; }
-  .mode-btn .mode-badge { font-size:.68rem; color:var(--muted); font-weight:500; }
-  .mode-btn.active { border-color:var(--accent2); background:rgba(58,170,85,.08); }
-  .mode-btn.active .mode-label { color:var(--accent2); }
+  .mode-btn .mode-check { font-size:1rem; font-weight:700; display:none; flex-shrink:0; }
+  .mode-btn.active {
+    border-color:var(--warn); background:var(--warn); color:#fff;
+    box-shadow:0 2px 8px rgba(245,159,0,.45);
+  }
+  .mode-btn.active .mode-label { color:#fff; }
+  .mode-btn.active .mode-check { display:inline; }
   .mode-btn:disabled, .mode-btn.disabled {
     cursor:not-allowed; opacity:.55; background:var(--bg);
   }
@@ -348,7 +352,7 @@
     <h1>Planty</h1>
     <span id="due-badge" class="badge" style="display:none"></span>
     <div style="flex:1"></div>
-    <button onclick="switchTab('settings')" id="tab-settings-btn" title="Einstellungen v3.64" style="background:none;border:none;font-size:1.5rem;cursor:pointer;padding:4px 6px;color:var(--accent2);flex-shrink:0">⚙️<span style="font-size:.45rem;color:var(--muted);vertical-align:super;margin-left:1px;font-weight:600;letter-spacing:.01em">3.64</span></button>
+    <button onclick="switchTab('settings')" id="tab-settings-btn" title="Einstellungen v3.65" style="background:none;border:none;font-size:1.5rem;cursor:pointer;padding:4px 6px;color:var(--accent2);flex-shrink:0">⚙️<span style="font-size:.45rem;color:var(--muted);vertical-align:super;margin-left:1px;font-weight:600;letter-spacing:.01em">3.65</span></button>
   </div>
 
   <nav id="nav">
@@ -414,13 +418,13 @@
 
       <div class="mode-row" id="mode-row">
         <button type="button" class="mode-btn" id="mode-btn-pflanze" onclick="setCaptureMode('pflanze')">
-          <span class="mode-icon">🌿</span><span class="mode-label">Pflanze</span>
+          <span class="mode-icon">🌿</span><span class="mode-label">Pflanze</span><span class="mode-check">✓</span>
         </button>
         <button type="button" class="mode-btn" id="mode-btn-pilz" onclick="setCaptureMode('pilz')">
-          <span class="mode-icon">🍄</span><span class="mode-label">Pilz</span>
+          <span class="mode-icon">🍄</span><span class="mode-label">Pilz</span><span class="mode-check">✓</span>
         </button>
-        <button type="button" class="mode-btn disabled" id="mode-btn-krankheit" disabled title="Noch nicht verfügbar">
-          <span class="mode-icon">🩺</span><span class="mode-label">Krankheit</span><span class="mode-badge">bald verfügbar</span>
+        <button type="button" class="mode-btn" id="mode-btn-krankheit" onclick="setCaptureMode('krankheit')">
+          <span class="mode-icon">🩺</span><span class="mode-label">Krankheit</span><span class="mode-check">✓</span>
         </button>
       </div>
 
@@ -569,7 +573,7 @@
     <!-- SETTINGS -->
     <div class="screen" id="settings-screen">
       <h2>⚙️ Einstellungen</h2>
-      <p style="color:var(--muted);font-size:.8rem;margin-bottom:12px;">Version 3.64 — Plant.id + DeepSeek</p>
+      <p style="color:var(--muted);font-size:.8rem;margin-bottom:12px;">Version 3.65 — Plant.id + DeepSeek</p>
 
       <div class="card" style="margin-bottom:16px;">
         <div style="font-weight:600;color:var(--accent2);margin-bottom:8px;">🌿 Pflanzeninfos</div>
@@ -896,7 +900,7 @@ let captureMode = localStorage.getItem('pflanz_capture_mode') || 'pflanze';
 let archiveFilter = localStorage.getItem('pflanz_archive_filter') || 'pflanze';
 
 function setCaptureMode(mode) {
-  if (mode !== 'pflanze' && mode !== 'pilz') return; // Krankheit: noch nicht wählbar
+  if (mode !== 'pflanze' && mode !== 'pilz' && mode !== 'krankheit') return;
   captureMode = mode;
   localStorage.setItem('pflanz_capture_mode', mode);
   _applyCaptureModeUI();
@@ -905,10 +909,15 @@ function setCaptureMode(mode) {
 function _applyCaptureModeUI() {
   document.getElementById('mode-btn-pflanze')?.classList.toggle('active', captureMode === 'pflanze');
   document.getElementById('mode-btn-pilz')?.classList.toggle('active', captureMode === 'pilz');
+  document.getElementById('mode-btn-krankheit')?.classList.toggle('active', captureMode === 'krankheit');
   const disclaimer = document.getElementById('pilz-disclaimer');
   if (disclaimer) disclaimer.style.display = captureMode === 'pilz' ? 'block' : 'none';
   const title = document.getElementById('add-screen-title');
-  if (title) title.textContent = captureMode === 'pilz' ? 'Neuen Pilz erfassen' : 'Neue Pflanze erfassen';
+  if (title) {
+    title.textContent = captureMode === 'pilz' ? 'Neuen Pilz erfassen'
+      : captureMode === 'krankheit' ? 'Kranke Pflanze erfassen'
+      : 'Neue Pflanze erfassen';
+  }
 }
 
 function setArchiveFilter(filter) {
@@ -1204,9 +1213,12 @@ async function getGPSAuto() {
 let currentAddPlantId = null;
 
 async function _autoSaveNewPlant() {
-  const defaultName = captureMode === 'pilz' ? 'Pilz ' : 'Pflanze ';
+  const defaultName = captureMode === 'pilz' ? 'Pilz ' : captureMode === 'krankheit' ? 'Kranke Pflanze ' : 'Pflanze ';
   const name = lastAiName || (defaultName + new Date().toLocaleDateString('de-DE'));
   const savedPhoto = addPhotoData;
+  // Archiv unterscheidet nur Pflanzen/Pilze (siehe setArchiveFilter) — "Krankheit"
+  // ist aktuell keine eigene Archiv-Kategorie, sondern landet mit bei den Pflanzen,
+  // bekommt aber ein eigenes Kennzeichen (krank:true) für spätere Auswertung.
   const newId = await dbPut({
     name,
     latin: lastAiLatin || '',
@@ -1215,6 +1227,7 @@ async function _autoSaveNewPlant() {
     gps: addGpsData,
     infoHtml: lastAiInfoHtml || undefined,
     type: captureMode === 'pilz' ? 'pilz' : 'pflanze',
+    krank: captureMode === 'krankheit' ? true : undefined,
     level: 0,
     nextReview: Date.now(),
     created: Date.now()
