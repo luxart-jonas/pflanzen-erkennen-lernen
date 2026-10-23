@@ -115,6 +115,29 @@
   textarea { resize: vertical; min-height: 80px; }
   .form-group { margin-bottom: 16px; }
 
+  /* ── Erfassungs-Modus (Pflanzen / Pilze / Krankheiten) ── */
+  .mode-row { display:flex; flex-direction:column; gap:8px; margin-bottom:18px; }
+  .mode-btn {
+    display:flex; align-items:center; gap:10px; width:100%; text-align:left;
+    padding:12px 14px; border-radius:10px; border:1.5px solid var(--border);
+    background:var(--surface); cursor:pointer; font-size:.95rem; color:var(--text);
+    transition:border-color .15s, background .15s;
+  }
+  .mode-btn .mode-icon { font-size:1.3rem; flex-shrink:0; }
+  .mode-btn .mode-label { flex:1; font-weight:600; }
+  .mode-btn .mode-badge { font-size:.68rem; color:var(--muted); font-weight:500; }
+  .mode-btn.active { border-color:var(--accent2); background:rgba(58,170,85,.08); }
+  .mode-btn.active .mode-label { color:var(--accent2); }
+  .mode-btn:disabled, .mode-btn.disabled {
+    cursor:not-allowed; opacity:.55; background:var(--bg);
+  }
+  .pilz-disclaimer {
+    display:none; margin-bottom:16px; padding:14px; border-radius:10px;
+    background:#fff4e5; border:1.5px solid #e8a33d; color:#7a4a08;
+    font-size:.85rem; line-height:1.45;
+  }
+  .pilz-disclaimer strong { display:block; margin-bottom:4px; font-size:.9rem; }
+
   /* ── Buttons ── */
   .btn {
     display: block; width: 100%; padding: 15px;
@@ -325,7 +348,7 @@
     <h1>Planty</h1>
     <span id="due-badge" class="badge" style="display:none"></span>
     <div style="flex:1"></div>
-    <button onclick="switchTab('settings')" id="tab-settings-btn" title="Einstellungen v3.63" style="background:none;border:none;font-size:1.5rem;cursor:pointer;padding:4px 6px;color:var(--accent2);flex-shrink:0">⚙️<span style="font-size:.45rem;color:var(--muted);vertical-align:super;margin-left:1px;font-weight:600;letter-spacing:.01em">3.63</span></button>
+    <button onclick="switchTab('settings')" id="tab-settings-btn" title="Einstellungen v3.64" style="background:none;border:none;font-size:1.5rem;cursor:pointer;padding:4px 6px;color:var(--accent2);flex-shrink:0">⚙️<span style="font-size:.45rem;color:var(--muted);vertical-align:super;margin-left:1px;font-weight:600;letter-spacing:.01em">3.64</span></button>
   </div>
 
   <nav id="nav">
@@ -387,7 +410,27 @@
 
     <!-- ADD -->
     <div class="screen active" id="add-screen">
-      <h2>Neue Pflanze erfassen</h2>
+      <h2 id="add-screen-title">Neue Pflanze erfassen</h2>
+
+      <div class="mode-row" id="mode-row">
+        <button type="button" class="mode-btn" id="mode-btn-pflanze" onclick="setCaptureMode('pflanze')">
+          <span class="mode-icon">🌿</span><span class="mode-label">Pflanze</span>
+        </button>
+        <button type="button" class="mode-btn" id="mode-btn-pilz" onclick="setCaptureMode('pilz')">
+          <span class="mode-icon">🍄</span><span class="mode-label">Pilz</span>
+        </button>
+        <button type="button" class="mode-btn disabled" id="mode-btn-krankheit" disabled title="Noch nicht verfügbar">
+          <span class="mode-icon">🩺</span><span class="mode-label">Krankheit</span><span class="mode-badge">bald verfügbar</span>
+        </button>
+      </div>
+
+      <div class="pilz-disclaimer" id="pilz-disclaimer">
+        <strong>⚠️ Keine Essensempfehlung!</strong>
+        Diese App gibt ausschließlich Bestimmungs<em>wahrscheinlichkeiten</em> aus — keine verlässliche Diagnose.
+        Die Verwechslungsgefahr zwischen essbaren und giftigen Pilzen ist groß, eine Pilzvergiftung kann
+        lebensgefährlich sein. Verzehre niemals einen Pilz allein aufgrund dieser App — ziehe im Zweifel
+        immer eine Pilzsachverständige oder einen Pilzsachverständigen zu Rate.
+      </div>
 
       <div class="form-group">
         <label>Foto</label>
@@ -446,11 +489,19 @@
 
     <!-- ARCHIVE -->
     <div class="screen" id="archive-screen">
-      <div class="section-title">Alle Pflanzen</div>
+      <div class="mode-row" style="flex-direction:row;margin-bottom:14px" id="archive-filter-row">
+        <button type="button" class="mode-btn" style="justify-content:center" id="archive-filter-pflanze" onclick="setArchiveFilter('pflanze')">
+          <span class="mode-icon">🌿</span><span class="mode-label">Pflanzen</span>
+        </button>
+        <button type="button" class="mode-btn" style="justify-content:center" id="archive-filter-pilz" onclick="setArchiveFilter('pilz')">
+          <span class="mode-icon">🍄</span><span class="mode-label">Pilze</span>
+        </button>
+      </div>
+      <div class="section-title" id="archive-title">Alle Pflanzen</div>
       <div id="archive-list"></div>
       <div id="archive-empty" style="text-align:center;padding:40px 0;color:var(--muted);display:none">
         <div style="font-size:2.5rem;margin-bottom:10px">🌱</div>
-        Noch keine Pflanzen erfasst.
+        <span id="archive-empty-text">Noch keine Pflanzen erfasst.</span>
       </div>
     </div>
 
@@ -518,7 +569,7 @@
     <!-- SETTINGS -->
     <div class="screen" id="settings-screen">
       <h2>⚙️ Einstellungen</h2>
-      <p style="color:var(--muted);font-size:.8rem;margin-bottom:12px;">Version 3.63 — Plant.id + DeepSeek</p>
+      <p style="color:var(--muted);font-size:.8rem;margin-bottom:12px;">Version 3.64 — Plant.id + DeepSeek</p>
 
       <div class="card" style="margin-bottom:16px;">
         <div style="font-weight:600;color:var(--accent2);margin-bottom:8px;">🌿 Pflanzeninfos</div>
@@ -840,6 +891,41 @@ let currentDetailId = null;
 let learnQueue = [], learnIndex = 0;
 let lastAiName = '', lastAiLatin = '';
 
+// ── Erfassungs-Modus (Pflanze / Pilz / Krankheit) ─────────────
+let captureMode = localStorage.getItem('pflanz_capture_mode') || 'pflanze';
+let archiveFilter = localStorage.getItem('pflanz_archive_filter') || 'pflanze';
+
+function setCaptureMode(mode) {
+  if (mode !== 'pflanze' && mode !== 'pilz') return; // Krankheit: noch nicht wählbar
+  captureMode = mode;
+  localStorage.setItem('pflanz_capture_mode', mode);
+  _applyCaptureModeUI();
+}
+
+function _applyCaptureModeUI() {
+  document.getElementById('mode-btn-pflanze')?.classList.toggle('active', captureMode === 'pflanze');
+  document.getElementById('mode-btn-pilz')?.classList.toggle('active', captureMode === 'pilz');
+  const disclaimer = document.getElementById('pilz-disclaimer');
+  if (disclaimer) disclaimer.style.display = captureMode === 'pilz' ? 'block' : 'none';
+  const title = document.getElementById('add-screen-title');
+  if (title) title.textContent = captureMode === 'pilz' ? 'Neuen Pilz erfassen' : 'Neue Pflanze erfassen';
+}
+
+function setArchiveFilter(filter) {
+  if (filter !== 'pflanze' && filter !== 'pilz') return;
+  archiveFilter = filter;
+  localStorage.setItem('pflanz_archive_filter', filter);
+  _applyArchiveFilterUI();
+  renderArchive();
+}
+
+function _applyArchiveFilterUI() {
+  document.getElementById('archive-filter-pflanze')?.classList.toggle('active', archiveFilter === 'pflanze');
+  document.getElementById('archive-filter-pilz')?.classList.toggle('active', archiveFilter === 'pilz');
+  const title = document.getElementById('archive-title');
+  if (title) title.textContent = archiveFilter === 'pilz' ? 'Alle Pilze' : 'Alle Pflanzen';
+}
+
 // ── Profil rendern ────────────────────────────────────────────
 async function renderProfile() {
   let all = [];
@@ -943,7 +1029,16 @@ document.getElementById('photo-upload-input').addEventListener('change', async e
 // stößt danach — falls ein Plant.id-Key hinterlegt ist — die Erkennung an.
 async function _autoSaveAndRecognize() {
   const newId = await _autoSaveNewPlant();
-  if (getPlantIdKey()) {
+  if (captureMode === 'pilz') {
+    // Plant.id erkennt nur Pflanzen — für Pilze gibt es noch keine
+    // automatische Erkennung (Design/Mechanik-Stand). Name & Infos
+    // müssen manuell im Archiv ergänzt werden.
+    document.getElementById('ai-enrichment').innerHTML =
+      '<p style="color:var(--muted);font-size:.82rem">Für Pilze gibt es noch keine automatische Erkennung — bitte Namen und Hinweise manuell im Archiv eintragen. ' +
+      '<strong>Beachte den Hinweis oben: keine Essensempfehlung, nur Wahrscheinlichkeiten einer späteren Bestimmung.</strong></p>';
+    document.getElementById('ai-result').style.display = 'block';
+    _renderAddAskBlock(newId);
+  } else if (getPlantIdKey()) {
     recognizePlant(newId);
   } else {
     // Keine Erkennung möglich, aber Chat zur (noch unbestimmten) Pflanze
@@ -1109,7 +1204,8 @@ async function getGPSAuto() {
 let currentAddPlantId = null;
 
 async function _autoSaveNewPlant() {
-  const name = lastAiName || ('Pflanze ' + new Date().toLocaleDateString('de-DE'));
+  const defaultName = captureMode === 'pilz' ? 'Pilz ' : 'Pflanze ';
+  const name = lastAiName || (defaultName + new Date().toLocaleDateString('de-DE'));
   const savedPhoto = addPhotoData;
   const newId = await dbPut({
     name,
@@ -1118,6 +1214,7 @@ async function _autoSaveNewPlant() {
     photo: addPhotoData,
     gps: addGpsData,
     infoHtml: lastAiInfoHtml || undefined,
+    type: captureMode === 'pilz' ? 'pilz' : 'pflanze',
     level: 0,
     nextReview: Date.now(),
     created: Date.now()
@@ -1160,20 +1257,29 @@ function _renderAddAskBlock(plantId) {
 
 // ── Archive ───────────────────────────────────────────────────
 async function renderArchive() {
-  const plants = await dbGetAll();
+  _applyArchiveFilterUI();
+  const all = await dbGetAll();
+  // Alteinträge ohne 'type'-Feld gelten als Pflanzen (Abwärtskompatibilität)
+  const plants = all.filter(p => (p.type || 'pflanze') === archiveFilter);
   const list = document.getElementById('archive-list');
   const empty = document.getElementById('archive-empty');
   list.innerHTML = '';
-  if (!plants.length) { empty.style.display = 'block'; return; }
+  if (!plants.length) {
+    empty.style.display = 'block';
+    const emptyText = document.getElementById('archive-empty-text');
+    if (emptyText) emptyText.textContent = archiveFilter === 'pilz' ? 'Noch keine Pilze erfasst.' : 'Noch keine Pflanzen erfasst.';
+    return;
+  }
   empty.style.display = 'none';
   plants.sort((a,b) => b.created - a.created);
   plants.forEach(p => {
     const div = document.createElement('div');
     div.className = 'plant-item';
     div.onclick = () => openDetail(p.id);
+    const placeholderIcon = p.type === 'pilz' ? '🍄' : '🌿';
     const thumb = p.photo
-      ? `<img class="plant-thumb" src="${p.photo}" alt="" onerror="this.outerHTML='<div class=\\'plant-thumb-placeholder\\'>🌿</div>'">`
-      : `<div class="plant-thumb-placeholder">🌿</div>`;
+      ? `<img class="plant-thumb" src="${p.photo}" alt="" onerror="this.outerHTML='<div class=\\'plant-thumb-placeholder\\'>${placeholderIcon}</div>'">`
+      : `<div class="plant-thumb-placeholder">${placeholderIcon}</div>`;
     const due = isDue(p) ? '<div class="due-indicator"></div>' : '';
     const st = pflanzenStatus(p.level||0);
     div.innerHTML = `${thumb}<div style="flex:1;min-width:0"><div class="plant-name">${esc(p.name)}</div><div class="plant-sub"><span class="level-pill" style="color:${st.color};border-color:${st.color}">${st.label}</span>${p.latin?'<span class="level-pill" style="margin-left:4px;font-style:italic">'+esc(p.latin)+'</span>':''}</div></div>${due}`;
@@ -2214,6 +2320,8 @@ openDB().then(async () => {
   updateGroqKeyStatus();
   updateDeepSeekKeyStatus();
   updateGithubTokenStatus();
+  _applyCaptureModeUI();
+  _applyArchiveFilterUI();
   try { renderProfile(); } catch(e) {}
 }).catch(err => alert('IndexedDB Fehler: ' + err));
 
