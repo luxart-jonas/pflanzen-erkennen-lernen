@@ -208,8 +208,8 @@
   .merkmale-table { width:100%; border-collapse:collapse; margin:8px 0 16px; font-size:.85rem; }
   .merkmale-table tr { border-bottom:1px solid var(--border); }
   .merkmale-table tr:last-child { border-bottom:none; }
-  .merkmal-key { padding:6px 10px 6px 0; color:var(--muted); font-weight:500; white-space:nowrap; width:1%; vertical-align:top; }
-  .merkmal-val { padding:6px 0; color:var(--text); }
+  .merkmal-key { padding:6px 10px 6px 0; color:var(--muted); font-weight:500; white-space:normal; width:38%; max-width:140px; vertical-align:top; word-break:break-word; }
+  .merkmal-val { padding:6px 0; color:var(--text); word-break:break-word; }
   #ai-result .ai-name { font-family: var(--ff-head); font-size: 1.3rem; color: #1b5e20; margin-bottom: 4px; }
   #ai-result .ai-info { font-size: .88rem; color: #388e3c; line-height: 1.5; }
   #ai-spinner { text-align: center; padding: 12px; color: #2e7d32; font-size: .9rem; display: none; }
@@ -360,7 +360,7 @@
     <h1>Planty</h1>
     <span id="due-badge" class="badge" style="display:none"></span>
     <div style="flex:1"></div>
-    <button onclick="switchTab('settings')" id="tab-settings-btn" title="Einstellungen v3.70" style="background:none;border:none;font-size:1.5rem;cursor:pointer;padding:4px 6px;color:var(--accent2);flex-shrink:0">⚙️<span style="font-size:.45rem;color:var(--muted);vertical-align:super;margin-left:1px;font-weight:600;letter-spacing:.01em">3.70</span></button>
+    <button onclick="switchTab('settings')" id="tab-settings-btn" title="Einstellungen v3.71" style="background:none;border:none;font-size:1.5rem;cursor:pointer;padding:4px 6px;color:var(--accent2);flex-shrink:0">⚙️<span style="font-size:.45rem;color:var(--muted);vertical-align:super;margin-left:1px;font-weight:600;letter-spacing:.01em">3.71</span></button>
   </div>
 
   <nav id="nav">
@@ -592,7 +592,7 @@
     <!-- SETTINGS -->
     <div class="screen" id="settings-screen">
       <h2>⚙️ Einstellungen</h2>
-      <p style="color:var(--muted);font-size:.8rem;margin-bottom:12px;">Version 3.70 — Plant.id + DeepSeek</p>
+      <p style="color:var(--muted);font-size:.8rem;margin-bottom:12px;">Version 3.71 — Plant.id + DeepSeek</p>
 
       <div class="card" style="margin-bottom:16px;">
         <div style="font-weight:600;color:var(--accent2);margin-bottom:8px;">🌿 Pflanzeninfos</div>
@@ -1105,6 +1105,10 @@ async function _autoSaveAndRecognize() {
     // Plant.id erkennt nur Pflanzen — für Pilze läuft die Erkennung über
     // die separate mushroom.id-Test-API (siehe recognizeMushroom()).
     recognizeMushroom(newId);
+  } else if (captureMode === 'krankheit' && getPlantIdKey()) {
+    // Krankheitsdiagnose läuft über denselben Plant.id-Key, nur mit
+    // zusätzlichem "health"-Parameter (siehe recognizePlantHealth()).
+    recognizePlantHealth(newId);
   } else if (getPlantIdKey()) {
     recognizePlant(newId);
   } else {
@@ -1211,6 +1215,104 @@ async function recognizePlant(plantId) {
     // Fun Facts/Bestimmungsmerkmale können dann nicht angezeigt werden.
     document.getElementById('ai-enrichment').innerHTML =
       '<p style="color:var(--danger)">Fehler bei der Pflanzenerkennung: ' + esc(err.message) + '</p>';
+    document.getElementById('ai-result').style.display = 'block';
+    if (plantId) _renderAddAskBlock(plantId);
+  } finally {
+    spinner.style.display = 'none';
+  }
+}
+
+// ── Krankheitsdiagnose (Plant.id v3, health=all) ──────────────
+// Nutzt denselben Plant.id-Key und denselben Endpunkt wie die normale
+// Pflanzenerkennung — nur mit dem zusätzlichen Body-Parameter
+// "health":"all", der zusätzlich eine Krankheits-Einschätzung inkl.
+// Behandlungsempfehlung liefert (verbraucht laut Kindwise einen
+// weiteren Credit pro Anfrage). Keine eigene Archiv-Kategorie nötig —
+// das Ergebnis wird direkt beim Erfassen angezeigt.
+async function recognizePlantHealth(plantId) {
+  const plantidKey = getPlantIdKey();
+  if (!plantidKey) { alert('Bitte zuerst einen Plant.id API-Key in den Einstellungen eintragen.'); return; }
+  if (!addPhotoData) { alert('Bitte zuerst ein Foto aufnehmen.'); return; }
+
+  const spinner = document.getElementById('ai-spinner');
+  const resultBox = document.getElementById('ai-result');
+  spinner.textContent = '🔍 Plant.id prüft Pflanzengesundheit …';
+  spinner.style.display = 'block';
+  resultBox.style.display = 'none';
+
+  try {
+    const base64 = _dataUrlToBase64(addPhotoData);
+    const url = 'https://plant.id/api/v3/identification?details=common_names,local_name,description,treatment,cause,url&language=de';
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Api-Key': plantidKey },
+      body: JSON.stringify({ images: [base64], health: 'all' })
+    });
+    const rawText = await response.text();
+    let data;
+    try {
+      data = JSON.parse(rawText);
+    } catch (parseErr) {
+      throw new Error('Unerwartete Antwort vom Server (Status ' + response.status + '): ' + rawText.slice(0, 200));
+    }
+    if (!response.ok) throw new Error(data.message || data.error || 'Plant.id Fehler ' + response.status);
+
+    // Pflanzenart (falls erkannt)
+    const plantSuggestions = data.result?.classification?.suggestions || [];
+    const best = plantSuggestions[0];
+    const latinName = best?.name || '';
+    const germanName = best?.details?.common_names?.[0] || latinName || 'Pflanze';
+    lastAiName = germanName;
+    lastAiLatin = latinName;
+    lastAiInfoHtml = null;
+    autoApplyAiName(germanName);
+    document.getElementById('ai-name-text').textContent =
+      germanName + (latinName && latinName !== germanName ? ` (${latinName})` : '');
+
+    // Gesundheitsstatus
+    const isHealthy = data.result?.is_healthy;
+    const healthyPct = isHealthy ? Math.round((isHealthy.probability || 0) * 100) : null;
+    document.getElementById('ai-info-text').textContent =
+      isHealthy ? (isHealthy.binary ? `✅ Wirkt gesund (${healthyPct}%)` : `⚠️ Mögliche Erkrankung (${healthyPct}% unauffällig)`) : 'Plant.id-Diagnose';
+
+    // Krankheits-Vorschläge
+    const diseaseSuggestions = data.result?.disease?.suggestions || [];
+    let html = '';
+    if (!diseaseSuggestions.length) {
+      html += '<p style="color:var(--muted);font-size:.85rem">Keine konkrete Erkrankung erkannt. Falls die Pflanze trotzdem auffällig wirkt, versuche ein deutlicheres Foto der betroffenen Stelle (Blatt-Unterseite, Stängel, Wurzelbereich).</p>';
+    } else {
+      diseaseSuggestions.slice(0, 2).forEach(d => {
+        const pct = Math.round((d.probability || 0) * 100);
+        const det = d.details || {};
+        html += '<div style="margin-bottom:16px;padding:12px;border-radius:10px;background:var(--surface2);border:1px solid var(--border)">';
+        html += '<div style="font-weight:700;font-size:1rem;margin-bottom:4px">' + esc(det.local_name || d.name) + ' <span style="font-weight:500;color:var(--muted);font-size:.8rem">(' + pct + '% Übereinstimmung)</span></div>';
+        if (det.description) html += '<p style="font-size:.85rem;margin-bottom:8px"><strong>Was ist es?</strong> ' + esc(det.description) + '</p>';
+        if (det.cause) html += '<p style="font-size:.85rem;margin-bottom:8px"><strong>Ursache:</strong> ' + esc(det.cause) + '</p>';
+        const t = det.treatment || {};
+        const renderList = (title, arr) => {
+          if (!arr || !arr.length) return '';
+          let out = '<p style="font-size:.85rem;margin-bottom:2px"><strong>' + title + ':</strong></p><ul style="margin:0 0 8px 18px;padding:0;font-size:.85rem">';
+          arr.forEach(x => out += '<li>' + esc(x) + '</li>');
+          return out + '</ul>';
+        };
+        const treatmentHtml = renderList('Vorbeugend', t.prevention) + renderList('Biologisch', t.biological) + renderList('Chemisch', t.chemical);
+        if (treatmentHtml) html += '<div><strong style="font-size:.85rem">🩺 Was tun?</strong>' + treatmentHtml + '</div>';
+        html += '</div>';
+      });
+    }
+    html += '<p style="color:var(--muted);font-size:.72rem">Diagnose via Plant.id — ersetzt keine fachkundige Beratung (z.B. Pflanzenschutzamt, Gärtnerei) bei unklaren oder schweren Fällen.</p>';
+
+    document.getElementById('ai-enrichment').innerHTML = html;
+    document.getElementById('ai-illustration').style.display = 'none';
+    resultBox.style.display = 'block';
+    document.getElementById('lens-link').style.display = 'none';
+
+    if (plantId) await _updateSavedPlant(plantId, { name: germanName, latin: latinName, infoHtml: html });
+    _renderAddAskBlock(plantId);
+
+  } catch (err) {
+    document.getElementById('ai-enrichment').innerHTML =
+      '<p style="color:var(--danger)">Fehler bei der Krankheitsdiagnose: ' + esc(err.message) + '</p>';
     document.getElementById('ai-result').style.display = 'block';
     if (plantId) _renderAddAskBlock(plantId);
   } finally {
