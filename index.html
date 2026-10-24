@@ -360,7 +360,7 @@
     <h1>Planty</h1>
     <span id="due-badge" class="badge" style="display:none"></span>
     <div style="flex:1"></div>
-    <button onclick="switchTab('settings')" id="tab-settings-btn" title="Einstellungen v3.69" style="background:none;border:none;font-size:1.5rem;cursor:pointer;padding:4px 6px;color:var(--accent2);flex-shrink:0">⚙️<span style="font-size:.45rem;color:var(--muted);vertical-align:super;margin-left:1px;font-weight:600;letter-spacing:.01em">3.69</span></button>
+    <button onclick="switchTab('settings')" id="tab-settings-btn" title="Einstellungen v3.70" style="background:none;border:none;font-size:1.5rem;cursor:pointer;padding:4px 6px;color:var(--accent2);flex-shrink:0">⚙️<span style="font-size:.45rem;color:var(--muted);vertical-align:super;margin-left:1px;font-weight:600;letter-spacing:.01em">3.70</span></button>
   </div>
 
   <nav id="nav">
@@ -592,7 +592,7 @@
     <!-- SETTINGS -->
     <div class="screen" id="settings-screen">
       <h2>⚙️ Einstellungen</h2>
-      <p style="color:var(--muted);font-size:.8rem;margin-bottom:12px;">Version 3.69 — Plant.id + DeepSeek</p>
+      <p style="color:var(--muted);font-size:.8rem;margin-bottom:12px;">Version 3.70 — Plant.id + DeepSeek</p>
 
       <div class="card" style="margin-bottom:16px;">
         <div style="font-weight:600;color:var(--accent2);margin-bottom:8px;">🌿 Pflanzeninfos</div>
@@ -1577,7 +1577,7 @@ async function _loadMushroomEnrichment(germanName, latinName, plantId) {
   try {
     const res = await aiChat([{ role: 'user', content:
       'Gib mir Informationen zum Pilz "' + germanName + '"' + (latinName ? ' (' + latinName + ')' : '') +
-      ' auf Deutsch.\n\n**Bestimmungsmerkmale:**\nListe NUR die zutreffenden Merkmale tabellarisch im Format "Punkt: Wert" auf — eine Zeile pro Merkmal. Prüfe folgende Punkte und nenne nur die, die für diesen Pilz relevant sind:\nHutfarbe, Hutform, Hutoberfläche (z.B. schleimig, trocken, schuppig), Lamellenfarbe, Stielform, Stieloberfläche, Fleischfarbe, Geruch, Speisewert/Giftigkeit (allgemein bekannt, ersetzt KEINE Bestimmung durch Fachleute), Vorkommen/Standort, Jahreszeit, typische Verwechslungsarten.\nKurz und stichwortartig, kein Fließtext.\n\n**Fun Facts:**\n3-4 kurze Fun Facts auf Deutsch. Schreibe: modern, lebendig, seriös und sachlich korrekt. Keine trockenen Lexikon-Sätze, sondern überraschende Details die im Gedächtnis bleiben. Kurz und prägnant. Wenn es leicht möglich ist, ohne den Satz zu verbiegen, vermeide den Namen des Pilzes im Fun Fact selbst zu nennen.\n\nWICHTIG: Verwende **ausschließlich** für die beiden Überschriften "**Bestimmungsmerkmale:**" und "**Fun Facts:**". Markiere innerhalb der Inhalte KEIN einziges Wort fett. Gib KEINE eigene Essensempfehlung oder Aufforderung zum Verzehr.'
+      ' auf Deutsch.\n\n**Bestimmungsmerkmale:**\nListe NUR die zutreffenden Merkmale tabellarisch im Format "Punkt: Wert" auf — eine Zeile pro Merkmal. Prüfe folgende Punkte und nenne nur die, die für diesen Pilz relevant sind (gib je nach Pilztyp Lamellen ODER Röhren an, nie beide, falls nur eines zutrifft):\nHutfarbe, Hutform, Hutoberfläche (z.B. schleimig, trocken, schuppig), Lamellenfarbe (bei Lamellenpilzen) oder Röhren-/Porenfarbe (bei Röhrlingen), Stielform, Stieloberfläche (z.B. genattert, Ring, Knolle), Fleischfarbe, Besonderheiten bei Anschnitt/Verletzung (z.B. Blaufärbung, Rötung, Farbwechsel des Fleisches oder der Röhren), Geruch, Speisewert/Giftigkeit (allgemein bekannt, ersetzt KEINE Bestimmung durch Fachleute), Vorkommen/Standort, Jahreszeit, typische Verwechslungsarten.\nKurz und stichwortartig, kein Fließtext.\n\n**Fun Facts:**\n3-4 kurze Fun Facts auf Deutsch. Schreibe: modern, lebendig, seriös und sachlich korrekt. Keine trockenen Lexikon-Sätze, sondern überraschende Details die im Gedächtnis bleiben. Kurz und prägnant. Wenn es leicht möglich ist, ohne den Satz zu verbiegen, vermeide den Namen des Pilzes im Fun Fact selbst zu nennen.\n\nWICHTIG: Verwende **ausschließlich** für die beiden Überschriften "**Bestimmungsmerkmale:**" und "**Fun Facts:**". Markiere innerhalb der Inhalte KEIN einziges Wort fett. Gib KEINE eigene Essensempfehlung oder Aufforderung zum Verzehr.'
     }], 1536);
     const data = await res.json();
     if (!res.ok) throw new Error(data.error?.message);
