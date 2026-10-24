@@ -370,7 +370,7 @@
     <h1>Planty</h1>
     <span id="due-badge" class="badge" style="display:none"></span>
     <div style="flex:1"></div>
-    <button onclick="switchTab('settings')" id="tab-settings-btn" title="Einstellungen v3.74" style="background:none;border:none;font-size:1.5rem;cursor:pointer;padding:4px 6px;color:var(--accent2);flex-shrink:0">⚙️<span style="font-size:.45rem;color:var(--muted);vertical-align:super;margin-left:1px;font-weight:600;letter-spacing:.01em">3.74</span></button>
+    <button onclick="switchTab('settings')" id="tab-settings-btn" title="Einstellungen v3.75" style="background:none;border:none;font-size:1.5rem;cursor:pointer;padding:4px 6px;color:var(--accent2);flex-shrink:0">⚙️<span style="font-size:.45rem;color:var(--muted);vertical-align:super;margin-left:1px;font-weight:600;letter-spacing:.01em">3.75</span></button>
   </div>
 
   <nav id="nav">
@@ -607,7 +607,7 @@
     <!-- SETTINGS -->
     <div class="screen" id="settings-screen">
       <h2>⚙️ Einstellungen</h2>
-      <p style="color:var(--muted);font-size:.8rem;margin-bottom:12px;">Version 3.74 — Plant.id + DeepSeek</p>
+      <p style="color:var(--muted);font-size:.8rem;margin-bottom:12px;">Version 3.75 — Plant.id + DeepSeek</p>
 
       <div class="card" style="margin-bottom:16px;">
         <div style="font-weight:600;color:var(--accent2);margin-bottom:8px;">🌿 Pflanzeninfos</div>
@@ -1692,10 +1692,16 @@ async function openDetail(id) {
   document.getElementById('modal-info-btn').style.display = 'none';
   document.getElementById('modal-overlay').classList.add('open');
   loadModalInfo();
-  // Botanische Illustration laden
+  // Illustration/Fotos laden — bei Krankheiten ausschließlich zur Krankheit
+  // selbst (nie zur befallenen Pflanze, die gibt es ja schon im Pflanzen-
+  // Archiv), sonst die botanische Illustration der Pflanzenart.
   document.getElementById('modal-illus-wrap').style.display = 'none';
   document.getElementById('modal-illus-source').innerHTML = '';
-  loadIllustration('modal', p.latin || '', id);
+  if (p.krank) {
+    loadDiseaseIllustration('modal', p.latin || '', p.name || '', id);
+  } else {
+    loadIllustration('modal', p.latin || '', id);
+  }
 }
 function closeModal(e) {
   if (!e || e.target === document.getElementById('modal-overlay'))
@@ -1881,6 +1887,13 @@ async function lookupPlantArchive(latinName) {
 
 async function generatePlantInfo(plantId) {
   const p = await dbGet(plantId); if (!p) return null;
+
+  // Krankheits-Einträge: ihr infoHtml kommt aus der Plant.id-Diagnose
+  // (Ursache/Heilung/Wikipedia-Infos zur Krankheit). Diese allgemeine
+  // "Bestimmungsmerkmale/Fun Facts einer Pflanze"-Logik passt dafür nicht
+  // und würde die Diagnose mit falschen Infos überschreiben — daher hier
+  // nichts (neu) generieren, einfach den vorhandenen Stand zurückgeben.
+  if (p.krank) return p.infoHtml || null;
 
   // ── Erst im Archiv nachschauen, bevor die KI bemüht wird ──
   if (p.latin) {
@@ -2377,6 +2390,76 @@ async function loadIllustration(context, latin, plantId) {
   }
 }
 
+// Krankheiten/Schädlinge haben auf Wikimedia Commons oft eine eigene,
+// nach dem (wissenschaftlichen) Namen benannte Kategorie mit Fotos UND
+// Illustrationen (z.B. "Phylloxeridae") — anders als bei Pflanzenarten
+// gibt es dafür keine "- botanical illustrations"-Unterkategorie. Diese
+// Funktion sucht deshalb gezielt nach der Krankheit/dem Erreger selbst
+// (nie nach der befallenen Pflanze) und nutzt bewusst NICHT loadIllustration().
+async function loadDiseaseIllustration(context, name, altName, plantId) {
+  const state = illusState[context];
+  state.latin = name || altName;
+  state.plantId = plantId;
+  state.index = 0;
+
+  const wrapEl = document.getElementById(context + '-illus-wrap');
+  const boxEl  = document.getElementById(context + '-illus-box');
+  const srcEl  = document.getElementById(context + '-illus-source');
+
+  if (!name && !altName) { wrapEl.style.display = 'none'; return; }
+
+  const p = await dbGet(plantId);
+  if (p?.illustrationUrl) {
+    state.customUrl = p.illustrationUrl;
+    showIllusImage(context, p.illustrationUrl, 'Eigenes Bild');
+    return;
+  }
+  state.customUrl = null;
+
+  wrapEl.style.display = 'block';
+  boxEl.innerHTML = '<div class="illus-loading">🔍 Suche Fotos/Illustrationen zur Krankheit …</div>';
+  srcEl.textContent = '';
+
+  try {
+    // 1. Versuch: direkte Commons-Kategorie mit dem (wissenschaftlichen)
+    // Namen der Krankheit/des Erregers.
+    let files = name ? await _wikiCategoryFiles(name) : [];
+    // 2. Versuch: deutscher Name der Krankheit, falls abweichend.
+    if (!files.length && altName && altName !== name) files = await _wikiCategoryFiles(altName);
+    // 3. Versuch: allgemeine Commons-Volltextsuche, falls keine passende
+    // Kategorie existiert.
+    if (!files.length) files = await _wikiFileSearch(name || altName || '');
+
+    state.files = files;
+    if (!state.files.length) {
+      boxEl.innerHTML = '<div class="illus-loading" style="color:var(--muted)">Keine zusätzlichen Fotos/Illustrationen verfügbar</div>';
+      return;
+    }
+    await showIllusIndex(context, 0);
+  } catch(err) {
+    boxEl.innerHTML = '<div class="illus-loading" style="color:#e88">Fehler beim Laden</div>';
+  }
+}
+
+async function _wikiCategoryFiles(name) {
+  try {
+    const apiUrl = `https://commons.wikimedia.org/w/api.php?action=query&list=categorymembers&cmtitle=Category:${encodeURIComponent(name)}&cmtype=file&cmlimit=10&format=json&origin=*`;
+    const res = await fetch(apiUrl);
+    const data = await res.json();
+    return (data?.query?.categorymembers || []).map(m => m.title);
+  } catch { return []; }
+}
+
+async function _wikiFileSearch(name) {
+  if (!name) return [];
+  try {
+    const apiUrl = `https://commons.wikimedia.org/w/api.php?action=query&list=search&srnamespace=6&srlimit=10&srsearch=${encodeURIComponent(name)}&format=json&origin=*`;
+    const res = await fetch(apiUrl);
+    const data = await res.json();
+    return (data?.query?.search || []).map(m => m.title);
+  } catch { return []; }
+}
+
 async function showIllusIndex(context, idx) {
   const state = illusState[context];
   if (!state.files.length) return;
@@ -2817,7 +2900,10 @@ async function loadAllInfos(forceReload=false) {
   btn.disabled = true;
 
   const all = await dbGetAll();
-  const toProcess = all.filter(p => (forceReload || !p.infoHtml) && p.name);
+  // Krankheits-Einträge ausnehmen: ihr infoHtml stammt aus der Plant.id-
+  // Diagnose, nicht aus dieser KI-"Bestimmungsmerkmale/Fun Facts"-Logik, die
+  // für eine Krankheit keinen Sinn ergibt und die Diagnose überschreiben würde.
+  const toProcess = all.filter(p => (forceReload || !p.infoHtml) && p.name && !p.krank);
   status.style.color = 'var(--muted)';
 
   if (!toProcess.length) {
