@@ -360,7 +360,7 @@
     <h1>Planty</h1>
     <span id="due-badge" class="badge" style="display:none"></span>
     <div style="flex:1"></div>
-    <button onclick="switchTab('settings')" id="tab-settings-btn" title="Einstellungen v3.66" style="background:none;border:none;font-size:1.5rem;cursor:pointer;padding:4px 6px;color:var(--accent2);flex-shrink:0">⚙️<span style="font-size:.45rem;color:var(--muted);vertical-align:super;margin-left:1px;font-weight:600;letter-spacing:.01em">3.66</span></button>
+    <button onclick="switchTab('settings')" id="tab-settings-btn" title="Einstellungen v3.67" style="background:none;border:none;font-size:1.5rem;cursor:pointer;padding:4px 6px;color:var(--accent2);flex-shrink:0">⚙️<span style="font-size:.45rem;color:var(--muted);vertical-align:super;margin-left:1px;font-weight:600;letter-spacing:.01em">3.67</span></button>
   </div>
 
   <nav id="nav">
@@ -592,7 +592,7 @@
     <!-- SETTINGS -->
     <div class="screen" id="settings-screen">
       <h2>⚙️ Einstellungen</h2>
-      <p style="color:var(--muted);font-size:.8rem;margin-bottom:12px;">Version 3.66 — Plant.id + DeepSeek</p>
+      <p style="color:var(--muted);font-size:.8rem;margin-bottom:12px;">Version 3.67 — Plant.id + DeepSeek</p>
 
       <div class="card" style="margin-bottom:16px;">
         <div style="font-weight:600;color:var(--accent2);margin-bottom:8px;">🌿 Pflanzeninfos</div>
@@ -618,6 +618,25 @@
       </div>
       <div id="plantid-key-status" class="key-none">Kein Plant.id API-Key gespeichert</div>
       <button class="btn btn-danger" style="margin-top:12px" onclick="deletePlantIdKey()">Plant.id Key löschen</button>
+
+      <hr style="border:none;border-top:1px solid var(--border);margin:24px 0">
+
+      <h2 style="margin-bottom:6px">🍄 Pilz-Erkennung (mushroom.id)</h2>
+      <p class="settings-note" style="margin-bottom:12px">
+        Nutzt aktuell die <strong>kostenlose Kindwise-Test-API</strong> für Pilze — ganz ohne eigenen Key,
+        begrenzt auf <strong>10 Erkennungen pro Tag und Gerät</strong>. Ideal zum Ausprobieren.<br><br>
+        Einen eigenen mushroom.id-Key (mehr Anfragen, kostenpflichtig nach Gratis-Credits) kannst du optional
+        unter <span style="color:var(--accent)">admin.kindwise.com</span> registrieren — jedes Kindwise-Produkt
+        braucht einen eigenen Key, auch wenn du schon einen Plant.id-Key hast. Die Anbindung an einen eigenen
+        Key ist technisch noch nicht fertig abgesichert; die App nutzt deshalb vorerst immer die Test-API.
+      </p>
+      <label>Eigener mushroom.id API-Key (optional, noch ohne Funktion)</label>
+      <div class="api-key-row">
+        <input type="text" id="mushroomid-key-input" placeholder="API-Key…" autocomplete="new-password" autocorrect="off" autocapitalize="off" spellcheck="false" name="mushroomid-key-field" style="-webkit-text-security:disc">
+        <button class="btn btn-primary btn-sm" onclick="saveMushroomIdKey()">Speichern</button>
+      </div>
+      <div id="mushroomid-key-status" class="key-none">Test-API aktiv — kein eigener Key hinterlegt</div>
+      <button class="btn btn-danger" style="margin-top:12px" onclick="deleteMushroomIdKey()">Key löschen</button>
 
       <hr style="border:none;border-top:1px solid var(--border);margin:24px 0">
 
@@ -897,6 +916,31 @@ function deletePlantIdKey() {
   localStorage.removeItem('plantid_key');
   updatePlantIdKeyStatus();
 }
+function getMushroomIdKey() { return localStorage.getItem('mushroomid_key') || ''; }
+function saveMushroomIdKey() {
+  const val = document.getElementById('mushroomid-key-input').value.trim();
+  if (!val) { alert('Bitte einen mushroom.id API-Key eingeben.'); return; }
+  localStorage.setItem('mushroomid_key', val);
+  document.getElementById('mushroomid-key-input').value = '';
+  updateMushroomIdKeyStatus();
+  alert('mushroom.id API-Key gespeichert! Hinweis: Die App nutzt zur Erkennung aktuell trotzdem die kostenlose Test-API — die Anbindung des eigenen Keys folgt, sobald der Produktions-Endpunkt bestätigt ist.');
+}
+function deleteMushroomIdKey() {
+  if (!confirm('mushroom.id API-Key wirklich löschen?')) return;
+  localStorage.removeItem('mushroomid_key');
+  updateMushroomIdKeyStatus();
+}
+function updateMushroomIdKeyStatus() {
+  const el = document.getElementById('mushroomid-key-status');
+  if (!el) return;
+  if (getMushroomIdKey()) {
+    el.textContent = '✓ Eigener Key gespeichert (noch nicht aktiv — Test-API wird weiter genutzt)';
+    el.className = 'key-ok';
+  } else {
+    el.textContent = 'Test-API aktiv — kein eigener Key hinterlegt';
+    el.className = 'key-none';
+  }
+}
 function updatePlantIdKeyStatus() {
   const el = document.getElementById('plantid-key-status');
   if (!el) return;
@@ -1058,14 +1102,9 @@ document.getElementById('photo-upload-input').addEventListener('change', async e
 async function _autoSaveAndRecognize() {
   const newId = await _autoSaveNewPlant();
   if (captureMode === 'pilz') {
-    // Plant.id erkennt nur Pflanzen — für Pilze gibt es noch keine
-    // automatische Erkennung (Design/Mechanik-Stand). Name & Infos
-    // müssen manuell im Archiv ergänzt werden.
-    document.getElementById('ai-enrichment').innerHTML =
-      '<p style="color:var(--muted);font-size:.82rem">Für Pilze gibt es noch keine automatische Erkennung — bitte Namen und Hinweise manuell im Archiv eintragen. ' +
-      '<strong>Beachte den Hinweis oben: keine Essensempfehlung, nur Wahrscheinlichkeiten einer späteren Bestimmung.</strong></p>';
-    document.getElementById('ai-result').style.display = 'block';
-    _renderAddAskBlock(newId);
+    // Plant.id erkennt nur Pflanzen — für Pilze läuft die Erkennung über
+    // die separate mushroom.id-Test-API (siehe recognizeMushroom()).
+    recognizeMushroom(newId);
   } else if (getPlantIdKey()) {
     recognizePlant(newId);
   } else {
@@ -1172,6 +1211,87 @@ async function recognizePlant(plantId) {
     // Fun Facts/Bestimmungsmerkmale können dann nicht angezeigt werden.
     document.getElementById('ai-enrichment').innerHTML =
       '<p style="color:var(--danger)">Fehler bei der Pflanzenerkennung: ' + esc(err.message) + '</p>';
+    document.getElementById('ai-result').style.display = 'block';
+    if (plantId) _renderAddAskBlock(plantId);
+  } finally {
+    spinner.style.display = 'none';
+  }
+}
+
+// ── mushroom.id Pilz-Erkennung (kostenlose Kindwise-Test-API) ──
+// Verwendet aktuell den öffentlichen Trial-Endpunkt von Kindwise
+// (https://agents.kindwise.com/mushroom_id/identification). Dieser
+// Endpunkt braucht KEINEN eigenen API-Key, ist aber auf 10 Anfragen
+// pro Gerät/IP und Tag begrenzt (HTTP 429 danach). Ein eigener
+// mushroom.id-Key (siehe Einstellungen) wird aktuell noch nicht
+// verwendet, weil der echte Produktions-Endpunkt dafür aus der
+// öffentlichen Dokumentation nicht zweifelsfrei zu ermitteln war —
+// das wird nachgerüstet, sobald er bestätigt ist.
+async function recognizeMushroom(plantId) {
+  if (!addPhotoData) { alert('Bitte zuerst ein Foto aufnehmen.'); return; }
+
+  const spinner = document.getElementById('ai-spinner');
+  const resultBox = document.getElementById('ai-result');
+  spinner.textContent = '🔍 mushroom.id (Test-API) erkennt Pilz …';
+  spinner.style.display = 'block';
+  resultBox.style.display = 'none';
+
+  try {
+    // Der Trial-Endpunkt erwartet das vollständige data:-URL (inkl.
+    // "data:image/jpeg;base64,…"-Präfix), anders als Plant.id.
+    const url = 'https://agents.kindwise.com/mushroom_id/identification?details=common_names,edibility&language=de';
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ images: [addPhotoData] })
+    });
+    const rawText = await response.text();
+
+    if (response.status === 429) {
+      throw new Error('Tageslimit der kostenlosen Test-API erreicht (max. 10 Erkennungen/Tag). Bitte morgen erneut versuchen, oder später einen eigenen Key hinterlegen.');
+    }
+
+    let data;
+    try {
+      data = JSON.parse(rawText);
+    } catch (parseErr) {
+      throw new Error('Unerwartete Antwort vom Server (Status ' + response.status + '): ' + rawText.slice(0, 200));
+    }
+
+    if (!response.ok) throw new Error(data.message || data.error || 'mushroom.id Fehler ' + response.status);
+    if (data.result?.is_mushroom && data.result.is_mushroom.probability < 0.3) {
+      throw new Error('Auf dem Foto wurde kein Pilz erkannt. Versuche ein deutlicheres Foto.');
+    }
+
+    const suggestions = data.result?.classification?.suggestions || [];
+    if (!suggestions.length) throw new Error('Kein Pilz erkannt. Versuche ein deutlicheres Foto.');
+
+    const best = suggestions[0];
+    const latinName = best.name || '';
+    const germanName = best.details?.common_names?.[0] || latinName || 'Unbekannt';
+    const pct = Math.round((best.probability || 0) * 100);
+    const edibility = best.details?.edibility || '';
+    const info = `mushroom.id (Test-API): ${pct}% Übereinstimmung` + (edibility ? ` · Einstufung: ${edibility}` : '');
+
+    lastAiName = germanName;
+    lastAiLatin = latinName;
+    lastAiInfoHtml = null;
+    autoApplyAiName(germanName);
+    document.getElementById('ai-name-text').textContent =
+      germanName + (latinName && latinName !== germanName ? ` (${latinName})` : '');
+    document.getElementById('ai-info-text').textContent = info;
+    document.getElementById('ai-enrichment').innerHTML =
+      '<p style="color:var(--danger);font-weight:700;font-size:.8rem;margin-bottom:6px">⚠️ Nur Bestimmungswahrscheinlichkeit — keine Essensempfehlung! Große Verwechslungsgefahr, im Zweifel Pilzsachverständige konsultieren.</p>' +
+      '<p style="color:var(--muted);font-size:.78rem">Erkennung über die kostenlose mushroom.id-Test-API (max. 10/Tag).</p>';
+    document.getElementById('ai-illustration').style.display = 'none';
+    resultBox.style.display = 'block';
+
+    if (plantId) await _updateSavedPlant(plantId, { name: germanName, latin: latinName });
+    _renderAddAskBlock(plantId);
+
+  } catch (err) {
+    document.getElementById('ai-enrichment').innerHTML =
+      '<p style="color:var(--danger)">Fehler bei der Pilz-Erkennung: ' + esc(err.message) + '</p>';
     document.getElementById('ai-result').style.display = 'block';
     if (plantId) _renderAddAskBlock(plantId);
   } finally {
@@ -2349,6 +2469,7 @@ async function pushPhotoToGithub(plantName, photoDataUrl) {
 openDB().then(async () => {
   updateDueBadge();
   updatePlantIdKeyStatus();
+  updateMushroomIdKeyStatus();
   updateGroqKeyStatus();
   updateDeepSeekKeyStatus();
   updateGithubTokenStatus();
