@@ -360,7 +360,7 @@
     <h1>Planty</h1>
     <span id="due-badge" class="badge" style="display:none"></span>
     <div style="flex:1"></div>
-    <button onclick="switchTab('settings')" id="tab-settings-btn" title="Einstellungen v3.67" style="background:none;border:none;font-size:1.5rem;cursor:pointer;padding:4px 6px;color:var(--accent2);flex-shrink:0">⚙️<span style="font-size:.45rem;color:var(--muted);vertical-align:super;margin-left:1px;font-weight:600;letter-spacing:.01em">3.67</span></button>
+    <button onclick="switchTab('settings')" id="tab-settings-btn" title="Einstellungen v3.68" style="background:none;border:none;font-size:1.5rem;cursor:pointer;padding:4px 6px;color:var(--accent2);flex-shrink:0">⚙️<span style="font-size:.45rem;color:var(--muted);vertical-align:super;margin-left:1px;font-weight:600;letter-spacing:.01em">3.68</span></button>
   </div>
 
   <nav id="nav">
@@ -592,7 +592,7 @@
     <!-- SETTINGS -->
     <div class="screen" id="settings-screen">
       <h2>⚙️ Einstellungen</h2>
-      <p style="color:var(--muted);font-size:.8rem;margin-bottom:12px;">Version 3.67 — Plant.id + DeepSeek</p>
+      <p style="color:var(--muted);font-size:.8rem;margin-bottom:12px;">Version 3.68 — Plant.id + DeepSeek</p>
 
       <div class="card" style="margin-bottom:16px;">
         <div style="font-weight:600;color:var(--accent2);margin-bottom:8px;">🌿 Pflanzeninfos</div>
@@ -1219,14 +1219,23 @@ async function recognizePlant(plantId) {
 }
 
 // ── mushroom.id Pilz-Erkennung (kostenlose Kindwise-Test-API) ──
-// Verwendet aktuell den öffentlichen Trial-Endpunkt von Kindwise
-// (https://agents.kindwise.com/mushroom_id/identification). Dieser
-// Endpunkt braucht KEINEN eigenen API-Key, ist aber auf 10 Anfragen
-// pro Gerät/IP und Tag begrenzt (HTTP 429 danach). Ein eigener
+// Verwendet den öffentlichen Trial-Endpunkt von Kindwise
+// (agents.kindwise.com/mushroom_id/identification). Dieser Endpunkt
+// braucht KEINEN eigenen API-Key, ist aber auf 10 Anfragen pro
+// Gerät/IP und Tag begrenzt (HTTP 429 danach). Ein eigener
 // mushroom.id-Key (siehe Einstellungen) wird aktuell noch nicht
 // verwendet, weil der echte Produktions-Endpunkt dafür aus der
 // öffentlichen Dokumentation nicht zweifelsfrei zu ermitteln war —
 // das wird nachgerüstet, sobald er bestätigt ist.
+//
+// Der direkte Browser-Aufruf gegen agents.kindwise.com schlägt mit
+// "Failed to fetch" fehl (kein CORS für Web-Apps vorgesehen — der
+// Endpunkt ist für Server/Agenten gedacht, nicht für Browser-JS).
+// Deshalb läuft der Aufruf über einen eigenen kleinen Supabase-Proxy
+// (mushroomid-proxy), der die Anfrage serverseitig weiterleitet und
+// die nötigen CORS-Header setzt — genau wie es vorher schon beim
+// PlantNet-Wechsel mit plantnet-proxy gelöst wurde.
+const MUSHROOMID_PROXY_URL = 'https://ormpszktwwiahjooukjk.supabase.co/functions/v1/mushroomid-proxy';
 async function recognizeMushroom(plantId) {
   if (!addPhotoData) { alert('Bitte zuerst ein Foto aufnehmen.'); return; }
 
@@ -1239,7 +1248,7 @@ async function recognizeMushroom(plantId) {
   try {
     // Der Trial-Endpunkt erwartet das vollständige data:-URL (inkl.
     // "data:image/jpeg;base64,…"-Präfix), anders als Plant.id.
-    const url = 'https://agents.kindwise.com/mushroom_id/identification?details=common_names,edibility&language=de';
+    const url = MUSHROOMID_PROXY_URL + '?details=common_names,edibility&language=de';
     const response = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
