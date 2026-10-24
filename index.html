@@ -136,11 +136,19 @@
     cursor:not-allowed; opacity:.55; background:var(--bg);
   }
   .pilz-disclaimer {
-    display:none; margin-bottom:16px; padding:14px; border-radius:10px;
-    background:#fff4e5; border:1.5px solid #e8a33d; color:#7a4a08;
-    font-size:.85rem; line-height:1.45;
+    display:none; margin-bottom:16px; padding:18px 16px; border-radius:12px;
+    background:#fdeaea; border:2.5px solid var(--danger); color:#7a0f0c;
+    font-size:.85rem; line-height:1.5; text-align:center;
+    box-shadow:0 2px 10px rgba(229,57,53,.2);
   }
-  .pilz-disclaimer strong { display:block; margin-bottom:4px; font-size:.9rem; }
+  .pilz-disclaimer-skull { font-size:2.6rem; line-height:1; margin-bottom:6px; }
+  .pilz-disclaimer-headline {
+    font-size:1.25rem; font-weight:800; color:var(--danger);
+    letter-spacing:.02em; margin-bottom:10px; text-transform:uppercase;
+  }
+  .pilz-disclaimer p { text-align:left; margin-bottom:10px; }
+  .pilz-disclaimer p:last-child { margin-bottom:0; }
+  .pilz-disclaimer strong { color:var(--danger); font-weight:800; }
 
   /* ── Buttons ── */
   .btn {
@@ -352,7 +360,7 @@
     <h1>Planty</h1>
     <span id="due-badge" class="badge" style="display:none"></span>
     <div style="flex:1"></div>
-    <button onclick="switchTab('settings')" id="tab-settings-btn" title="Einstellungen v3.65" style="background:none;border:none;font-size:1.5rem;cursor:pointer;padding:4px 6px;color:var(--accent2);flex-shrink:0">⚙️<span style="font-size:.45rem;color:var(--muted);vertical-align:super;margin-left:1px;font-weight:600;letter-spacing:.01em">3.65</span></button>
+    <button onclick="switchTab('settings')" id="tab-settings-btn" title="Einstellungen v3.66" style="background:none;border:none;font-size:1.5rem;cursor:pointer;padding:4px 6px;color:var(--accent2);flex-shrink:0">⚙️<span style="font-size:.45rem;color:var(--muted);vertical-align:super;margin-left:1px;font-weight:600;letter-spacing:.01em">3.66</span></button>
   </div>
 
   <nav id="nav">
@@ -428,14 +436,6 @@
         </button>
       </div>
 
-      <div class="pilz-disclaimer" id="pilz-disclaimer">
-        <strong>⚠️ Keine Essensempfehlung!</strong>
-        Diese App gibt ausschließlich Bestimmungs<em>wahrscheinlichkeiten</em> aus — keine verlässliche Diagnose.
-        Die Verwechslungsgefahr zwischen essbaren und giftigen Pilzen ist groß, eine Pilzvergiftung kann
-        lebensgefährlich sein. Verzehre niemals einen Pilz allein aufgrund dieser App — ziehe im Zweifel
-        immer eine Pilzsachverständige oder einen Pilzsachverständigen zu Rate.
-      </div>
-
       <div class="form-group">
         <label>Foto</label>
         <!-- Zwei Optionen (Standard) -->
@@ -462,6 +462,25 @@
         </div>
         <input type="file" id="photo-input" accept="image/*" capture="environment">
         <input type="file" id="photo-upload-input" accept="image/*" style="display:none">
+      </div>
+
+      <div class="pilz-disclaimer" id="pilz-disclaimer">
+        <div class="pilz-disclaimer-skull">💀</div>
+        <div class="pilz-disclaimer-headline">KEINE SPEISEEMPFEHLUNG!</div>
+        <p>
+          Diese App gibt <strong>ausschließlich Bestimmungswahrscheinlichkeiten</strong> aus —
+          keine verlässliche Diagnose und keine Garantie für Essbarkeit.
+        </p>
+        <p>
+          Die Verwechslungsgefahr zwischen essbaren und <strong>giftigen</strong> Pilzen ist groß — manche
+          Doppelgänger unterscheiden sich nur in winzigen Details, die auf einem Foto kaum zu erkennen sind.
+          Eine Pilzvergiftung kann <strong>lebensgefährlich</strong> sein, im schlimmsten Fall tödlich enden.
+        </p>
+        <p>
+          Verzehre <strong>niemals</strong> einen Pilz allein aufgrund dieser App. Ziehe im Zweifel immer
+          eine Pilzsachverständige oder einen Pilzsachverständigen zu Rate (z. B. örtliche Pilzberatungsstellen
+          oder Vereine), bevor du einen selbst gesammelten Pilz isst.
+        </p>
       </div>
 
       <!-- AI Recognition -->
@@ -573,7 +592,7 @@
     <!-- SETTINGS -->
     <div class="screen" id="settings-screen">
       <h2>⚙️ Einstellungen</h2>
-      <p style="color:var(--muted);font-size:.8rem;margin-bottom:12px;">Version 3.65 — Plant.id + DeepSeek</p>
+      <p style="color:var(--muted);font-size:.8rem;margin-bottom:12px;">Version 3.66 — Plant.id + DeepSeek</p>
 
       <div class="card" style="margin-bottom:16px;">
         <div style="font-weight:600;color:var(--accent2);margin-bottom:8px;">🌿 Pflanzeninfos</div>
