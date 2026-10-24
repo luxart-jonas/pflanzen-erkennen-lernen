@@ -360,7 +360,7 @@
     <h1>Planty</h1>
     <span id="due-badge" class="badge" style="display:none"></span>
     <div style="flex:1"></div>
-    <button onclick="switchTab('settings')" id="tab-settings-btn" title="Einstellungen v3.68" style="background:none;border:none;font-size:1.5rem;cursor:pointer;padding:4px 6px;color:var(--accent2);flex-shrink:0">⚙️<span style="font-size:.45rem;color:var(--muted);vertical-align:super;margin-left:1px;font-weight:600;letter-spacing:.01em">3.68</span></button>
+    <button onclick="switchTab('settings')" id="tab-settings-btn" title="Einstellungen v3.69" style="background:none;border:none;font-size:1.5rem;cursor:pointer;padding:4px 6px;color:var(--accent2);flex-shrink:0">⚙️<span style="font-size:.45rem;color:var(--muted);vertical-align:super;margin-left:1px;font-weight:600;letter-spacing:.01em">3.69</span></button>
   </div>
 
   <nav id="nav">
@@ -592,7 +592,7 @@
     <!-- SETTINGS -->
     <div class="screen" id="settings-screen">
       <h2>⚙️ Einstellungen</h2>
-      <p style="color:var(--muted);font-size:.8rem;margin-bottom:12px;">Version 3.68 — Plant.id + DeepSeek</p>
+      <p style="color:var(--muted);font-size:.8rem;margin-bottom:12px;">Version 3.69 — Plant.id + DeepSeek</p>
 
       <div class="card" style="margin-bottom:16px;">
         <div style="font-weight:600;color:var(--accent2);margin-bottom:8px;">🌿 Pflanzeninfos</div>
@@ -1290,13 +1290,15 @@ async function recognizeMushroom(plantId) {
       germanName + (latinName && latinName !== germanName ? ` (${latinName})` : '');
     document.getElementById('ai-info-text').textContent = info;
     document.getElementById('ai-enrichment').innerHTML =
-      '<p style="color:var(--danger);font-weight:700;font-size:.8rem;margin-bottom:6px">⚠️ Nur Bestimmungswahrscheinlichkeit — keine Essensempfehlung! Große Verwechslungsgefahr, im Zweifel Pilzsachverständige konsultieren.</p>' +
-      '<p style="color:var(--muted);font-size:.78rem">Erkennung über die kostenlose mushroom.id-Test-API (max. 10/Tag).</p>';
+      '<div style="color:#388e3c;font-size:.82rem;padding:6px 0">🔍 Lade Details …</div>';
     document.getElementById('ai-illustration').style.display = 'none';
     resultBox.style.display = 'block';
 
     if (plantId) await _updateSavedPlant(plantId, { name: germanName, latin: latinName });
     _renderAddAskBlock(plantId);
+    // Fun Facts & Bestimmungsmerkmale sofort nachladen (statt erst beim
+    // späteren Öffnen im Archiv) — mit pilzspezifischen Merkmalen.
+    _loadMushroomEnrichment(germanName, latinName, plantId);
 
   } catch (err) {
     document.getElementById('ai-enrichment').innerHTML =
@@ -1552,6 +1554,65 @@ async function _loadAiEnrichment(germanName, latinName, plantId) {
   }
 
   // Wikipedia illustration
+  const wikiImg = await wikiPromise;
+  const illustDiv = document.getElementById('ai-illustration');
+  if (wikiImg && illustDiv) {
+    document.getElementById('ai-illus-img').src = wikiImg.src;
+    document.getElementById('ai-illus-credit').textContent = '© Wikipedia / Wikimedia Commons';
+    illustDiv.style.display = 'block';
+  }
+}
+
+// Fester Warnhinweis, der bei Pilz-Fun-Facts immer mit angezeigt wird
+// (unabhängig davon, ob das Laden der KI-Infos klappt oder fehlschlägt).
+const MUSHROOM_DISCLAIMER_HTML =
+  '<p style="color:var(--danger);font-weight:700;font-size:.8rem;margin-bottom:10px">⚠️ Nur Bestimmungswahrscheinlichkeit — keine Essensempfehlung! Große Verwechslungsgefahr, im Zweifel Pilzsachverständige konsultieren.</p>';
+
+// ── Fun Facts & Bestimmungsmerkmale für Pilze (eigener, pilzspezifischer
+//    Prompt statt der pflanzenspezifischen Merkmale wie Blütenfarbe etc.) ──
+async function _loadMushroomEnrichment(germanName, latinName, plantId) {
+  const wikiPromise = latinName ? _fetchWikiImage(latinName) : Promise.resolve(null);
+
+  let infoHtml = null;
+  try {
+    const res = await aiChat([{ role: 'user', content:
+      'Gib mir Informationen zum Pilz "' + germanName + '"' + (latinName ? ' (' + latinName + ')' : '') +
+      ' auf Deutsch.\n\n**Bestimmungsmerkmale:**\nListe NUR die zutreffenden Merkmale tabellarisch im Format "Punkt: Wert" auf — eine Zeile pro Merkmal. Prüfe folgende Punkte und nenne nur die, die für diesen Pilz relevant sind:\nHutfarbe, Hutform, Hutoberfläche (z.B. schleimig, trocken, schuppig), Lamellenfarbe, Stielform, Stieloberfläche, Fleischfarbe, Geruch, Speisewert/Giftigkeit (allgemein bekannt, ersetzt KEINE Bestimmung durch Fachleute), Vorkommen/Standort, Jahreszeit, typische Verwechslungsarten.\nKurz und stichwortartig, kein Fließtext.\n\n**Fun Facts:**\n3-4 kurze Fun Facts auf Deutsch. Schreibe: modern, lebendig, seriös und sachlich korrekt. Keine trockenen Lexikon-Sätze, sondern überraschende Details die im Gedächtnis bleiben. Kurz und prägnant. Wenn es leicht möglich ist, ohne den Satz zu verbiegen, vermeide den Namen des Pilzes im Fun Fact selbst zu nennen.\n\nWICHTIG: Verwende **ausschließlich** für die beiden Überschriften "**Bestimmungsmerkmale:**" und "**Fun Facts:**". Markiere innerhalb der Inhalte KEIN einziges Wort fett. Gib KEINE eigene Essensempfehlung oder Aufforderung zum Verzehr.'
+    }], 1536);
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error?.message);
+    const text = data.choices?.[0]?.message?.content || '';
+    if (!text.trim()) throw new Error('Leere Antwort');
+    const stripBold = s => (s || '').replace(/\*\*/g, '').trim();
+    const merkmaleMatch = text.match(/\*\*\s*Bestimmungsmerkmale\s*:?\s*\*\*([\s\S]*?)(?=\*\*\s*Fun\s*Facts|$)/i);
+    const funfactsMatch = text.match(/\*\*\s*Fun\s*Facts\s*:?\s*\*\*([\s\S]*)/i);
+    let html = '';
+    const merkmaleBody = merkmaleMatch ? stripBold(merkmaleMatch[1]) : '';
+    const funfactsBody = funfactsMatch ? stripBold(funfactsMatch[1]) : '';
+    if (funfactsBody) {
+      html += '<h3>Fun Facts</h3>';
+      funfactsBody.split('\n').filter(l => l.trim()).forEach(l => {
+        html += '<p>' + l.replace(/^[-•*\d.]+\s*/,'') + '</p>';
+      });
+    }
+    if (merkmaleBody) {
+      html += '<h3>Bestimmungsmerkmale</h3><table class="merkmale-table">';
+      merkmaleBody.split('\n').filter(l => l.trim() && l.includes(':')).forEach(row => {
+        const [k, ...rest] = row.split(':');
+        html += '<tr><td class="merkmal-key">' + k.trim().replace(/^[-•*]\s*/,'') + '</td><td class="merkmal-val">' + rest.join(':').trim() + '</td></tr>';
+      });
+      html += '</table>';
+    }
+    if (html) infoHtml = MUSHROOM_DISCLAIMER_HTML + html;
+  } catch(e) { console.warn('Mushroom enrichment error:', e.message); }
+
+  const enrichDiv = document.getElementById('ai-enrichment');
+  if (enrichDiv) enrichDiv.innerHTML = infoHtml || (MUSHROOM_DISCLAIMER_HTML + '<p style="color:var(--muted);font-size:.82rem">Details nicht verfügbar.</p>');
+  if (infoHtml) {
+    lastAiInfoHtml = infoHtml;
+    if (plantId) _updateSavedPlant(plantId, { infoHtml });
+  }
+
   const wikiImg = await wikiPromise;
   const illustDiv = document.getElementById('ai-illustration');
   if (wikiImg && illustDiv) {
