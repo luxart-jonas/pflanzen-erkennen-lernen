@@ -370,7 +370,7 @@
     <h1>Planty</h1>
     <span id="due-badge" class="badge" style="display:none"></span>
     <div style="flex:1"></div>
-    <button onclick="switchTab('settings')" id="tab-settings-btn" title="Einstellungen v3.78" style="background:none;border:none;font-size:1.5rem;cursor:pointer;padding:4px 6px;color:var(--accent2);flex-shrink:0">⚙️<span style="font-size:.45rem;color:var(--muted);vertical-align:super;margin-left:1px;font-weight:600;letter-spacing:.01em">3.78</span></button>
+    <button onclick="switchTab('settings')" id="tab-settings-btn" title="Einstellungen v3.79" style="background:none;border:none;font-size:1.5rem;cursor:pointer;padding:4px 6px;color:var(--accent2);flex-shrink:0">⚙️<span style="font-size:.45rem;color:var(--muted);vertical-align:super;margin-left:1px;font-weight:600;letter-spacing:.01em">3.79</span></button>
   </div>
 
   <nav id="nav">
@@ -607,7 +607,7 @@
     <!-- SETTINGS -->
     <div class="screen" id="settings-screen">
       <h2>⚙️ Einstellungen</h2>
-      <p style="color:var(--muted);font-size:.8rem;margin-bottom:12px;">Version 3.78 — Plant.id + DeepSeek</p>
+      <p style="color:var(--muted);font-size:.8rem;margin-bottom:12px;">Version 3.79 — Plant.id + DeepSeek</p>
 
       <div class="card" style="margin-bottom:16px;">
         <div style="font-weight:600;color:var(--accent2);margin-bottom:8px;">🌿 Pflanzeninfos</div>
@@ -1328,6 +1328,7 @@ async function _humanizeDiseaseInfo(diseaseGerman, hostPlantGerman, det) {
     const prompt = 'Du bist Gartenberater in einer Pflanzen-App. Hier sind rohe, sehr fachsprachliche Rohdaten einer Krankheitsdiagnose für "' + diseaseGerman + '"' + (hostPlantGerman ? ' an "' + hostPlantGerman + '"' : '') + ':\n\n' + parts.join('\n') +
       '\n\nSchreibe daraus einen nutzerfreundlichen, praxisnahen Text für Hobbygärtner ohne Fachkenntnisse. Wichtig:\n' +
       '- Möglichst wenig trockener Chemie-Fachjargon. Statt reiner Verbindungsnamen wie "Kaliumhydrogencarbonat" lieber die Alltags-Variante nennen (z.B. "Backpulver/Natron-Spritzung") oder den Wirkstoff kurz einklammern, falls er wichtig ist.\n' +
+      '- JEDES genannte Mittel/Präparat (egal ob chemisch, biologisch oder natürlich, z.B. auch "Neemöl"/"Neem-Präparate", Gesteinsmehl, Schachtelhalmextrakt etc.) MUSS kurz in einfachen Worten erklärt werden, was es überhaupt ist, UND wo man es normalerweise bekommt (z.B. "Gartencenter/Baumarkt", "Drogerie", "online"). Setze nichts als bekannt voraus. Beispiel: "Neemöl (ein Pflanzenöl aus den Samen des Neembaums, das Schädlinge und Pilze abwehrt – erhältlich in Gartencentern, Baumärkten oder online)".\n' +
       '- Einfache Hausmittel und praktische Alltagstipps/Lifehacks VOR chemischen oder speziellen Bio-Präparaten bevorzugen, wo das sinnvoll möglich ist.\n' +
       '- Konkrete, direkt umsetzbare Handlungsschritte statt allgemeiner Floskeln.\n' +
       '- Kurz, übersichtlich, keine Wiederholungen, keine Markennamen.\n\n' +
