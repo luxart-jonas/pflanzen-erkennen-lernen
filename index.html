@@ -370,7 +370,7 @@
     <h1>Planty</h1>
     <span id="due-badge" class="badge" style="display:none"></span>
     <div style="flex:1"></div>
-    <button onclick="switchTab('settings')" id="tab-settings-btn" title="Einstellungen v3.76" style="background:none;border:none;font-size:1.5rem;cursor:pointer;padding:4px 6px;color:var(--accent2);flex-shrink:0">⚙️<span style="font-size:.45rem;color:var(--muted);vertical-align:super;margin-left:1px;font-weight:600;letter-spacing:.01em">3.76</span></button>
+    <button onclick="switchTab('settings')" id="tab-settings-btn" title="Einstellungen v3.77" style="background:none;border:none;font-size:1.5rem;cursor:pointer;padding:4px 6px;color:var(--accent2);flex-shrink:0">⚙️<span style="font-size:.45rem;color:var(--muted);vertical-align:super;margin-left:1px;font-weight:600;letter-spacing:.01em">3.77</span></button>
   </div>
 
   <nav id="nav">
@@ -607,7 +607,7 @@
     <!-- SETTINGS -->
     <div class="screen" id="settings-screen">
       <h2>⚙️ Einstellungen</h2>
-      <p style="color:var(--muted);font-size:.8rem;margin-bottom:12px;">Version 3.76 — Plant.id + DeepSeek</p>
+      <p style="color:var(--muted);font-size:.8rem;margin-bottom:12px;">Version 3.77 — Plant.id + DeepSeek</p>
 
       <div class="card" style="margin-bottom:16px;">
         <div style="font-weight:600;color:var(--accent2);margin-bottom:8px;">🌿 Pflanzeninfos</div>
@@ -1187,6 +1187,42 @@ function _dataUrlToBase64(dataUrl) {
   // nach dem Komma ist genau das Base64, das Plant.id erwartet.
   return dataUrl.split(',')[1] || '';
 }
+
+// Plant.id/mushroom.id liefern trotz "language=de" nicht für jede Art einen
+// deutschen Trivialnamen — dann bleibt nur der lateinische Name übrig, und
+// genau DER soll laut Nutzerwunsch nie groß/allein als Hauptname erscheinen.
+// Fallback: deutsche Wikipedia fragen — Pilz-/Pflanzenartikel liegen dort
+// fast immer unter dem deutschen Trivialnamen, der lateinische Name ist
+// meist nur eine Weiterleitung darauf.
+function _looksLikeLatinBinomial(s) {
+  const parts = (s || '').trim().split(/\s+/);
+  if (parts.length < 2 || parts.length > 3) return false;
+  return /^[A-ZÄÖÜ][a-zäöüß\-]+$/.test(parts[0]) && parts.slice(1).every(w => /^[a-zäöüß.\-]+$/.test(w));
+}
+async function _fetchGermanNameFallback(latinName) {
+  if (!latinName) return null;
+  try {
+    const url = `https://de.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(latinName)}&redirects=1&format=json&origin=*`;
+    const r = await fetch(url);
+    const d = await r.json();
+    const redirectTo = d.query?.redirects?.[0]?.to;
+    if (redirectTo && !_looksLikeLatinBinomial(redirectTo)) return redirectTo;
+    const pages = d.query?.pages || {};
+    const page = Object.values(pages)[0];
+    if (page && page.missing === undefined && page.title && page.title !== latinName && !_looksLikeLatinBinomial(page.title)) {
+      return page.title;
+    }
+  } catch {}
+  return null;
+}
+// Ermittelt den anzuzeigenden deutschen Namen: erst die von der API
+// gelieferten common_names, sonst der Wikipedia-Fallback, erst zuletzt
+// (wirklich nur als letzter Ausweg) der lateinische Name selbst.
+async function _resolveGermanName(apiName, latinName) {
+  if (apiName && apiName !== latinName && !_looksLikeLatinBinomial(apiName)) return apiName;
+  const fromWiki = await _fetchGermanNameFallback(latinName);
+  return fromWiki || apiName || latinName || 'Unbekannt';
+}
 async function recognizePlant(plantId) {
   const plantidKey = getPlantIdKey();
   if (!plantidKey) { alert('Bitte zuerst einen Plant.id API-Key in den Einstellungen eintragen.'); return; }
@@ -1230,7 +1266,7 @@ async function recognizePlant(plantId) {
 
     const best = suggestions[0];
     const latinName = best.name || '';
-    const germanName = best.details?.common_names?.[0] || latinName || 'Unbekannt';
+    const germanName = await _resolveGermanName(best.details?.common_names?.[0] || '', latinName);
     const pct = Math.round((best.probability || 0) * 100);
     const info = `Plant.id: ${pct}% Übereinstimmung`;
 
@@ -1239,8 +1275,10 @@ async function recognizePlant(plantId) {
     lastAiInfoHtml = null;
     autoApplyAiName(germanName);
     document.getElementById('ai-label-text').textContent = '🌿 Plant.id-Vorschlag';
-    document.getElementById('ai-name-text').textContent =
-      germanName + (latinName && latinName !== germanName ? ` (${latinName})` : '');
+    // Deutscher Name immer groß/prominent, lateinischer Name klein dahinter
+    // (nie umgekehrt, auch wenn die API mal keinen deutschen Namen liefert).
+    document.getElementById('ai-name-text').innerHTML =
+      esc(germanName) + (latinName && latinName !== germanName ? ' <span style="font-size:.6em;font-weight:400;opacity:.75;font-style:italic">(' + esc(latinName) + ')</span>' : '');
     document.getElementById('ai-info-text').textContent = info;
     document.getElementById('ai-subname-text').textContent = '';
     // Reset enrichment area
@@ -1308,7 +1346,7 @@ async function recognizePlantHealth(plantId) {
     const plantSuggestions = data.result?.classification?.suggestions || [];
     const best = plantSuggestions[0];
     const latinName = best?.name || '';
-    const germanName = best?.details?.common_names?.[0] || latinName || '';
+    const germanName = latinName ? await _resolveGermanName(best?.details?.common_names?.[0] || '', latinName) : '';
     lastAiLatin = latinName;
     lastAiInfoHtml = null;
 
@@ -1340,11 +1378,12 @@ async function recognizePlantHealth(plantId) {
       // Sowohl deutscher als auch lateinischer/wissenschaftlicher Name der
       // Krankheit anzeigen, nicht nur einen davon.
       const diseaseLatin = d.name || '';
-      const diseaseGerman = det.local_name || diseaseLatin;
-      const diseaseDisplayName = diseaseGerman + (diseaseLatin && diseaseLatin !== diseaseGerman ? ' (' + diseaseLatin + ')' : '');
+      const diseaseGerman = await _resolveGermanName(det.local_name || '', diseaseLatin);
       lastAiName = diseaseGerman;
       autoApplyAiName(diseaseGerman);
-      document.getElementById('ai-name-text').textContent = diseaseDisplayName;
+      // Deutscher Name immer groß/prominent, lateinischer Name klein dahinter.
+      document.getElementById('ai-name-text').innerHTML =
+        esc(diseaseGerman) + (diseaseLatin && diseaseLatin !== diseaseGerman ? ' <span style="font-size:.6em;font-weight:400;opacity:.75;font-style:italic">(' + esc(diseaseLatin) + ')</span>' : '');
       document.getElementById('ai-info-text').textContent = pct + '% Übereinstimmung';
 
       if (det.description || det.cause) {
@@ -1467,7 +1506,7 @@ async function recognizeMushroom(plantId) {
 
     const best = suggestions[0];
     const latinName = best.name || '';
-    const germanName = best.details?.common_names?.[0] || latinName || 'Unbekannt';
+    const germanName = await _resolveGermanName(best.details?.common_names?.[0] || '', latinName);
     const pct = Math.round((best.probability || 0) * 100);
     const edibility = best.details?.edibility || '';
     const info = `mushroom.id (Test-API): ${pct}% Übereinstimmung` + (edibility ? ` · Einstufung: ${edibility}` : '');
@@ -1477,8 +1516,10 @@ async function recognizeMushroom(plantId) {
     lastAiInfoHtml = null;
     autoApplyAiName(germanName);
     document.getElementById('ai-label-text').textContent = '🍄 mushroom.id-Vorschlag';
-    document.getElementById('ai-name-text').textContent =
-      germanName + (latinName && latinName !== germanName ? ` (${latinName})` : '');
+    // Deutscher Name immer groß/prominent, lateinischer Name klein dahinter
+    // (nie umgekehrt, auch wenn die API mal keinen deutschen Namen liefert).
+    document.getElementById('ai-name-text').innerHTML =
+      esc(germanName) + (latinName && latinName !== germanName ? ' <span style="font-size:.6em;font-weight:400;opacity:.75;font-style:italic">(' + esc(latinName) + ')</span>' : '');
     document.getElementById('ai-info-text').textContent = info;
     document.getElementById('ai-subname-text').textContent = '';
     document.getElementById('ai-enrichment').innerHTML =
