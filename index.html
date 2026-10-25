@@ -370,7 +370,7 @@
     <h1>Planty</h1>
     <span id="due-badge" class="badge" style="display:none"></span>
     <div style="flex:1"></div>
-    <button onclick="switchTab('settings')" id="tab-settings-btn" title="Einstellungen v3.79" style="background:none;border:none;font-size:1.5rem;cursor:pointer;padding:4px 6px;color:var(--accent2);flex-shrink:0">⚙️<span style="font-size:.45rem;color:var(--muted);vertical-align:super;margin-left:1px;font-weight:600;letter-spacing:.01em">3.79</span></button>
+    <button onclick="switchTab('settings')" id="tab-settings-btn" title="Einstellungen v3.80" style="background:none;border:none;font-size:1.5rem;cursor:pointer;padding:4px 6px;color:var(--accent2);flex-shrink:0">⚙️<span style="font-size:.45rem;color:var(--muted);vertical-align:super;margin-left:1px;font-weight:600;letter-spacing:.01em">3.80</span></button>
   </div>
 
   <nav id="nav">
@@ -607,68 +607,7 @@
     <!-- SETTINGS -->
     <div class="screen" id="settings-screen">
       <h2>⚙️ Einstellungen</h2>
-      <p style="color:var(--muted);font-size:.8rem;margin-bottom:12px;">Version 3.79 — Plant.id + DeepSeek</p>
-
-      <div class="card" style="margin-bottom:16px;">
-        <div style="font-weight:600;color:var(--accent2);margin-bottom:8px;">🌿 Pflanzeninfos</div>
-        <p style="font-size:.85rem;color:var(--muted);margin-bottom:12px;">Neue Pflanzen erhalten ihre Infos automatisch im Hintergrund. Mit diesem Button werden alle Infos für die gesamte Sammlung neu generiert.</p>
-        <button class="btn btn-secondary" onclick="confirmRegenAll()" id="btn-load-all">🔄 Alle Infos neu generieren</button>
-        <div id="load-all-status" style="margin-top:10px;font-size:.85rem;color:var(--muted);"></div>
-      </div>
-      <p class="settings-note">
-        Für Fun Facts und Bestimmungsmerkmale.<br>Wird nur lokal gespeichert.
-      </p>
-
-      <hr style="border:none;border-top:1px solid var(--border);margin:24px 0">
-
-      <h2 style="margin-bottom:6px">🌿 Plant.id API-Key</h2>
-      <p class="settings-note" style="margin-bottom:12px">
-        Für die Pflanzenerkennung via Plant.id (kostenpflichtig nach Verbrauch der Gratis-Credits).<br>
-        Key unter <span style="color:var(--accent)">admin.kindwise.com</span> registrieren.
-      </p>
-      <label>Plant.id API-Key</label>
-      <div class="api-key-row">
-        <input type="text" id="plantid-key-input" placeholder="API-Key…" autocomplete="new-password" autocorrect="off" autocapitalize="off" spellcheck="false" name="plantid-key-field" style="-webkit-text-security:disc">
-        <button class="btn btn-primary btn-sm" onclick="savePlantIdKey()">Speichern</button>
-      </div>
-      <div id="plantid-key-status" class="key-none">Kein Plant.id API-Key gespeichert</div>
-      <button class="btn btn-danger" style="margin-top:12px" onclick="deletePlantIdKey()">Plant.id Key löschen</button>
-
-      <hr style="border:none;border-top:1px solid var(--border);margin:24px 0">
-
-      <h2 style="margin-bottom:6px">🍄 Pilz-Erkennung (mushroom.id)</h2>
-      <p class="settings-note" style="margin-bottom:12px">
-        Nutzt aktuell die <strong>kostenlose Kindwise-Test-API</strong> für Pilze — ganz ohne eigenen Key,
-        begrenzt auf <strong>10 Erkennungen pro Tag und Gerät</strong>. Ideal zum Ausprobieren.<br><br>
-        Einen eigenen mushroom.id-Key (mehr Anfragen, kostenpflichtig nach Gratis-Credits) kannst du optional
-        unter <span style="color:var(--accent)">admin.kindwise.com</span> registrieren — jedes Kindwise-Produkt
-        braucht einen eigenen Key, auch wenn du schon einen Plant.id-Key hast. Die Anbindung an einen eigenen
-        Key ist technisch noch nicht fertig abgesichert; die App nutzt deshalb vorerst immer die Test-API.
-      </p>
-      <label>Eigener mushroom.id API-Key (optional, noch ohne Funktion)</label>
-      <div class="api-key-row">
-        <input type="text" id="mushroomid-key-input" placeholder="API-Key…" autocomplete="new-password" autocorrect="off" autocapitalize="off" spellcheck="false" name="mushroomid-key-field" style="-webkit-text-security:disc">
-        <button class="btn btn-primary btn-sm" onclick="saveMushroomIdKey()">Speichern</button>
-      </div>
-      <div id="mushroomid-key-status" class="key-none">Test-API aktiv — kein eigener Key hinterlegt</div>
-      <button class="btn btn-danger" style="margin-top:12px" onclick="deleteMushroomIdKey()">Key löschen</button>
-
-      <hr style="border:none;border-top:1px solid var(--border);margin:24px 0">
-
-      <h2 style="margin-bottom:6px">💬 DeepSeek API-Key (optional)</h2>
-      <p class="settings-note" style="margin-bottom:12px">
-        Für Pflanzeninfos (Fun Facts, Bestimmungsmerkmale) und die "Frage zur Pflanze"-Funktion. Funktioniert bereits ohne eigenen Key (geteiltes Kontingent). Trage hier nur einen eigenen ein, wenn du deinen eigenen DeepSeek-Zugang nutzen möchtest.<br>
-        Key unter <span style="color:var(--accent)">platform.deepseek.com</span> registrieren — dort ist vorher etwas Guthaben nötig (kostenpflichtig, kein Freikontingent).
-      </p>
-      <label>DeepSeek API-Key</label>
-      <div class="api-key-row">
-        <input type="text" id="deepseek-key-input" placeholder="sk-…" autocomplete="new-password" autocorrect="off" autocapitalize="off" spellcheck="false" name="deepseek-key-field" style="-webkit-text-security:disc">
-        <button class="btn btn-primary btn-sm" onclick="saveDeepSeekKey()">Speichern</button>
-      </div>
-      <div id="deepseek-key-status" class="key-none">Kein DeepSeek API-Key gespeichert</div>
-      <button class="btn btn-danger" style="margin-top:12px" onclick="deleteDeepSeekKey()">DeepSeek Key löschen</button>
-
-      <hr style="border:none;border-top:1px solid var(--border);margin:24px 0">
+      <p style="color:var(--muted);font-size:.8rem;margin-bottom:12px;">Version 3.80 — Plant.id + DeepSeek</p>
 
       <h2 style="margin-bottom:6px">🧹 Duplikate entfernen</h2>
       <p class="settings-note">Erkennt doppelte Einträge anhand von Name und Foto und löscht die Kopien.</p>
@@ -826,147 +765,41 @@ function pflanzenStatus(level) {
   return                            { label:'🌟 Meisterhaft', color:'#f59f00' };
 }
 
-// ── API Key (localStorage) ───────────────────────────────────
-function getPlantIdKey() { return localStorage.getItem('plantid_key') || ''; }
-function getGroqKey() { return localStorage.getItem('groq_key') || ''; }
-
-// ── Groq-Anfrage: eigener Key falls hinterlegt, sonst über den
-//    serverseitigen Proxy (Supabase Edge Function), damit die App auch
-//    ohne eigenen Groq-Key "einfach funktioniert". ──
-const GROQ_PROXY_URL = 'https://ormpszktwwiahjooukjk.supabase.co/functions/v1/groq-proxy';
+// ── Backend-Proxys (Supabase Edge Functions) ──────────────────
+// Alle API-Keys (Plant.id, mushroom.id, DeepSeek) liegen serverseitig als
+// Supabase-Secrets — nirgends mehr im Client, kein eigener Key nötig.
+// Jede Anfrage trägt eine anonyme Geräte-ID, über die der Server das
+// wöchentliche Nutzungslimit durchsetzt (siehe plantid-proxy/
+// mushroomid-proxy).
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9ybXBzemt0d3dpYWhqb291a2prIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4NzM5NTAsImV4cCI6MjA5NjQ0OTk1MH0.Jz4rKTlrvRbfdxS1e8fRkwXeD3CJsITeC6Q4lDBjfCc';
-async function groqChat(messages, max_tokens) {
-  const key = getGroqKey();
-  if (key) {
-    return fetch('https://api.groq.com/openai/v1/chat/completions', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key },
-      body: JSON.stringify({ model: 'openai/gpt-oss-120b', max_tokens, messages })
-    });
+const PLANTID_PROXY_URL = 'https://ormpszktwwiahjooukjk.supabase.co/functions/v1/plantid-proxy';
+const MUSHROOMID_PROXY_URL = 'https://ormpszktwwiahjooukjk.supabase.co/functions/v1/mushroomid-proxy';
+const DEEPSEEK_PROXY_URL = 'https://ormpszktwwiahjooukjk.supabase.co/functions/v1/deepseek-proxy';
+
+function getDeviceId() {
+  let id = localStorage.getItem('pflanz_device_id');
+  if (!id) {
+    id = (crypto.randomUUID ? crypto.randomUUID() : 'dev-' + Date.now() + '-' + Math.random().toString(36).slice(2));
+    localStorage.setItem('pflanz_device_id', id);
   }
-  return fetch(GROQ_PROXY_URL, {
+  return id;
+}
+// Gemeinsame Header für alle Proxy-Aufrufe: Supabase-Anon-Key (Pflicht,
+// da verify_jwt aktiv ist) + die anonyme Geräte-ID für die Limit-Prüfung.
+function _proxyHeaders() {
+  return {
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+    'x-device-id': getDeviceId(),
+  };
+}
+
+async function aiChat(messages, max_tokens) {
+  return fetch(DEEPSEEK_PROXY_URL, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + SUPABASE_ANON_KEY },
+    headers: _proxyHeaders(),
     body: JSON.stringify({ max_tokens, messages })
   });
-}
-
-function saveGroqKey() {
-  const val = document.getElementById('groq-key-input').value.trim();
-  if (!val) { alert('Bitte einen Groq API-Key eingeben.'); return; }
-  localStorage.setItem('groq_key', val);
-  localStorage.setItem('groq_key_source', 'user');
-  document.getElementById('groq-key-input').value = '';
-  updateGroqKeyStatus();
-  alert('Groq API-Key gespeichert!');
-}
-function deleteGroqKey() {
-  if (!confirm('Groq API-Key wirklich löschen?')) return;
-  localStorage.removeItem('groq_key');
-  localStorage.removeItem('groq_key_source');
-  updateGroqKeyStatus();
-}
-function updateGroqKeyStatus() {
-  const el = document.getElementById('groq-key-status');
-  if (!el) return;
-  if (getGroqKey()) {
-    el.textContent = '✓ Groq API-Key gespeichert';
-    el.className = 'key-ok';
-  } else {
-    el.textContent = 'Kein Groq API-Key gespeichert';
-    el.className = 'key-none';
-  }
-}
-
-// ── DeepSeek (eigener Key, optional) — hat Vorrang vor Groq ────
-function getDeepSeekKey() { return localStorage.getItem('deepseek_key') || ''; }
-async function deepSeekChat(messages, max_tokens) {
-  const key = getDeepSeekKey();
-  return fetch('https://api.deepseek.com/chat/completions', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + key },
-    body: JSON.stringify({ model: 'deepseek-chat', max_tokens, messages })
-  });
-}
-function saveDeepSeekKey() {
-  const val = document.getElementById('deepseek-key-input').value.trim();
-  if (!val) { alert('Bitte einen DeepSeek API-Key eingeben.'); return; }
-  localStorage.setItem('deepseek_key', val);
-  document.getElementById('deepseek-key-input').value = '';
-  updateDeepSeekKeyStatus();
-  alert('DeepSeek API-Key gespeichert!');
-}
-function deleteDeepSeekKey() {
-  if (!confirm('DeepSeek API-Key wirklich löschen?')) return;
-  localStorage.removeItem('deepseek_key');
-  updateDeepSeekKeyStatus();
-}
-function updateDeepSeekKeyStatus() {
-  const el = document.getElementById('deepseek-key-status');
-  if (!el) return;
-  if (getDeepSeekKey()) {
-    el.textContent = '✓ DeepSeek API-Key gespeichert';
-    el.className = 'key-ok';
-  } else {
-    el.textContent = 'Kein DeepSeek API-Key gespeichert';
-    el.className = 'key-none';
-  }
-}
-// ── Gemeinsamer Einstiegspunkt für alle KI-Anfragen: eigener
-//    DeepSeek-Key hat Vorrang, sonst wie bisher unverändert über
-//    Groq (eigener Key, geteilter Standard-Key oder Proxy). ──
-async function aiChat(messages, max_tokens) {
-  if (getDeepSeekKey()) return deepSeekChat(messages, max_tokens);
-  return groqChat(messages, max_tokens);
-}
-function savePlantIdKey() {
-  const val = document.getElementById('plantid-key-input').value.trim();
-  if (!val) { alert('Bitte einen Plant.id API-Key eingeben.'); return; }
-  localStorage.setItem('plantid_key', val);
-  document.getElementById('plantid-key-input').value = '';
-  updatePlantIdKeyStatus();
-  alert('Plant.id API-Key gespeichert!');
-}
-function deletePlantIdKey() {
-  if (!confirm('Plant.id API-Key wirklich löschen?')) return;
-  localStorage.removeItem('plantid_key');
-  updatePlantIdKeyStatus();
-}
-function getMushroomIdKey() { return localStorage.getItem('mushroomid_key') || ''; }
-function saveMushroomIdKey() {
-  const val = document.getElementById('mushroomid-key-input').value.trim();
-  if (!val) { alert('Bitte einen mushroom.id API-Key eingeben.'); return; }
-  localStorage.setItem('mushroomid_key', val);
-  document.getElementById('mushroomid-key-input').value = '';
-  updateMushroomIdKeyStatus();
-  alert('mushroom.id API-Key gespeichert! Hinweis: Die App nutzt zur Erkennung aktuell trotzdem die kostenlose Test-API — die Anbindung des eigenen Keys folgt, sobald der Produktions-Endpunkt bestätigt ist.');
-}
-function deleteMushroomIdKey() {
-  if (!confirm('mushroom.id API-Key wirklich löschen?')) return;
-  localStorage.removeItem('mushroomid_key');
-  updateMushroomIdKeyStatus();
-}
-function updateMushroomIdKeyStatus() {
-  const el = document.getElementById('mushroomid-key-status');
-  if (!el) return;
-  if (getMushroomIdKey()) {
-    el.textContent = '✓ Eigener Key gespeichert (noch nicht aktiv — Test-API wird weiter genutzt)';
-    el.className = 'key-ok';
-  } else {
-    el.textContent = 'Test-API aktiv — kein eigener Key hinterlegt';
-    el.className = 'key-none';
-  }
-}
-function updatePlantIdKeyStatus() {
-  const el = document.getElementById('plantid-key-status');
-  if (!el) return;
-  if (getPlantIdKey()) {
-    el.textContent = '✓ Plant.id API-Key gespeichert';
-    el.className = 'key-ok';
-  } else {
-    el.textContent = 'Kein Plant.id API-Key gespeichert';
-    el.className = 'key-none';
-  }
 }
 // ── State ────────────────────────────────────────────────────
 let addPhotoData = null, editPhotoData = null, editId = null, addGpsData = null;
@@ -1064,8 +897,6 @@ function switchTab(tab) {
   if (tab === 'profil')  renderProfile();
   if (tab === 'archive') renderArchive();
   if (tab === 'learn')   initLearn();
-  updatePlantIdKeyStatus();
-  updateGroqKeyStatus();
 }
 
 // ── Image Resize ─────────────────────────────────────────────
@@ -1143,26 +974,21 @@ document.getElementById('photo-upload-input').addEventListener('change', async e
 });
 
 // Legt die Pflanze sofort im Archiv an (ohne "Speichern"-Button) und
-// stößt danach — falls ein Plant.id-Key hinterlegt ist — die Erkennung an.
+// stößt danach die Erkennung an. Läuft immer über den serverseitigen
+// Proxy (kein eigener API-Key mehr nötig, siehe plantid-proxy/
+// mushroomid-proxy).
 async function _autoSaveAndRecognize() {
   const newId = await _autoSaveNewPlant();
   if (captureMode === 'pilz') {
     // Plant.id erkennt nur Pflanzen — für Pilze läuft die Erkennung über
     // die separate mushroom.id-Test-API (siehe recognizeMushroom()).
     recognizeMushroom(newId);
-  } else if (captureMode === 'krankheit' && getPlantIdKey()) {
-    // Krankheitsdiagnose läuft über denselben Plant.id-Key, nur mit
+  } else if (captureMode === 'krankheit') {
+    // Krankheitsdiagnose läuft über denselben Plant.id-Proxy, nur mit
     // zusätzlichem "health"-Parameter (siehe recognizePlantHealth()).
     recognizePlantHealth(newId);
-  } else if (getPlantIdKey()) {
-    recognizePlant(newId);
   } else {
-    // Keine Erkennung möglich, aber Chat zur (noch unbestimmten) Pflanze
-    // trotzdem sofort anbieten.
-    document.getElementById('ai-enrichment').innerHTML =
-      '<p style="color:var(--muted);font-size:.82rem">Kein Plant.id API-Key hinterlegt — Fun Facts &amp; Bestimmungsmerkmale können nicht automatisch geladen werden. Du kannst die Pflanze trotzdem im Archiv bearbeiten.</p>';
-    document.getElementById('ai-result').style.display = 'block';
-    _renderAddAskBlock(newId);
+    recognizePlant(newId);
   }
 }
 
@@ -1224,8 +1050,6 @@ async function _resolveGermanName(apiName, latinName) {
   return fromWiki || apiName || latinName || 'Unbekannt';
 }
 async function recognizePlant(plantId) {
-  const plantidKey = getPlantIdKey();
-  if (!plantidKey) { alert('Bitte zuerst einen Plant.id API-Key in den Einstellungen eintragen.'); return; }
   if (!addPhotoData) { alert('Bitte zuerst ein Foto aufnehmen.'); return; }
 
   const spinner = document.getElementById('ai-spinner');
@@ -1235,13 +1059,10 @@ async function recognizePlant(plantId) {
 
   try {
     const base64 = _dataUrlToBase64(addPhotoData);
-    const url = 'https://plant.id/api/v3/identification?details=common_names&language=de';
+    const url = PLANTID_PROXY_URL + '?details=common_names&language=de';
     const response = await fetch(url, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Api-Key': plantidKey
-      },
+      headers: _proxyHeaders(),
       body: JSON.stringify({ images: [base64] })
     });
     // Erst als Text lesen statt direkt .json() — wenn der Server (oder ein
@@ -1256,7 +1077,8 @@ async function recognizePlant(plantId) {
       throw new Error('Unerwartete Antwort vom Server (Status ' + response.status + '): ' + rawText.slice(0, 200));
     }
 
-    if (!response.ok) throw new Error(data.message || data.error || 'Plant.id Fehler ' + response.status);
+    if (response.status === 429) throw new Error(data?.error?.message || 'Wöchentliches Limit erreicht.');
+    if (!response.ok) throw new Error(data.message || data.error?.message || data.error || 'Plant.id Fehler ' + response.status);
     if (data.result?.is_plant && data.result.is_plant.probability < 0.3) {
       throw new Error('Auf dem Foto wurde keine Pflanze erkannt. Versuche ein deutlicheres Foto.');
     }
@@ -1378,8 +1200,6 @@ async function _humanizeDiseaseInfo(diseaseGerman, hostPlantGerman, det) {
 // weiteren Credit pro Anfrage). Keine eigene Archiv-Kategorie nötig —
 // das Ergebnis wird direkt beim Erfassen angezeigt.
 async function recognizePlantHealth(plantId) {
-  const plantidKey = getPlantIdKey();
-  if (!plantidKey) { alert('Bitte zuerst einen Plant.id API-Key in den Einstellungen eintragen.'); return; }
   if (!addPhotoData) { alert('Bitte zuerst ein Foto aufnehmen.'); return; }
 
   const spinner = document.getElementById('ai-spinner');
@@ -1390,10 +1210,10 @@ async function recognizePlantHealth(plantId) {
 
   try {
     const base64 = _dataUrlToBase64(addPhotoData);
-    const url = 'https://plant.id/api/v3/identification?details=common_names,local_name,description,treatment,cause,url&language=de';
+    const url = PLANTID_PROXY_URL + '?details=common_names,local_name,description,treatment,cause,url&language=de';
     const response = await fetch(url, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Api-Key': plantidKey },
+      headers: _proxyHeaders(),
       body: JSON.stringify({ images: [base64], health: 'all' })
     });
     const rawText = await response.text();
@@ -1403,7 +1223,8 @@ async function recognizePlantHealth(plantId) {
     } catch (parseErr) {
       throw new Error('Unerwartete Antwort vom Server (Status ' + response.status + '): ' + rawText.slice(0, 200));
     }
-    if (!response.ok) throw new Error(data.message || data.error || 'Plant.id Fehler ' + response.status);
+    if (response.status === 429) throw new Error(data?.error?.message || 'Wöchentliches Limit erreicht.');
+    if (!response.ok) throw new Error(data.message || data.error?.message || data.error || 'Plant.id Fehler ' + response.status);
 
     // Pflanzenart (als Zweitinfo — die Krankheit selbst steht im Fokus)
     const plantSuggestions = data.result?.classification?.suggestions || [];
@@ -1520,24 +1341,9 @@ async function recognizePlantHealth(plantId) {
   }
 }
 
-// ── mushroom.id Pilz-Erkennung (kostenlose Kindwise-Test-API) ──
-// Verwendet den öffentlichen Trial-Endpunkt von Kindwise
-// (agents.kindwise.com/mushroom_id/identification). Dieser Endpunkt
-// braucht KEINEN eigenen API-Key, ist aber auf 10 Anfragen pro
-// Gerät/IP und Tag begrenzt (HTTP 429 danach). Ein eigener
-// mushroom.id-Key (siehe Einstellungen) wird aktuell noch nicht
-// verwendet, weil der echte Produktions-Endpunkt dafür aus der
-// öffentlichen Dokumentation nicht zweifelsfrei zu ermitteln war —
-// das wird nachgerüstet, sobald er bestätigt ist.
-//
-// Der direkte Browser-Aufruf gegen agents.kindwise.com schlägt mit
-// "Failed to fetch" fehl (kein CORS für Web-Apps vorgesehen — der
-// Endpunkt ist für Server/Agenten gedacht, nicht für Browser-JS).
-// Deshalb läuft der Aufruf über einen eigenen kleinen Supabase-Proxy
-// (mushroomid-proxy), der die Anfrage serverseitig weiterleitet und
-// die nötigen CORS-Header setzt — genau wie es vorher schon beim
-// PlantNet-Wechsel mit plantnet-proxy gelöst wurde.
-const MUSHROOMID_PROXY_URL = 'https://ormpszktwwiahjooukjk.supabase.co/functions/v1/mushroomid-proxy';
+// ── mushroom.id Pilz-Erkennung ─────────────────────────────────
+// Läuft über den serverseitigen mushroomid-proxy (CORS + Limit-Prüfung),
+// kein eigener Key nötig — siehe Backend-Proxys oben.
 async function recognizeMushroom(plantId) {
   if (!addPhotoData) { alert('Bitte zuerst ein Foto aufnehmen.'); return; }
 
@@ -1553,13 +1359,15 @@ async function recognizeMushroom(plantId) {
     const url = MUSHROOMID_PROXY_URL + '?details=common_names,edibility&language=de';
     const response = await fetch(url, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: _proxyHeaders(),
       body: JSON.stringify({ images: [addPhotoData] })
     });
     const rawText = await response.text();
 
     if (response.status === 429) {
-      throw new Error('Tageslimit der kostenlosen Test-API erreicht (max. 10 Erkennungen/Tag). Bitte morgen erneut versuchen, oder später einen eigenen Key hinterlegen.');
+      let limitMsg = 'Wöchentliches Limit erreicht. Schau in ein paar Tagen wieder vorbei, oder hol dir unbegrenzte Erkennungen mit dem Abo.';
+      try { const d = JSON.parse(rawText); if (d?.error?.message) limitMsg = d.error.message; } catch {}
+      throw new Error(limitMsg);
     }
 
     let data;
@@ -2868,44 +2676,9 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ── Init ──────────────────────────────────────────────────────
-// ── Vorbelegte Standard-Keys ─────────────────────────────────
-// Werden nur beim allerersten Start übernommen (falls noch keine Keys
-// gespeichert sind) — Cornelia muss dafür nichts in den Einstellungen
-// eintragen. Jederzeit in den Einstellungen änderbar/löschbar.
-// HINWEIS: Für Plant.id gibt es bewusst KEINEN Standard-Key mehr. Anders als
-// der alte PlantNet-Key (500 kostenlose Anfragen/Tag) kostet jede Plant.id-
-// Anfrage echtes Guthaben (Credits) aus deinem eigenen Konto — ein
-// eingebetteter Default-Key würde bei jedem Tester/Freund automatisch dein
-// Guthaben verbrauchen, ohne dass du es merkst. Jeder trägt seinen Plant.id-
-// Key deshalb selbst in den Einstellungen ein.
-const DEFAULT_GROQ_KEY = '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';
-// Frühere im Code hinterlegte Standard-Keys. Wird gebraucht, um bei Freunden,
-// die die App schon länger installiert haben, den alten (evtl. ungültigen)
-// automatisch übernommenen Groq-Key durch den neuen zu ersetzen — OHNE dabei
-// einen Key zu überschreiben, den jemand manuell in den Einstellungen
-// eingetragen hat.
-const PREVIOUS_DEFAULT_GROQ_KEYS = ['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'];
-(function seedDefaultKeys() {
-  const storedGroq = localStorage.getItem('groq_key');
-  const groqSource = localStorage.getItem('groq_key_source');
-  if (!storedGroq && DEFAULT_GROQ_KEY) {
-    // Allererster Start: noch kein Key vorhanden.
-    localStorage.setItem('groq_key', DEFAULT_GROQ_KEY);
-    localStorage.setItem('groq_key_source', 'default');
-  } else if (storedGroq && DEFAULT_GROQ_KEY && storedGroq !== DEFAULT_GROQ_KEY) {
-    // Es ist bereits ein Key gespeichert, der nicht dem aktuellen Standard
-    // entspricht. Nur automatisch überschreiben, wenn er selbst mal
-    // automatisch gesetzt wurde (source === 'default') oder einem bekannten
-    // alten Standard-Key entspricht — ein manuell eingetragener Key bleibt
-    // immer unangetastet.
-    const wasAutoSeeded = groqSource === 'default' || PREVIOUS_DEFAULT_GROQ_KEYS.includes(storedGroq);
-    if (wasAutoSeeded) {
-      localStorage.setItem('groq_key', DEFAULT_GROQ_KEY);
-      localStorage.setItem('groq_key_source', 'default');
-    }
-  }
-})();
-
+// (Frühere fest im Code hinterlegte Standard-Keys sind entfernt — alle
+// KI-/Erkennungs-Anfragen laufen jetzt ausschließlich über die
+// serverseitigen Proxys, siehe "Backend-Proxys" weiter oben.)
 
 // ── GitHub Foto-Upload ────────────────────────────────────────────────────
 const GITHUB_REPO = 'luxart-jonas/pflanzen-erkennen-lernen';
@@ -2970,10 +2743,6 @@ async function pushPhotoToGithub(plantName, photoDataUrl) {
 
 openDB().then(async () => {
   updateDueBadge();
-  updatePlantIdKeyStatus();
-  updateMushroomIdKeyStatus();
-  updateGroqKeyStatus();
-  updateDeepSeekKeyStatus();
   updateGithubTokenStatus();
   _applyCaptureModeUI();
   _applyArchiveFilterUI();
@@ -3002,111 +2771,6 @@ document.addEventListener('DOMContentLoaded', () => {
     el.style.display = 'flex';
   }
 });
-function confirmRegenAll() {
-  if (!confirm('⚠️ Alle Infos neu generieren?\n\nDies überschreibt alle bereits generierten Bestimmungsmerkmale und Fun Facts für alle Pflanzen in deiner Sammlung. Dieser Vorgang kann mehrere Minuten dauern und kann nicht rückgängig gemacht werden.')) return;
-  if (!confirm('Wirklich alle Infos neu generieren? Alle vorherigen Texte gehen verloren!')) return;
-  loadAllInfos(true);
-}
-
-async function loadAllInfos(forceReload=false) {
-  const btn = document.getElementById('btn-load-all');
-  const status = document.getElementById('load-all-status');
-  btn.disabled = true;
-
-  const all = await dbGetAll();
-  // Krankheits-Einträge ausnehmen: ihr infoHtml stammt aus der Plant.id-
-  // Diagnose, nicht aus dieser KI-"Bestimmungsmerkmale/Fun Facts"-Logik, die
-  // für eine Krankheit keinen Sinn ergibt und die Diagnose überschreiben würde.
-  const toProcess = all.filter(p => (forceReload || !p.infoHtml) && p.name && !p.krank);
-  status.style.color = 'var(--muted)';
-
-  if (!toProcess.length) {
-    status.textContent = '✓ Alle Pflanzen haben bereits Infos!';
-    btn.disabled = false;
-    return;
-  }
-
-  status.textContent = `0 / ${toProcess.length} geladen …`;
-
-  // Erfolge/Fehler sichtbar mitzählen — bisher wurde JEDER Fehler (z.B.
-  // Rate-Limit beim KI-Proxy) nur in die Browser-Konsole geschrieben und am
-  // Ende trotzdem "✓ Fertig!" angezeigt, egal ob tatsächlich etwas
-  // geklappt hat. Dadurch wirkte ein kompletter Fehlschlag (z.B. weil der
-  // geteilte Standard-Key gerade ausgelastet ist) wie ein Erfolg.
-  let okCount = 0, failCount = 0, firstError = '';
-
-  for (let i = 0; i < toProcess.length; i++) {
-    const p = toProcess[i];
-    status.textContent = `${i+1} / ${toProcess.length}: ${p.name} …`;
-    let thisOk = true;
-
-    try {
-      // ── Lateinischen Namen von der KI erfragen falls fehlend ──
-      // (Plant.id wie auch zuvor PlantNet bieten keine Text-basierte Suche
-      // nach Namen an, nur Bild-Identifikation — daher direkt der KI-Fallback.)
-      if (!p.latin) {
-        try {
-          const latinRes = await aiChat([{ role: 'user', content: `Was ist der lateinische Name der Pflanze "${p.name}"? Antworte NUR mit dem lateinischen Namen, sonst nichts.` }], 50);
-          const latinData = await latinRes.json();
-          if (latinRes.ok) {
-            const latin = latinData.choices[0].message.content.trim().replace(/[^a-zA-Z ]/g, '').trim();
-            if (latin) {
-              const full = await dbGet(p.id);
-              if (full && !full.latin) { full.latin = latin; await dbPut(full); p.latin = latin; }
-            }
-          }
-        } catch {}
-      }
-
-      // ── Illustration via Wikimedia holen ──
-      if (p.latin) {
-        try {
-          const cat = p.latin + ' - botanical illustrations';
-          const wikiRes = await fetch(`https://commons.wikimedia.org/w/api.php?action=query&list=categorymembers&cmtitle=Category:${encodeURIComponent(cat)}&cmtype=file&cmlimit=1&format=json&origin=*`);
-          const wikiData = await wikiRes.json();
-          const members = wikiData?.query?.categorymembers || [];
-          if (members.length) {
-            const imgRes = await fetch(`https://commons.wikimedia.org/w/api.php?action=query&titles=${encodeURIComponent(members[0].title)}&prop=imageinfo&iiprop=url&iiurlwidth=600&format=json&origin=*`);
-            const imgData = await imgRes.json();
-            const pages = imgData?.query?.pages || {};
-            const thumbUrl = Object.values(pages)[0]?.imageinfo?.[0]?.thumburl;
-            if (thumbUrl) {
-              const full = await dbGet(p.id);
-              if (full && !full.illustrationUrl) { full.illustrationCacheUrl = thumbUrl; await dbPut(full); }
-            }
-          }
-        } catch {}
-      }
-
-      // ── Fun Facts + Bestimmungsmerkmale via zentrale Funktion ──
-      await generatePlantInfo(p.id);
-    } catch(err) {
-      thisOk = false;
-      failCount++;
-      if (!firstError) firstError = err.message || String(err);
-      console.warn('Fehler bei', p.name, err.message);
-    }
-    if (thisOk) okCount++;
-
-    // Nach einem Fehler (oft Rate-Limit) etwas länger pausieren, damit der
-    // geteilte KI-Proxy sich erholen kann, statt im selben Tempo weiter
-    // gegen das Limit zu laufen.
-    await new Promise(r => setTimeout(r, thisOk ? 600 : 2500));
-  }
-
-  if (failCount === 0) {
-    status.textContent = `✓ Fertig! ${okCount} Pflanze(n) aktualisiert.`;
-  } else if (okCount === 0) {
-    status.style.color = 'var(--danger)';
-    status.textContent = `⚠️ Alle ${failCount} fehlgeschlagen — z.B.: "${firstError}". Oft Rate-Limit des geteilten KI-Zugangs; in den Einstellungen einen eigenen Groq- oder DeepSeek-Key eintragen hilft, oder es später erneut versuchen.`;
-  } else {
-    status.style.color = 'var(--danger)';
-    status.textContent = `⚠️ ${okCount} geladen, ${failCount} fehlgeschlagen (z.B.: "${firstError}"). "Infos neu laden" erneut ausführen, um die fehlenden nachzuholen.`;
-  }
-  btn.disabled = false;
-}
-
-
 // ── Beim Start: fehlende Infos still im Hintergrund nachladen ──
 document.addEventListener('DOMContentLoaded', () => {
   setTimeout(async () => {
