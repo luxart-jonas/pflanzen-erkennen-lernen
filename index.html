@@ -370,7 +370,7 @@
     <h1>Planty</h1>
     <span id="due-badge" class="badge" style="display:none"></span>
     <div style="flex:1"></div>
-    <button onclick="switchTab('settings')" id="tab-settings-btn" title="Einstellungen v3.81" style="background:none;border:none;font-size:1.5rem;cursor:pointer;padding:4px 6px;color:var(--accent2);flex-shrink:0">⚙️<span style="font-size:.45rem;color:var(--muted);vertical-align:super;margin-left:1px;font-weight:600;letter-spacing:.01em">3.81</span></button>
+    <button onclick="switchTab('settings')" id="tab-settings-btn" title="Einstellungen v3.82" style="background:none;border:none;font-size:1.5rem;cursor:pointer;padding:4px 6px;color:var(--accent2);flex-shrink:0">⚙️<span style="font-size:.45rem;color:var(--muted);vertical-align:super;margin-left:1px;font-weight:600;letter-spacing:.01em">3.82</span></button>
   </div>
 
   <nav id="nav">
@@ -607,7 +607,7 @@
     <!-- SETTINGS -->
     <div class="screen" id="settings-screen">
       <h2>⚙️ Einstellungen</h2>
-      <p style="color:var(--muted);font-size:.8rem;margin-bottom:12px;">Version 3.81 — Plant.id + DeepSeek</p>
+      <p style="color:var(--muted);font-size:.8rem;margin-bottom:12px;">Version 3.82 — Plant.id + DeepSeek</p>
 
       <h2 style="margin-bottom:6px">🧹 Duplikate entfernen</h2>
       <p class="settings-note">Erkennt doppelte Einträge anhand von Name und Foto und löscht die Kopien.</p>
@@ -800,6 +800,21 @@ async function aiChat(messages, max_tokens) {
     headers: _proxyHeaders(),
     body: JSON.stringify({ max_tokens, messages })
   });
+}
+
+// ── Abo-Verifizierung (Google Play Billing) ───────────────────
+// Wird aufgerufen, sobald ein Kauf/Abo ueber die native Play-Billing-API
+// abgeschlossen wurde (Capacitor-Plugin, Phase 4). Der purchaseToken wird
+// serverseitig bei Google verifiziert — der Client kann einen Kauf nicht
+// faelschen. Erst danach gilt das Abo fuer den Server als aktiv.
+const VERIFY_PURCHASE_URL = 'https://ormpszktwwiahjooukjk.supabase.co/functions/v1/verify-purchase';
+async function verifyPurchase(purchaseToken, productId) {
+  const res = await fetch(VERIFY_PURCHASE_URL, {
+    method: 'POST',
+    headers: _proxyHeaders(),
+    body: JSON.stringify({ purchaseToken, productId })
+  });
+  return res.json();
 }
 // ── State ────────────────────────────────────────────────────
 let addPhotoData = null, editPhotoData = null, editId = null, addGpsData = null;
@@ -1088,6 +1103,7 @@ async function recognizePlant(plantId) {
       throw new Error('Unerwartete Antwort vom Server (Status ' + response.status + '): ' + rawText.slice(0, 200));
     }
 
+    if (response.status === 402) throw new Error(data?.error?.message || 'Die kostenlose Testphase ist abgelaufen. Schließe ein Abo ab, um weiterzumachen.');
     if (response.status === 429) throw new Error(data?.error?.message || 'Wöchentliches Limit erreicht.');
     if (!response.ok) throw new Error(data.message || data.error?.message || data.error || 'Plant.id Fehler ' + response.status);
     if (data.result?.is_plant && data.result.is_plant.probability < 0.3) {
@@ -1234,6 +1250,7 @@ async function recognizePlantHealth(plantId) {
     } catch (parseErr) {
       throw new Error('Unerwartete Antwort vom Server (Status ' + response.status + '): ' + rawText.slice(0, 200));
     }
+    if (response.status === 402) throw new Error(data?.error?.message || 'Die kostenlose Testphase ist abgelaufen. Schließe ein Abo ab, um weiterzumachen.');
     if (response.status === 429) throw new Error(data?.error?.message || 'Wöchentliches Limit erreicht.');
     if (!response.ok) throw new Error(data.message || data.error?.message || data.error || 'Plant.id Fehler ' + response.status);
 
@@ -1375,6 +1392,11 @@ async function recognizeMushroom(plantId) {
     });
     const rawText = await response.text();
 
+    if (response.status === 402) {
+      let subMsg = 'Die kostenlose Testphase ist abgelaufen. Schließe ein Abo ab, um weiterzumachen.';
+      try { const d = JSON.parse(rawText); if (d?.error?.message) subMsg = d.error.message; } catch {}
+      throw new Error(subMsg);
+    }
     if (response.status === 429) {
       let limitMsg = 'Wöchentliches Limit erreicht. Schau in ein paar Tagen wieder vorbei, oder hol dir unbegrenzte Erkennungen mit dem Abo.';
       try { const d = JSON.parse(rawText); if (d?.error?.message) limitMsg = d.error.message; } catch {}
