@@ -370,7 +370,7 @@
     <h1>Planty</h1>
     <span id="due-badge" class="badge" style="display:none"></span>
     <div style="flex:1"></div>
-    <button onclick="switchTab('settings')" id="tab-settings-btn" title="Einstellungen v3.77" style="background:none;border:none;font-size:1.5rem;cursor:pointer;padding:4px 6px;color:var(--accent2);flex-shrink:0">⚙️<span style="font-size:.45rem;color:var(--muted);vertical-align:super;margin-left:1px;font-weight:600;letter-spacing:.01em">3.77</span></button>
+    <button onclick="switchTab('settings')" id="tab-settings-btn" title="Einstellungen v3.78" style="background:none;border:none;font-size:1.5rem;cursor:pointer;padding:4px 6px;color:var(--accent2);flex-shrink:0">⚙️<span style="font-size:.45rem;color:var(--muted);vertical-align:super;margin-left:1px;font-weight:600;letter-spacing:.01em">3.78</span></button>
   </div>
 
   <nav id="nav">
@@ -607,7 +607,7 @@
     <!-- SETTINGS -->
     <div class="screen" id="settings-screen">
       <h2>⚙️ Einstellungen</h2>
-      <p style="color:var(--muted);font-size:.8rem;margin-bottom:12px;">Version 3.77 — Plant.id + DeepSeek</p>
+      <p style="color:var(--muted);font-size:.8rem;margin-bottom:12px;">Version 3.78 — Plant.id + DeepSeek</p>
 
       <div class="card" style="margin-bottom:16px;">
         <div style="font-weight:600;color:var(--accent2);margin-bottom:8px;">🌿 Pflanzeninfos</div>
@@ -1307,6 +1307,68 @@ async function recognizePlant(plantId) {
   }
 }
 
+// Plant.id liefert Heilungs-/Vorbeugungs-Tipps roh und sehr fachsprachlich
+// (z.B. "kaliumhydrogencarbonat", "Bacillus amyloliquefaciens") — für
+// Hobbygärtner ohne Fachkenntnisse schwer greifbar. Diese Funktion lässt
+// die KI daraus einen nutzerfreundlichen Text mit mehr Alltagstipps/
+// Hausmitteln und weniger unerklärtem Chemie-Jargon machen. Gibt null
+// zurück, wenn die Aufbereitung fehlschlägt — dann greift der Aufrufer auf
+// die ursprüngliche Plant.id-Rohdarstellung zurück.
+async function _humanizeDiseaseInfo(diseaseGerman, hostPlantGerman, det) {
+  const parts = [];
+  if (det.description) parts.push('Beschreibung: ' + det.description);
+  if (det.cause) parts.push('Ursache: ' + det.cause);
+  const t = det.treatment || {};
+  if (t.chemical?.length) parts.push('Chemische Maßnahmen (Rohdaten der API): ' + t.chemical.join(' | '));
+  if (t.biological?.length) parts.push('Biologische Maßnahmen (Rohdaten der API): ' + t.biological.join(' | '));
+  if (t.prevention?.length) parts.push('Vorbeugung (Rohdaten der API): ' + t.prevention.join(' | '));
+  if (!parts.length) return null;
+
+  try {
+    const prompt = 'Du bist Gartenberater in einer Pflanzen-App. Hier sind rohe, sehr fachsprachliche Rohdaten einer Krankheitsdiagnose für "' + diseaseGerman + '"' + (hostPlantGerman ? ' an "' + hostPlantGerman + '"' : '') + ':\n\n' + parts.join('\n') +
+      '\n\nSchreibe daraus einen nutzerfreundlichen, praxisnahen Text für Hobbygärtner ohne Fachkenntnisse. Wichtig:\n' +
+      '- Möglichst wenig trockener Chemie-Fachjargon. Statt reiner Verbindungsnamen wie "Kaliumhydrogencarbonat" lieber die Alltags-Variante nennen (z.B. "Backpulver/Natron-Spritzung") oder den Wirkstoff kurz einklammern, falls er wichtig ist.\n' +
+      '- Einfache Hausmittel und praktische Alltagstipps/Lifehacks VOR chemischen oder speziellen Bio-Präparaten bevorzugen, wo das sinnvoll möglich ist.\n' +
+      '- Konkrete, direkt umsetzbare Handlungsschritte statt allgemeiner Floskeln.\n' +
+      '- Kurz, übersichtlich, keine Wiederholungen, keine Markennamen.\n\n' +
+      'Struktur GENAU mit diesen drei Überschriften (fett mit **):\n' +
+      '**Was ist es?** (2-3 Sätze: Merkmale, Ursache, wie es entsteht/sich ausbreitet)\n' +
+      '**Heilung** (Aufzählungspunkte mit konkreten, nutzerfreundlichen Behandlungsschritten)\n' +
+      '**Vorbeugung** (Aufzählungspunkte mit Tipps, wie man es künftig vermeidet)\n\n' +
+      'Auf Deutsch, in der Du-Form, freundlich und motivierend.';
+
+    const res = await aiChat([{ role: 'user', content: prompt }], 900);
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error?.message || 'Fehler');
+    const text = data.choices?.[0]?.message?.content || '';
+    if (!text.trim()) return null;
+
+    const stripBold = s => (s || '').replace(/\*\*/g, '').trim();
+    const wasMatch = text.match(/\*\*\s*Was ist es\?\s*\*\*([\s\S]*?)(?=\*\*\s*Heilung|$)/i);
+    const healMatch = text.match(/\*\*\s*Heilung\s*\*\*([\s\S]*?)(?=\*\*\s*Vorbeugung|$)/i);
+    const prevMatch = text.match(/\*\*\s*Vorbeugung\s*\*\*([\s\S]*)/i);
+
+    const toList = s => {
+      const lines = (s || '').split('\n').map(l => l.trim().replace(/^[-•*]\s*/, '')).filter(Boolean);
+      return lines.length ? '<ul>' + lines.map(l => '<li>' + esc(l) + '</li>').join('') + '</ul>' : '';
+    };
+
+    const healBody = healMatch ? stripBold(healMatch[1]) : '';
+    const prevBody = prevMatch ? stripBold(prevMatch[1]) : '';
+    if (!healBody && !prevBody) return null;
+
+    let out = '';
+    const wasBody = wasMatch ? stripBold(wasMatch[1]) : '';
+    if (wasBody) out += '<p style="font-size:.85rem;margin-bottom:14px"><strong>Was ist es?</strong> ' + esc(wasBody) + '</p>';
+    out += '<div class="disease-card disease-heal"><div class="disease-card-title">💊 Heilung</div>' + (toList(healBody) || '<p style="font-size:.82rem;color:var(--muted);margin:4px 0 0">Keine Angabe.</p>') + '</div>';
+    out += '<div class="disease-card disease-growth"><div class="disease-card-title">🌱 Vorbeugung &amp; Tipps</div>' + (toList(prevBody) || '<p style="font-size:.82rem;color:var(--muted);margin:4px 0 0">Keine Angabe.</p>') + '</div>';
+    return out;
+  } catch (e) {
+    console.warn('Konnte Krankheitsinfos nicht nutzerfreundlich aufbereiten:', e.message);
+    return null;
+  }
+}
+
 // ── Krankheitsdiagnose (Plant.id v3, health=all) ──────────────
 // Nutzt denselben Plant.id-Key und denselben Endpunkt wie die normale
 // Pflanzenerkennung — nur mit dem zusätzlichen Body-Parameter
@@ -1386,21 +1448,31 @@ async function recognizePlantHealth(plantId) {
         esc(diseaseGerman) + (diseaseLatin && diseaseLatin !== diseaseGerman ? ' <span style="font-size:.6em;font-weight:400;opacity:.75;font-style:italic">(' + esc(diseaseLatin) + ')</span>' : '');
       document.getElementById('ai-info-text').textContent = pct + '% Übereinstimmung';
 
-      if (det.description || det.cause) {
-        html += '<p style="font-size:.85rem;margin-bottom:14px">';
-        if (det.description) html += '<strong>Was ist es?</strong> ' + esc(det.description);
-        if (det.cause) html += (det.description ? ' ' : '<strong>Ursache:</strong> ') + esc(det.cause);
-        html += '</p>';
+      // Plant.id liefert die Behandlungstipps roh und sehr fachsprachlich
+      // (chemische Verbindungsnamen, Bakterienarten etc.) — die KI bereitet
+      // das in Alltagssprache mit mehr praktischen Tipps/Hausmitteln auf.
+      // Schlägt das fehl (z.B. kein KI-Key, Rate-Limit), zeigen wir
+      // ersatzweise die ursprüngliche Plant.id-Rohdarstellung.
+      const humanized = await _humanizeDiseaseInfo(diseaseGerman, germanName, det);
+      if (humanized) {
+        html += humanized;
+      } else {
+        if (det.description || det.cause) {
+          html += '<p style="font-size:.85rem;margin-bottom:14px">';
+          if (det.description) html += '<strong>Was ist es?</strong> ' + esc(det.description);
+          if (det.cause) html += (det.description ? ' ' : '<strong>Ursache:</strong> ') + esc(det.cause);
+          html += '</p>';
+        }
+
+        const t = det.treatment || {};
+        const renderItems = arr => (arr && arr.length)
+          ? '<ul>' + arr.map(x => '<li>' + esc(x) + '</li>').join('') + '</ul>'
+          : '<p style="font-size:.82rem;color:var(--muted);margin:4px 0 0">Keine Angabe.</p>';
+        const healArr = [...(t.chemical || []), ...(t.biological || [])];
+
+        html += '<div class="disease-card disease-heal"><div class="disease-card-title">💊 Heilung</div>' + renderItems(healArr) + '</div>';
+        html += '<div class="disease-card disease-growth"><div class="disease-card-title">🌱 Tipps für besseres Wachstum</div>' + renderItems(t.prevention) + '</div>';
       }
-
-      const t = det.treatment || {};
-      const renderItems = arr => (arr && arr.length)
-        ? '<ul>' + arr.map(x => '<li>' + esc(x) + '</li>').join('') + '</ul>'
-        : '<p style="font-size:.82rem;color:var(--muted);margin:4px 0 0">Keine Angabe.</p>';
-      const healArr = [...(t.chemical || []), ...(t.biological || [])];
-
-      html += '<div class="disease-card disease-heal"><div class="disease-card-title">💊 Heilung</div>' + renderItems(healArr) + '</div>';
-      html += '<div class="disease-card disease-growth"><div class="disease-card-title">🌱 Tipps für besseres Wachstum</div>' + renderItems(t.prevention) + '</div>';
 
       // Zusätzliche Infos & Bild von Wikipedia (z.B. Nahaufnahme des
       // Schadbilds/Erregers) — nutzt den wissenschaftlichen Namen, da
