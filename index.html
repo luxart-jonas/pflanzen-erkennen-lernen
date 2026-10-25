@@ -370,7 +370,7 @@
     <h1>Planty</h1>
     <span id="due-badge" class="badge" style="display:none"></span>
     <div style="flex:1"></div>
-    <button onclick="switchTab('settings')" id="tab-settings-btn" title="Einstellungen v3.75" style="background:none;border:none;font-size:1.5rem;cursor:pointer;padding:4px 6px;color:var(--accent2);flex-shrink:0">⚙️<span style="font-size:.45rem;color:var(--muted);vertical-align:super;margin-left:1px;font-weight:600;letter-spacing:.01em">3.75</span></button>
+    <button onclick="switchTab('settings')" id="tab-settings-btn" title="Einstellungen v3.76" style="background:none;border:none;font-size:1.5rem;cursor:pointer;padding:4px 6px;color:var(--accent2);flex-shrink:0">⚙️<span style="font-size:.45rem;color:var(--muted);vertical-align:super;margin-left:1px;font-weight:600;letter-spacing:.01em">3.76</span></button>
   </div>
 
   <nav id="nav">
@@ -470,7 +470,7 @@
             </div>
           </div>
         </div>
-        <input type="file" id="photo-input" accept="image/*">
+        <input type="file" id="photo-input" accept="image/*" capture="environment">
         <input type="file" id="photo-upload-input" accept="image/*" style="display:none">
       </div>
 
@@ -607,7 +607,7 @@
     <!-- SETTINGS -->
     <div class="screen" id="settings-screen">
       <h2>⚙️ Einstellungen</h2>
-      <p style="color:var(--muted);font-size:.8rem;margin-bottom:12px;">Version 3.75 — Plant.id + DeepSeek</p>
+      <p style="color:var(--muted);font-size:.8rem;margin-bottom:12px;">Version 3.76 — Plant.id + DeepSeek</p>
 
       <div class="card" style="margin-bottom:16px;">
         <div style="font-weight:600;color:var(--accent2);margin-bottom:8px;">🌿 Pflanzeninfos</div>
@@ -745,7 +745,7 @@
         <span>Tippen um Foto zu ändern</span>
         <div class="overlay">Ändern</div>
       </div>
-      <input type="file" id="edit-photo-input" accept="image/*">
+      <input type="file" id="edit-photo-input" accept="image/*" capture="environment">
     </div>
     <div class="form-group">
       <label>Pflanzenname</label>
