@@ -371,7 +371,7 @@
     <span id="due-badge" class="badge" style="display:none"></span>
     <div style="flex:1"></div>
     <button onclick="toggleHeaderLang()" id="header-lang-btn" title="Language / Sprache" style="background:none;border:none;font-size:1.3rem;cursor:pointer;padding:4px 6px;color:var(--accent2);flex-shrink:0;position:relative">🌐<span id="header-lang-code" style="font-size:.55rem;color:var(--muted);vertical-align:super;margin-left:1px;font-weight:700;letter-spacing:.01em">DE</span></button>
-    <button onclick="switchTab('settings')" id="tab-settings-btn" title="Einstellungen v3.84" style="background:none;border:none;font-size:1.5rem;cursor:pointer;padding:4px 6px;color:var(--accent2);flex-shrink:0">⚙️<span style="font-size:.45rem;color:var(--muted);vertical-align:super;margin-left:1px;font-weight:600;letter-spacing:.01em">3.84</span></button>
+    <button onclick="switchTab('settings')" id="tab-settings-btn" title="Einstellungen v3.85" style="background:none;border:none;font-size:1.5rem;cursor:pointer;padding:4px 6px;color:var(--accent2);flex-shrink:0">⚙️<span style="font-size:.45rem;color:var(--muted);vertical-align:super;margin-left:1px;font-weight:600;letter-spacing:.01em">3.85</span></button>
   </div>
 
   <nav id="nav">
@@ -617,7 +617,7 @@
     <!-- SETTINGS -->
     <div class="screen" id="settings-screen">
       <h2 data-i18n="settings">⚙️ Einstellungen</h2>
-      <p style="color:var(--muted);font-size:.8rem;margin-bottom:12px;">Version 3.84 — Plant.id + DeepSeek</p>
+      <p style="color:var(--muted);font-size:.8rem;margin-bottom:12px;">Version 3.85 — Plant.id + DeepSeek</p>
 
       <h2 style="margin-bottom:6px" data-i18n="remove_dupes_title">🧹 Duplikate entfernen</h2>
       <p class="settings-note" data-i18n="remove_dupes_note">Erkennt doppelte Einträge anhand von Name und Foto und löscht die Kopien.</p>
@@ -1239,7 +1239,8 @@ function _looksLikeLatinBinomial(s) {
 async function _fetchGermanNameFallback(latinName) {
   if (!latinName) return null;
   try {
-    const url = `https://de.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(latinName)}&redirects=1&format=json&origin=*`;
+    const wikiHost = LANG === 'en' ? 'en.wikipedia.org' : 'de.wikipedia.org';
+    const url = `https://${wikiHost}/w/api.php?action=query&titles=${encodeURIComponent(latinName)}&redirects=1&format=json&origin=*`;
     const r = await fetch(url);
     const d = await r.json();
     const redirectTo = d.query?.redirects?.[0]?.to;
@@ -1870,24 +1871,39 @@ function closeModal(e) {
 let lastAiInfoHtml = null;
 
 async function _fetchWikiImage(latinName) {
+  const wikiHost = LANG === 'en' ? 'en.wikipedia.org' : 'de.wikipedia.org';
   try {
-    const url = `https://en.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(latinName)}&prop=pageimages&format=json&pithumbsize=500&origin=*`;
+    const url = `https://${wikiHost}/w/api.php?action=query&titles=${encodeURIComponent(latinName)}&redirects=1&prop=pageimages&format=json&pithumbsize=500&origin=*`;
     const r = await fetch(url);
     const d = await r.json();
     const pages = d.query?.pages || {};
     const page = Object.values(pages)[0];
     const thumb = page?.thumbnail;
     if (thumb) return { src: thumb.source };
-    return null;
-  } catch { return null; }
+  } catch {}
+  // Fallback: englische Wikipedia hat oft mehr/bessere Artikelbilder als
+  // die deutsche, gerade bei weniger verbreiteten Arten.
+  if (wikiHost !== 'en.wikipedia.org') {
+    try {
+      const url2 = `https://en.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(latinName)}&redirects=1&prop=pageimages&format=json&pithumbsize=500&origin=*`;
+      const r2 = await fetch(url2);
+      const d2 = await r2.json();
+      const pages2 = d2.query?.pages || {};
+      const page2 = Object.values(pages2)[0];
+      const thumb2 = page2?.thumbnail;
+      if (thumb2) return { src: thumb2.source };
+    } catch {}
+  }
+  return null;
 }
 
 // Für Krankheiten/Erreger: Bild (möglichst Nahaufnahme des Schadbilds/
 // Erregers) UND kurzer Erklärtext von Wikipedia in einem Aufruf.
 async function _fetchWikiDiseaseInfo(name) {
   if (!name) return null;
-  try {
-    const url = `https://en.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(name)}&prop=pageimages%7Cextracts&exintro=1&explaintext=1&exchars=500&format=json&pithumbsize=700&origin=*`;
+  const wikiHost = LANG === 'en' ? 'en.wikipedia.org' : 'de.wikipedia.org';
+  const fetchFrom = async host => {
+    const url = `https://${host}/w/api.php?action=query&titles=${encodeURIComponent(name)}&redirects=1&prop=pageimages%7Cextracts&exintro=1&explaintext=1&exchars=500&format=json&pithumbsize=700&origin=*`;
     const r = await fetch(url);
     const d = await r.json();
     const pages = d.query?.pages || {};
@@ -1896,8 +1912,19 @@ async function _fetchWikiDiseaseInfo(name) {
     return {
       image: page.thumbnail?.source || null,
       extract: (page.extract || '').trim(),
-      pageUrl: 'https://en.wikipedia.org/wiki/' + encodeURIComponent(page.title.replace(/ /g, '_'))
+      pageUrl: `https://${host}/wiki/` + encodeURIComponent(page.title.replace(/ /g, '_'))
     };
+  };
+  try {
+    const result = await fetchFrom(wikiHost);
+    if (result && result.extract) return result;
+    // Fallback: falls der Artikel in der gewählten Sprache fehlt oder keinen
+    // Text liefert, lieber die englische Wikipedia nehmen als gar nichts.
+    if (wikiHost !== 'en.wikipedia.org') {
+      const fallback = await fetchFrom('en.wikipedia.org');
+      if (fallback) return fallback;
+    }
+    return result;
   } catch { return null; }
 }
 
