@@ -370,7 +370,8 @@
     <h1>Planty</h1>
     <span id="due-badge" class="badge" style="display:none"></span>
     <div style="flex:1"></div>
-    <button onclick="switchTab('settings')" id="tab-settings-btn" title="Einstellungen v3.83" style="background:none;border:none;font-size:1.5rem;cursor:pointer;padding:4px 6px;color:var(--accent2);flex-shrink:0">⚙️<span style="font-size:.45rem;color:var(--muted);vertical-align:super;margin-left:1px;font-weight:600;letter-spacing:.01em">3.83</span></button>
+    <button onclick="toggleHeaderLang()" id="header-lang-btn" title="Language / Sprache" style="background:none;border:none;font-size:1.3rem;cursor:pointer;padding:4px 6px;color:var(--accent2);flex-shrink:0;position:relative">🌐<span id="header-lang-code" style="font-size:.55rem;color:var(--muted);vertical-align:super;margin-left:1px;font-weight:700;letter-spacing:.01em">DE</span></button>
+    <button onclick="switchTab('settings')" id="tab-settings-btn" title="Einstellungen v3.84" style="background:none;border:none;font-size:1.5rem;cursor:pointer;padding:4px 6px;color:var(--accent2);flex-shrink:0">⚙️<span style="font-size:.45rem;color:var(--muted);vertical-align:super;margin-left:1px;font-weight:600;letter-spacing:.01em">3.84</span></button>
   </div>
 
   <nav id="nav">
@@ -616,7 +617,7 @@
     <!-- SETTINGS -->
     <div class="screen" id="settings-screen">
       <h2 data-i18n="settings">⚙️ Einstellungen</h2>
-      <p style="color:var(--muted);font-size:.8rem;margin-bottom:12px;">Version 3.83 — Plant.id + DeepSeek</p>
+      <p style="color:var(--muted);font-size:.8rem;margin-bottom:12px;">Version 3.84 — Plant.id + DeepSeek</p>
 
       <h2 style="margin-bottom:6px" data-i18n="remove_dupes_title">🧹 Duplikate entfernen</h2>
       <p class="settings-note" data-i18n="remove_dupes_note">Erkennt doppelte Einträge anhand von Name und Foto und löscht die Kopien.</p>
@@ -844,6 +845,10 @@ function applyI18n() {
   document.documentElement.lang = LANG;
   document.getElementById('lang-btn-de')?.classList.toggle('active', LANG === 'de');
   document.getElementById('lang-btn-en')?.classList.toggle('active', LANG === 'en');
+  const codeEl = document.getElementById('header-lang-code');
+  if (codeEl) codeEl.textContent = LANG === 'en' ? 'EN' : 'DE';
+  const headerBtn = document.getElementById('header-lang-btn');
+  if (headerBtn) headerBtn.title = LANG === 'en' ? 'Switch to German' : 'Auf Englisch umschalten';
 }
 function setLang(l) {
   if (l !== 'de' && l !== 'en') return;
@@ -852,6 +857,9 @@ function setLang(l) {
   applyI18n();
   if (typeof _applyCaptureModeUI === 'function') _applyCaptureModeUI();
   if (typeof _applyArchiveFilterUI === 'function') _applyArchiveFilterUI();
+}
+function toggleHeaderLang() {
+  setLang(LANG === 'en' ? 'de' : 'en');
 }
 
 // ── IndexedDB ────────────────────────────────────────────────
