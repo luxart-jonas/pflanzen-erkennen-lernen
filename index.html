@@ -358,7 +358,7 @@
   <!-- iOS-Installationshinweis: erscheint nur in Safari, solange die App noch nicht zum Home-Bildschirm hinzugefügt wurde -->
   <div id="ios-install-hint" style="display:none;position:fixed;left:12px;right:12px;bottom:14px;z-index:9999;background:#ffffff;color:#1a2d1a;border:1px solid #c2ddb5;border-radius:14px;padding:14px 16px;box-shadow:0 6px 24px rgba(0,0,0,.4);align-items:center;gap:12px;">
     <div style="font-size:1.6rem;line-height:1;animation:iosHintBounce 1.4s ease-in-out infinite">📲</div>
-    <div style="flex:1;font-size:.85rem;line-height:1.45">
+    <div style="flex:1;font-size:.85rem;line-height:1.45" data-i18n-html="ios_hint">
       <strong>App installieren:</strong> Unten auf <strong>Teilen</strong> ⬆️ tippen, dann <strong>„Zum Home-Bildschirm"</strong> auswählen.
     </div>
     <button onclick="dismissInstallHint()" aria-label="Schließen" style="background:none;border:none;color:#9ab89a;font-size:1.2rem;cursor:pointer;padding:4px;line-height:1">✕</button>
@@ -370,21 +370,21 @@
     <h1>Planty</h1>
     <span id="due-badge" class="badge" style="display:none"></span>
     <div style="flex:1"></div>
-    <button onclick="switchTab('settings')" id="tab-settings-btn" title="Einstellungen v3.82" style="background:none;border:none;font-size:1.5rem;cursor:pointer;padding:4px 6px;color:var(--accent2);flex-shrink:0">⚙️<span style="font-size:.45rem;color:var(--muted);vertical-align:super;margin-left:1px;font-weight:600;letter-spacing:.01em">3.82</span></button>
+    <button onclick="switchTab('settings')" id="tab-settings-btn" title="Einstellungen v3.83" style="background:none;border:none;font-size:1.5rem;cursor:pointer;padding:4px 6px;color:var(--accent2);flex-shrink:0">⚙️<span style="font-size:.45rem;color:var(--muted);vertical-align:super;margin-left:1px;font-weight:600;letter-spacing:.01em">3.83</span></button>
   </div>
 
   <nav id="nav">
     <button class="nav-btn" onclick="switchTab('profil')" id="tab-profil">
-      <span class="icon">🌿</span>Profil
+      <span class="icon">🌿</span><span data-i18n="nav_profil">Profil</span>
     </button>
     <button class="nav-btn active" onclick="switchTab('add')" id="tab-add">
-      <span class="icon">➕</span>Erfassen
+      <span class="icon">➕</span><span data-i18n="nav_add">Erfassen</span>
     </button>
     <button class="nav-btn" onclick="switchTab('archive')" id="tab-archive">
-      <span class="icon">📚</span>Archiv
+      <span class="icon">📚</span><span data-i18n="nav_archive">Archiv</span>
     </button>
     <button class="nav-btn" onclick="switchTab('learn')" id="tab-learn">
-      <span class="icon">🧠</span>Lernen
+      <span class="icon">🧠</span><span data-i18n="nav_learn">Lernen</span>
     </button>
   </nav>
 
@@ -393,80 +393,89 @@
     <!-- PROFIL -->
     <div class="screen" id="profil-screen">
       <button onclick="switchTab('add')" style="display:flex;align-items:center;gap:8px;background:var(--surface2);border:1px solid var(--border);border-radius:24px;color:var(--text);font-size:1rem;font-weight:600;cursor:pointer;padding:10px 20px;font-family:inherit;margin-bottom:16px">
-        <span style="font-size:1.3rem">←</span> Schließen
+        <span style="font-size:1.3rem">←</span> <span data-i18n="close">Schließen</span>
       </button>
       <!-- Stats-Grid -->
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px">
         <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:14px;text-align:center;box-shadow:var(--shadow)">
           <div style="font-size:2rem;margin-bottom:4px">🌱</div>
           <div id="profil-stat-pflanzen" style="font-size:1.8rem;font-weight:900;color:var(--accent2);line-height:1">0</div>
-          <div style="font-size:.78rem;color:var(--muted);margin-top:2px">Pflanzen erfasst</div>
+          <div style="font-size:.78rem;color:var(--muted);margin-top:2px" data-i18n="stat_captured">Pflanzen erfasst</div>
         </div>
         <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:14px;text-align:center;box-shadow:var(--shadow)">
           <div style="font-size:2rem;margin-bottom:4px">🧠</div>
           <div id="profil-stat-gelernt" style="font-size:1.8rem;font-weight:900;color:var(--accent2);line-height:1">0</div>
-          <div style="font-size:.78rem;color:var(--muted);margin-top:2px">davon gelernt</div>
+          <div style="font-size:.78rem;color:var(--muted);margin-top:2px" data-i18n="stat_learned">davon gelernt</div>
         </div>
         <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:14px;text-align:center;box-shadow:var(--shadow)">
           <div style="font-size:2rem;margin-bottom:4px">🔥</div>
           <div id="profil-stat-streak" style="font-size:1.8rem;font-weight:900;color:var(--accent2);line-height:1">0</div>
-          <div style="font-size:.78rem;color:var(--muted);margin-top:2px">Tage-Serie</div>
+          <div style="font-size:.78rem;color:var(--muted);margin-top:2px" data-i18n="stat_streak">Tage-Serie</div>
         </div>
       </div>
 
       <!-- Pflanzenwissen -->
       <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:12px;box-shadow:var(--shadow)">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-          <div style="font-family:var(--ff-head);font-size:1rem;color:var(--accent2)">🧬 Pflanzenwissen</div>
+          <div style="font-family:var(--ff-head);font-size:1rem;color:var(--accent2)" data-i18n="plant_knowledge">🧬 Pflanzenwissen</div>
           <div id="profil-pw-pct" style="font-weight:900;font-size:1.3rem;color:var(--accent2)">0 %</div>
         </div>
         <div style="height:10px;background:var(--border);border-radius:5px;overflow:hidden;margin-bottom:8px">
           <div id="profil-pw-fill" style="height:100%;background:linear-gradient(90deg,#1e7a38,#7ed957);border-radius:5px;transition:width .6s ease"></div>
         </div>
-        <div style="font-size:.8rem;color:var(--muted)">Wie sicher beherrschst du deine bisher gelernten Pflanzen?</div>
+        <div style="font-size:.8rem;color:var(--muted)" data-i18n="plant_knowledge_sub">Wie sicher beherrschst du deine bisher gelernten Pflanzen?</div>
       </div>
 
       <!-- Heute lernen -->
-      <button class="btn btn-primary" style="margin-bottom:12px;font-size:1.05rem;padding:16px" onclick="switchTab('learn')">🧠 HEUTE LERNEN</button>
+      <button class="btn btn-primary" style="margin-bottom:12px;font-size:1.05rem;padding:16px" onclick="switchTab('learn')" data-i18n="learn_today">🧠 HEUTE LERNEN</button>
+
+      <!-- Sprache -->
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow)">
+        <div style="font-family:var(--ff-head);font-size:1rem;color:var(--accent2);margin-bottom:10px" data-i18n="language">🌐 Sprache</div>
+        <div style="display:flex;gap:8px">
+          <button type="button" class="mode-btn" id="lang-btn-de" style="justify-content:center" onclick="setLang('de')">🇩🇪 Deutsch</button>
+          <button type="button" class="mode-btn" id="lang-btn-en" style="justify-content:center" onclick="setLang('en')">🇬🇧 English</button>
+        </div>
+      </div>
     </div>
 
     <!-- ADD -->
     <div class="screen active" id="add-screen">
-      <h2 id="add-screen-title">Neue Pflanze erfassen</h2>
+      <h2 id="add-screen-title" data-i18n="add_title_plant">Neue Pflanze erfassen</h2>
 
       <div class="mode-row" id="mode-row">
         <button type="button" class="mode-btn" id="mode-btn-pflanze" onclick="setCaptureMode('pflanze')">
-          <span class="mode-icon">🌿</span><span class="mode-label">Pflanze</span><span class="mode-check">✓</span>
+          <span class="mode-icon">🌿</span><span class="mode-label" data-i18n="mode_plant">Pflanze</span><span class="mode-check">✓</span>
         </button>
         <button type="button" class="mode-btn" id="mode-btn-pilz" onclick="setCaptureMode('pilz')">
-          <span class="mode-icon">🍄</span><span class="mode-label">Pilz</span><span class="mode-check">✓</span>
+          <span class="mode-icon">🍄</span><span class="mode-label" data-i18n="mode_mushroom">Pilz</span><span class="mode-check">✓</span>
         </button>
         <button type="button" class="mode-btn" id="mode-btn-krankheit" onclick="setCaptureMode('krankheit')">
-          <span class="mode-icon">🩺</span><span class="mode-label">Krankheit</span><span class="mode-check">✓</span>
+          <span class="mode-icon">🩺</span><span class="mode-label" data-i18n="mode_disease">Krankheit</span><span class="mode-check">✓</span>
         </button>
       </div>
 
       <div class="form-group">
-        <label>Foto</label>
+        <label data-i18n="photo">Foto</label>
         <!-- Zwei Optionen (Standard) -->
         <div id="photo-cols" style="display:flex;gap:10px">
           <div class="photo-area" onclick="document.getElementById('photo-input').click()" style="flex:1;min-height:130px">
             <span class="big-icon">📷</span>
-            <span style="font-size:.78rem;text-align:center">Foto aufnehmen</span>
-            <div class="overlay">Ändern</div>
+            <span style="font-size:.78rem;text-align:center" data-i18n="photo_take">Foto aufnehmen</span>
+            <div class="overlay" data-i18n="change">Ändern</div>
           </div>
           <div class="photo-area" onclick="document.getElementById('photo-upload-input').click()" style="flex:1;min-height:130px;border-style:dashed;border-color:var(--accent2)">
             <span class="big-icon">⬆️</span>
-            <span style="font-size:.78rem;text-align:center">Foto hochladen</span>
-            <div class="overlay">Ändern</div>
+            <span style="font-size:.78rem;text-align:center" data-i18n="photo_upload">Foto hochladen</span>
+            <div class="overlay" data-i18n="change">Ändern</div>
           </div>
         </div>
         <!-- Einzelne große Vorschau nach Auswahl -->
         <div id="photo-single" style="display:none">
           <div class="photo-area" id="photo-area" style="min-height:260px" onclick="document.getElementById('photo-input').click()">
             <div class="overlay" style="opacity:1;display:flex;flex-direction:column;align-items:center;gap:6px">
-              <span>📷 neu aufnehmen</span>
-              <span onclick="event.stopPropagation();document.getElementById('photo-upload-input').click()" style="text-decoration:underline;cursor:pointer;font-size:.85rem">⬆️ hochladen</span>
+              <span data-i18n="photo_retake">📷 neu aufnehmen</span>
+              <span onclick="event.stopPropagation();document.getElementById('photo-upload-input').click()" style="text-decoration:underline;cursor:pointer;font-size:.85rem" data-i18n="photo_upload_short">⬆️ hochladen</span>
             </div>
           </div>
         </div>
@@ -476,17 +485,17 @@
 
       <div class="pilz-disclaimer" id="pilz-disclaimer">
         <div class="pilz-disclaimer-skull">💀</div>
-        <div class="pilz-disclaimer-headline">KEINE SPEISEEMPFEHLUNG!</div>
-        <p>
+        <div class="pilz-disclaimer-headline" data-i18n="pilz_headline">KEINE SPEISEEMPFEHLUNG!</div>
+        <p data-i18n-html="pilz_p1">
           Diese App gibt <strong>ausschließlich Bestimmungswahrscheinlichkeiten</strong> aus —
           keine verlässliche Diagnose und keine Garantie für Essbarkeit.
         </p>
-        <p>
+        <p data-i18n-html="pilz_p2">
           Die Verwechslungsgefahr zwischen essbaren und <strong>giftigen</strong> Pilzen ist groß — manche
           Doppelgänger unterscheiden sich nur in winzigen Details, die auf einem Foto kaum zu erkennen sind.
           Eine Pilzvergiftung kann <strong>lebensgefährlich</strong> sein, im schlimmsten Fall tödlich enden.
         </p>
-        <p>
+        <p data-i18n-html="pilz_p3">
           Verzehre <strong>niemals</strong> einen Pilz allein aufgrund dieser App. Ziehe im Zweifel immer
           eine Pilzsachverständige oder einen Pilzsachverständigen zu Rate (z. B. örtliche Pilzberatungsstellen
           oder Vereine), bevor du einen selbst gesammelten Pilz isst.
@@ -494,11 +503,11 @@
       </div>
 
       <!-- AI Recognition -->
-      <div id="ai-spinner">🔍 Plant.id erkennt Pflanze …</div>
+      <div id="ai-spinner" data-i18n="loading_plant">🔍 Plant.id erkennt Pflanze …</div>
       <div id="ai-result">
         <!-- Sticky name header -->
         <div id="ai-result-header">
-          <div class="ai-label" id="ai-label-text">🌿 Plant.id-Vorschlag</div>
+          <div class="ai-label" id="ai-label-text" data-i18n="label_plant_suggestion">🌿 Plant.id-Vorschlag</div>
           <div class="ai-name" id="ai-name-text"></div>
           <div class="ai-info" id="ai-info-text"></div>
           <div class="ai-info" id="ai-subname-text" style="font-size:.8rem;color:var(--muted);margin-top:2px"></div>
@@ -518,7 +527,7 @@
 
       <div id="add-save-bar" style="position:sticky;bottom:-16px;z-index:5;margin:20px -16px -16px;padding:14px 16px calc(14px + env(safe-area-inset-bottom));background:var(--surface);border-top:1px solid var(--border);box-shadow:0 -6px 16px rgba(40,100,40,.12);">
         <div id="add-msg" style="display:none"></div>
-        <button class="btn btn-secondary" id="btn-reset-add" style="display:none" onclick="resetAddScreen()">➕ Weitere Pflanze / Pilz / Krankheit erfassen</button>
+        <button class="btn btn-secondary" id="btn-reset-add" style="display:none" onclick="resetAddScreen()" data-i18n="capture_another">➕ Weitere Pflanze / Pilz / Krankheit erfassen</button>
       </div>
     </div>
 
@@ -526,31 +535,31 @@
     <div class="screen" id="archive-screen">
       <div class="mode-row" style="flex-direction:row;margin-bottom:14px" id="archive-filter-row">
         <button type="button" class="mode-btn" style="justify-content:center" id="archive-filter-pflanze" onclick="setArchiveFilter('pflanze')">
-          <span class="mode-icon">🌿</span><span class="mode-label">Pflanzen</span>
+          <span class="mode-icon">🌿</span><span class="mode-label" data-i18n="mode_plants_pl">Pflanzen</span>
         </button>
         <button type="button" class="mode-btn" style="justify-content:center" id="archive-filter-pilz" onclick="setArchiveFilter('pilz')">
-          <span class="mode-icon">🍄</span><span class="mode-label">Pilze</span>
+          <span class="mode-icon">🍄</span><span class="mode-label" data-i18n="mode_mushrooms_pl">Pilze</span>
         </button>
         <button type="button" class="mode-btn" style="justify-content:center" id="archive-filter-krankheit" onclick="setArchiveFilter('krankheit')">
-          <span class="mode-icon">🩺</span><span class="mode-label">Krankheiten</span>
+          <span class="mode-icon">🩺</span><span class="mode-label" data-i18n="mode_diseases_pl">Krankheiten</span>
         </button>
       </div>
-      <div class="section-title" id="archive-title">Alle Pflanzen</div>
+      <div class="section-title" id="archive-title" data-i18n="archive_all_plants">Alle Pflanzen</div>
       <div id="archive-list"></div>
       <div id="archive-empty" style="text-align:center;padding:40px 0;color:var(--muted);display:none">
         <div style="font-size:2.5rem;margin-bottom:10px">🌱</div>
-        <span id="archive-empty-text">Noch keine Pflanzen erfasst.</span>
+        <span id="archive-empty-text" data-i18n="archive_empty">Noch keine Pflanzen erfasst.</span>
       </div>
     </div>
 
     <!-- LEARN -->
     <div class="screen" id="learn-screen">
-      <button class="btn" style="margin-bottom:14px;background:var(--accent2);color:#ffffff;width:100%;opacity:.9" onclick="startBee()">🐝 Fleißige Biene — 15 zufällige Pflanzen</button>
+      <button class="btn" style="margin-bottom:14px;background:var(--accent2);color:#ffffff;width:100%;opacity:.9" onclick="startBee()" data-i18n="busy_bee">🐝 Fleißige Biene — 15 zufällige Pflanzen</button>
       <div id="learn-empty" style="display:none">
         <div class="big">🎉</div>
-        <h2>Alle erledigt!</h2>
-        <p>Keine fälligen Wiederholungen. Komm morgen wieder.</p>
-        <button class="btn" style="margin-top:16px;background:var(--accent2);color:#0f1f0f;width:100%" onclick="startBee()">🐝 Fleißige Biene — 15 zufällige Pflanzen</button>
+        <h2 data-i18n="learn_done_title">Alle erledigt!</h2>
+        <p data-i18n="learn_done_sub">Keine fälligen Wiederholungen. Komm morgen wieder.</p>
+        <button class="btn" style="margin-top:16px;background:var(--accent2);color:#0f1f0f;width:100%" onclick="startBee()" data-i18n="busy_bee">🐝 Fleißige Biene — 15 zufällige Pflanzen</button>
       </div>
       <div id="learn-card" style="display:none">
         <div id="learn-progress"></div>
@@ -561,20 +570,20 @@
           <span id="learn-name-revealed"></span>
           <span id="learn-latin-revealed"></span>
         </div>
-        <button class="btn btn-secondary" id="btn-reveal" onclick="revealName()" style="width:100%;margin-top:4px">🔍 Auflösen</button>
+        <button class="btn btn-secondary" id="btn-reveal" onclick="revealName()" style="width:100%;margin-top:4px" data-i18n="reveal">🔍 Auflösen</button>
         <div class="learn-grade-row" id="grade-row" style="display:none">
-          <button class="btn btn-danger" onclick="gradeCard(false)">✗ Nicht gewusst</button>
+          <button class="btn btn-danger" onclick="gradeCard(false)" data-i18n="not_known">✗ Nicht gewusst</button>
           <button onclick="showInfoModal()" style="background:none;border:none;font-size:1.6rem;cursor:pointer;padding:0 6px;flex:0 0 auto;">ℹ️</button>
-          <button class="btn btn-primary" onclick="gradeCard(true)">✓ Gewusst</button>
+          <button class="btn btn-primary" onclick="gradeCard(true)" data-i18n="known">✓ Gewusst</button>
         </div>
         <div id="delete-row" style="display:none; margin-top:4px;">
-          <button class="btn btn-danger" onclick="deleteLearnCard()" style="width:100%; opacity:0.65; font-size:.85rem; padding:9px;">🗑 Pflanze löschen</button>
+          <button class="btn btn-danger" onclick="deleteLearnCard()" style="width:100%; opacity:0.65; font-size:.85rem; padding:9px;" data-i18n="delete_plant">🗑 Pflanze löschen</button>
         </div>
         <div id="delete-confirm" style="display:none; background:var(--surface); border:1.5px solid var(--danger); border-radius:var(--radius); padding:16px; text-align:center; margin-top:4px;">
-          <div style="font-size:.95rem; margin-bottom:12px; color:var(--text);"><strong id="delete-confirm-name" style="color:var(--accent2)"></strong> wirklich aus der Sammlung löschen?</div>
+          <div style="font-size:.95rem; margin-bottom:12px; color:var(--text);"><strong id="delete-confirm-name" style="color:var(--accent2)"></strong> <span data-i18n="delete_confirm_suffix">wirklich aus der Sammlung löschen?</span></div>
           <div style="display:flex; gap:10px;">
-            <button class="btn btn-secondary" onclick="cancelDeleteLearn()" style="flex:1;">Abbrechen</button>
-            <button class="btn btn-danger" onclick="confirmDeleteLearn()" style="flex:1;">Ja, löschen</button>
+            <button class="btn btn-secondary" onclick="cancelDeleteLearn()" style="flex:1;" data-i18n="cancel">Abbrechen</button>
+            <button class="btn btn-danger" onclick="confirmDeleteLearn()" style="flex:1;" data-i18n="yes_delete">Ja, löschen</button>
           </div>
         </div>
       </div>
@@ -592,47 +601,47 @@
             <div class="illus-loading">🔍 Lade Illustration …</div>
           </div>
           <div class="illus-controls">
-            <button class="illus-btn" onclick="illusPrev('info')">← Vorherige</button>
-            <button class="illus-btn" onclick="illusNext('info')">Nächste →</button>
-            <button class="illus-btn" onclick="illusUpload('info')">📤 Eigenes</button>
-            <button class="illus-btn" onclick="illusDelete('info')" style="color:#e88">🗑 Löschen</button>
+            <button class="illus-btn" onclick="illusPrev('info')" data-i18n="prev">← Vorherige</button>
+            <button class="illus-btn" onclick="illusNext('info')" data-i18n="next">Nächste →</button>
+            <button class="illus-btn" onclick="illusUpload('info')" data-i18n="own_upload">📤 Eigenes</button>
+            <button class="illus-btn" onclick="illusDelete('info')" style="color:#e88" data-i18n="delete_short">🗑 Löschen</button>
           </div>
           <div class="illus-source" id="info-illus-source"></div>
         </div>
-        <div id="info-modal-content"><div id="info-loading">🔍 Lade Informationen …</div></div>
-        <button class="btn btn-secondary" onclick="closeInfoModal()" style="margin-top:20px;width:100%">← Zurück</button>
+        <div id="info-modal-content"><div id="info-loading" data-i18n="loading_info">🔍 Lade Informationen …</div></div>
+        <button class="btn btn-secondary" onclick="closeInfoModal()" style="margin-top:20px;width:100%" data-i18n="back">← Zurück</button>
       </div>
     </div>
 
     <!-- SETTINGS -->
     <div class="screen" id="settings-screen">
-      <h2>⚙️ Einstellungen</h2>
-      <p style="color:var(--muted);font-size:.8rem;margin-bottom:12px;">Version 3.82 — Plant.id + DeepSeek</p>
+      <h2 data-i18n="settings">⚙️ Einstellungen</h2>
+      <p style="color:var(--muted);font-size:.8rem;margin-bottom:12px;">Version 3.83 — Plant.id + DeepSeek</p>
 
-      <h2 style="margin-bottom:6px">🧹 Duplikate entfernen</h2>
-      <p class="settings-note">Erkennt doppelte Einträge anhand von Name und Foto und löscht die Kopien.</p>
-      <button class="btn btn-secondary" onclick="removeDuplicates()">Duplikate suchen & löschen</button>
+      <h2 style="margin-bottom:6px" data-i18n="remove_dupes_title">🧹 Duplikate entfernen</h2>
+      <p class="settings-note" data-i18n="remove_dupes_note">Erkennt doppelte Einträge anhand von Name und Foto und löscht die Kopien.</p>
+      <button class="btn btn-secondary" onclick="removeDuplicates()" data-i18n="remove_dupes_btn">Duplikate suchen & löschen</button>
       <div id="dedup-status" style="font-size:.85rem;color:var(--muted);margin-top:8px;min-height:20px"></div>
 
       <hr style="border:none;border-top:1px solid var(--border);margin:24px 0">
 
-      <h2 style="margin-bottom:6px">🗑 Archiv löschen</h2>
-      <p class="settings-note">Löscht alle erfassten Pflanzen unwiderruflich. Für einen kompletten Neustart.</p>
-      <button class="btn btn-danger" onclick="confirmDeleteArchive()">Archiv komplett löschen</button>
+      <h2 style="margin-bottom:6px" data-i18n="delete_archive_title">🗑 Archiv löschen</h2>
+      <p class="settings-note" data-i18n="delete_archive_note">Löscht alle erfassten Pflanzen unwiderruflich. Für einen kompletten Neustart.</p>
+      <button class="btn btn-danger" onclick="confirmDeleteArchive()" data-i18n="delete_archive_btn">Archiv komplett löschen</button>
       <div id="delete-archive-status" style="font-size:.85rem;color:var(--muted);margin-top:8px;min-height:20px"></div>
 
 
       <hr style="border:none;border-top:1px solid var(--border);margin:24px 0">
 
-      <h2 style="margin-bottom:6px">📦 Daten sichern</h2>
-      <p class="settings-note">Exportiere alle Pflanzen als Datei – z. B. zum Umzug auf ein neues Gerät oder nach Netlify.</p>
+      <h2 style="margin-bottom:6px" data-i18n="backup_title">📦 Daten sichern</h2>
+      <p class="settings-note" data-i18n="backup_note">Exportiere alle Pflanzen als Datei – z. B. zum Umzug auf ein neues Gerät oder nach Netlify.</p>
 
-      <button class="btn btn-secondary" style="margin-bottom:10px" onclick="exportData()">⬆️ Alle Pflanzen exportieren</button>
+      <button class="btn btn-secondary" style="margin-bottom:10px" onclick="exportData()" data-i18n="export_btn">⬆️ Alle Pflanzen exportieren</button>
 
       <div class="form-group" style="margin-bottom:6px">
-        <label>Import (JSON-Datei)</label>
+        <label data-i18n="import_label">Import (JSON-Datei)</label>
         <input type="file" id="import-file-input" accept=".json" style="display:none">
-        <button class="btn btn-secondary" onclick="document.getElementById('import-file-input').click()">⬇️ Pflanzen importieren</button>
+        <button class="btn btn-secondary" onclick="document.getElementById('import-file-input').click()" data-i18n="import_btn">⬇️ Pflanzen importieren</button>
       </div>
       <div id="import-status" style="font-size:.85rem;color:var(--muted);margin-top:6px;min-height:20px"></div>
     </div>
@@ -651,59 +660,200 @@
     <div id="modal-notes"></div>
     <!-- Botanische Illustration -->
     <div id="modal-illus-wrap" style="margin-top:14px;display:none">
-      <div style="font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:6px">Botanische Illustration</div>
+      <div style="font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:6px" data-i18n="botanical_illus">Botanische Illustration</div>
       <div class="illus-wrap" id="modal-illus-box">
-        <div class="illus-loading">🔍 Lade Illustration …</div>
+        <div class="illus-loading" data-i18n="loading_illus">🔍 Lade Illustration …</div>
       </div>
       <div class="illus-controls">
-        <button class="illus-btn" onclick="illusPrev('modal')">← Vorherige</button>
-        <button class="illus-btn" onclick="illusNext('modal')">Nächste →</button>
-        <button class="illus-btn" onclick="illusUpload('modal')">📤 Eigenes</button>
-        <button class="illus-btn" onclick="illusDelete('modal')" style="color:#e88">🗑 Löschen</button>
+        <button class="illus-btn" onclick="illusPrev('modal')" data-i18n="prev">← Vorherige</button>
+        <button class="illus-btn" onclick="illusNext('modal')" data-i18n="next">Nächste →</button>
+        <button class="illus-btn" onclick="illusUpload('modal')" data-i18n="own_upload">📤 Eigenes</button>
+        <button class="illus-btn" onclick="illusDelete('modal')" style="color:#e88" data-i18n="delete_short">🗑 Löschen</button>
       </div>
       <div class="illus-source" id="modal-illus-source"></div>
     </div>
     <div id="modal-info-content" style="display:none;margin-top:12px;font-size:.9rem"></div>
-    <button class="btn btn-secondary" id="modal-info-btn" style="margin-top:12px;width:100%" onclick="loadModalInfo()">ℹ️ Bestimmung & Fun Facts</button>
+    <button class="btn btn-secondary" id="modal-info-btn" style="margin-top:12px;width:100%" onclick="loadModalInfo()" data-i18n="facts_btn">ℹ️ Bestimmung & Fun Facts</button>
     <div class="modal-actions" style="margin-top:10px">
-      <button class="btn btn-secondary" onclick="openEdit(currentDetailId)">Bearbeiten</button>
-      <button class="btn btn-danger" onclick="deletePlant(currentDetailId)">Löschen</button>
+      <button class="btn btn-secondary" onclick="openEdit(currentDetailId)" data-i18n="edit">Bearbeiten</button>
+      <button class="btn btn-danger" onclick="deletePlant(currentDetailId)" data-i18n="delete_short">Löschen</button>
     </div>
-    <button class="btn btn-secondary" style="margin-top:10px" onclick="closeModal()">Schließen</button>
+    <button class="btn btn-secondary" style="margin-top:10px" onclick="closeModal()" data-i18n="close">Schließen</button>
   </div>
 </div>
 
 <!-- Edit Modal -->
 <div id="edit-modal-overlay" onclick="closeEditModal(event)">
   <div id="edit-modal-box">
-    <h2>Pflanze bearbeiten</h2>
+    <h2 data-i18n="edit_plant_title">Pflanze bearbeiten</h2>
     <div class="form-group">
-      <label>Foto</label>
+      <label data-i18n="photo">Foto</label>
       <div class="photo-area" id="edit-photo-area" onclick="document.getElementById('edit-photo-input').click()">
         <span class="big-icon">📷</span>
-        <span>Tippen um Foto zu ändern</span>
-        <div class="overlay">Ändern</div>
+        <span data-i18n="photo_tap_change">Tippen um Foto zu ändern</span>
+        <div class="overlay" data-i18n="change">Ändern</div>
       </div>
       <input type="file" id="edit-photo-input" accept="image/*" capture="environment">
     </div>
     <div class="form-group">
-      <label>Pflanzenname</label>
+      <label data-i18n="plant_name">Pflanzenname</label>
       <input type="text" id="edit-name" autocomplete="off">
     </div>
     <div class="form-group">
-      <label>Lateinischer Name</label>
+      <label data-i18n="latin_name">Lateinischer Name</label>
       <input type="text" id="edit-latin" autocomplete="off" placeholder="z.B. Valeriana officinalis">
     </div>
     <div class="form-group">
-      <label>Sonstiges</label>
+      <label data-i18n="misc">Sonstiges</label>
       <textarea id="edit-notes"></textarea>
     </div>
-    <button class="btn btn-primary" onclick="saveEdit()">Speichern</button>
-    <button class="btn btn-secondary" style="margin-top:10px" onclick="closeEditModal()">Abbrechen</button>
+    <button class="btn btn-primary" onclick="saveEdit()" data-i18n="save">Speichern</button>
+    <button class="btn btn-secondary" style="margin-top:10px" onclick="closeEditModal()" data-i18n="cancel">Abbrechen</button>
   </div>
 </div>
 
 <script>
+// ── i18n (Deutsch / Englisch) ───────────────────────────────
+const I18N = {
+  de: {
+    nav_profil: 'Profil', nav_add: 'Erfassen', nav_archive: 'Archiv', nav_learn: 'Lernen',
+    close: 'Schließen', stat_captured: 'Pflanzen erfasst', stat_learned: 'davon gelernt', stat_streak: 'Tage-Serie',
+    plant_knowledge: '🧬 Pflanzenwissen', plant_knowledge_sub: 'Wie sicher beherrschst du deine bisher gelernten Pflanzen?',
+    learn_today: '🧠 HEUTE LERNEN', language: '🌐 Sprache',
+    add_title_plant: 'Neue Pflanze erfassen', add_title_mushroom: 'Neuen Pilz erfassen', add_title_disease: 'Kranke Pflanze erfassen',
+    mode_plant: 'Pflanze', mode_mushroom: 'Pilz', mode_disease: 'Krankheit',
+    photo: 'Foto', photo_take: 'Foto aufnehmen', change: 'Ändern', photo_upload: 'Foto hochladen',
+    photo_retake: '📷 neu aufnehmen', photo_upload_short: '⬆️ hochladen',
+    pilz_headline: 'KEINE SPEISEEMPFEHLUNG!',
+    pilz_p1: 'Diese App gibt <strong>ausschließlich Bestimmungswahrscheinlichkeiten</strong> aus — keine verlässliche Diagnose und keine Garantie für Essbarkeit.',
+    pilz_p2: 'Die Verwechslungsgefahr zwischen essbaren und <strong>giftigen</strong> Pilzen ist groß — manche Doppelgänger unterscheiden sich nur in winzigen Details, die auf einem Foto kaum zu erkennen sind. Eine Pilzvergiftung kann <strong>lebensgefährlich</strong> sein, im schlimmsten Fall tödlich enden.',
+    pilz_p3: 'Verzehre <strong>niemals</strong> einen Pilz allein aufgrund dieser App. Ziehe im Zweifel immer eine Pilzsachverständige oder einen Pilzsachverständigen zu Rate (z. B. örtliche Pilzberatungsstellen oder Vereine), bevor du einen selbst gesammelten Pilz isst.',
+    capture_another: '➕ Weitere Pflanze / Pilz / Krankheit erfassen',
+    mode_plants_pl: 'Pflanzen', mode_mushrooms_pl: 'Pilze', mode_diseases_pl: 'Krankheiten',
+    archive_all_plants: 'Alle Pflanzen', archive_all_mushrooms: 'Alle Pilze', archive_all_diseases: 'Alle Krankheiten',
+    archive_empty: 'Noch keine Pflanzen erfasst.',
+    busy_bee: '🐝 Fleißige Biene — 15 zufällige Pflanzen',
+    learn_done_title: 'Alle erledigt!', learn_done_sub: 'Keine fälligen Wiederholungen. Komm morgen wieder.',
+    reveal: '🔍 Auflösen', not_known: '✗ Nicht gewusst', known: '✓ Gewusst',
+    delete_plant: '🗑 Pflanze löschen', delete_confirm_suffix: 'wirklich aus der Sammlung löschen?',
+    cancel: 'Abbrechen', yes_delete: 'Ja, löschen',
+    prev: '← Vorherige', next: 'Nächste →', own_upload: '📤 Eigenes', delete_short: '🗑 Löschen',
+    loading_info: '🔍 Lade Informationen …', back: '← Zurück',
+    settings: '⚙️ Einstellungen',
+    remove_dupes_title: '🧹 Duplikate entfernen', remove_dupes_note: 'Erkennt doppelte Einträge anhand von Name und Foto und löscht die Kopien.', remove_dupes_btn: 'Duplikate suchen & löschen',
+    delete_archive_title: '🗑 Archiv löschen', delete_archive_note: 'Löscht alle erfassten Pflanzen unwiderruflich. Für einen kompletten Neustart.', delete_archive_btn: 'Archiv komplett löschen',
+    backup_title: '📦 Daten sichern', backup_note: 'Exportiere alle Pflanzen als Datei – z. B. zum Umzug auf ein neues Gerät oder nach Netlify.',
+    export_btn: '⬆️ Alle Pflanzen exportieren', import_label: 'Import (JSON-Datei)', import_btn: '⬇️ Pflanzen importieren',
+    ios_hint: '<strong>App installieren:</strong> Unten auf <strong>Teilen</strong> ⬆️ tippen, dann <strong>„Zum Home-Bildschirm"</strong> auswählen.',
+    botanical_illus: 'Botanische Illustration', loading_illus: '🔍 Lade Illustration …',
+    facts_btn: 'ℹ️ Bestimmung & Fun Facts', edit: 'Bearbeiten', edit_plant_title: 'Pflanze bearbeiten',
+    photo_tap_change: 'Tippen um Foto zu ändern', plant_name: 'Pflanzenname', latin_name: 'Lateinischer Name',
+    misc: 'Sonstiges', save: 'Speichern',
+    // dynamische Texte (JS)
+    trial_expired: 'Die kostenlose Testphase ist abgelaufen. Schließe ein Abo ab, um weiterzumachen.',
+    weekly_limit: 'Wöchentliches Limit erreicht.',
+    weekly_limit_mushroom: 'Wöchentliches Limit erreicht. Schau in ein paar Tagen wieder vorbei, oder hol dir unbegrenzte Erkennungen mit dem Abo.',
+    label_plant_suggestion: '🌿 Plant.id-Vorschlag', label_mushroom_suggestion: '🍄 mushroom.id-Vorschlag', label_disease: '🩺 Krankheitsdiagnose',
+    loading_details: '🔍 Lade Details …', loading_plant: '🔍 Plant.id erkennt Pflanze …', loading_plant_health: '🔍 Plant.id prüft Pflanzengesundheit …',
+    loading_mushroom: '🔍 mushroom.id (Test-API) erkennt Pilz …',
+    gps_locating: '📡 Standort wird ermittelt …', gps_address_loading: '📍 Adresse wird geladen …',
+    auto_saved: '✅ Automatisch im Archiv gespeichert', match_pct: '% Übereinstimmung',
+    no_disease_found: '✅ Keine Erkrankung erkannt',
+    no_disease_hint: 'Falls die Pflanze trotzdem auffällig wirkt, versuche ein deutlicheres Foto der betroffenen Stelle (Blatt-Unterseite, Stängel, Wurzelbereich).',
+    heal_label: '💊 Heilung', prevention_label: '🌱 Vorbeugung & Tipps', growth_tips_label: '🌱 Tipps für besseres Wachstum',
+    more_about_disease: '📖 Mehr über diese Krankheit', more_on_wikipedia: '📖 Mehr auf Wikipedia ↗',
+    plant_disclaimer: 'Diagnose via Plant.id — ersetzt keine fachkundige Beratung (z.B. Pflanzenschutzamt, Gärtnerei) bei unklaren oder schweren Fällen.',
+    mushroom_disclaimer: '⚠️ Nur Bestimmungswahrscheinlichkeit — keine Essensempfehlung! Große Verwechslungsgefahr, im Zweifel Pilzsachverständige konsultieren.',
+    details_unavailable: 'Details nicht verfügbar.', reload_info: '🔄 Infos neu laden',
+    ask_placeholder: 'z.B. Ist sie giftig für Hunde?', answering: '🔍 Wird beantwortet …',
+    confirm_delete_plant: 'Diese Pflanze wirklich löschen?', session_done: 'Session abgeschlossen! 🎉',
+    no_dupes_found: '✓ Keine Duplikate gefunden.',
+    confirm_delete_archive: '⚠️ Komplettes Archiv löschen?\n\nAlle ', confirm_delete_archive_suffix: ' erfassten Pflanzen werden unwiderruflich gelöscht. Dieser Vorgang kann nicht rückgängig gemacht werden.',
+    confirm_delete_archive2: 'Wirklich ALLE Pflanzen löschen? Es gibt kein Zurück!', archive_cleared: '✓ Archiv wurde geleert.',
+    searching_illus: '🔍 Suche Illustration …', no_illus_available: 'Keine historische Illustration verfügbar',
+    searching_disease_photos: '🔍 Suche Fotos/Illustrationen zur Krankheit …', no_extra_photos: 'Keine zusätzlichen Fotos/Illustrationen verfügbar',
+    image_unavailable: 'Bild nicht verfügbar', invalid_format: 'Ungültiges Format.',
+  },
+  en: {
+    nav_profil: 'Profile', nav_add: 'Capture', nav_archive: 'Archive', nav_learn: 'Learn',
+    close: 'Close', stat_captured: 'captured', stat_learned: 'learned', stat_streak: 'day streak',
+    plant_knowledge: '🧬 Plant knowledge', plant_knowledge_sub: 'How confidently do you know the plants you’ve learned so far?',
+    learn_today: '🧠 LEARN TODAY', language: '🌐 Language',
+    add_title_plant: 'Capture a new plant', add_title_mushroom: 'Capture a new mushroom', add_title_disease: 'Capture a sick plant',
+    mode_plant: 'Plant', mode_mushroom: 'Mushroom', mode_disease: 'Disease',
+    photo: 'Photo', photo_take: 'Take photo', change: 'Change', photo_upload: 'Upload photo',
+    photo_retake: '📷 retake', photo_upload_short: '⬆️ upload',
+    pilz_headline: 'NOT A FOOD RECOMMENDATION!',
+    pilz_p1: 'This app only gives <strong>identification probabilities</strong> — not a reliable diagnosis and no guarantee of edibility.',
+    pilz_p2: 'The risk of confusing edible and <strong>poisonous</strong> mushrooms is high — some look-alikes differ only in tiny details that are barely visible in a photo. Mushroom poisoning can be <strong>life-threatening</strong>, and in the worst case fatal.',
+    pilz_p3: '<strong>Never</strong> eat a mushroom based solely on this app. When in doubt, always consult a mushroom expert (e.g. a local mycological society or advisory service) before eating a mushroom you’ve foraged yourself.',
+    capture_another: '➕ Capture another plant / mushroom / disease',
+    mode_plants_pl: 'Plants', mode_mushrooms_pl: 'Mushrooms', mode_diseases_pl: 'Diseases',
+    archive_all_plants: 'All plants', archive_all_mushrooms: 'All mushrooms', archive_all_diseases: 'All diseases',
+    archive_empty: 'No plants captured yet.',
+    busy_bee: '🐝 Busy bee — 15 random plants',
+    learn_done_title: 'All done!', learn_done_sub: 'No reviews due. Come back tomorrow.',
+    reveal: '🔍 Reveal', not_known: '✗ Didn’t know', known: '✓ Knew it',
+    delete_plant: '🗑 Delete plant', delete_confirm_suffix: 'really remove it from the collection?',
+    cancel: 'Cancel', yes_delete: 'Yes, delete',
+    prev: '← Previous', next: 'Next →', own_upload: '📤 Own photo', delete_short: '🗑 Delete',
+    loading_info: '🔍 Loading information …', back: '← Back',
+    settings: '⚙️ Settings',
+    remove_dupes_title: '🧹 Remove duplicates', remove_dupes_note: 'Finds duplicate entries by name and photo and deletes the copies.', remove_dupes_btn: 'Find & remove duplicates',
+    delete_archive_title: '🗑 Delete archive', delete_archive_note: 'Permanently deletes all captured plants. For a complete reset.', delete_archive_btn: 'Delete entire archive',
+    backup_title: '📦 Back up data', backup_note: 'Export all plants as a file — e.g. to move to a new device or to Netlify.',
+    export_btn: '⬆️ Export all plants', import_label: 'Import (JSON file)', import_btn: '⬇️ Import plants',
+    ios_hint: '<strong>Install app:</strong> Tap <strong>Share</strong> ⬆️ below, then choose <strong>“Add to Home Screen”</strong>.',
+    botanical_illus: 'Botanical illustration', loading_illus: '🔍 Loading illustration …',
+    facts_btn: 'ℹ️ ID features & fun facts', edit: 'Edit', edit_plant_title: 'Edit plant',
+    photo_tap_change: 'Tap to change photo', plant_name: 'Plant name', latin_name: 'Latin name',
+    misc: 'Notes', save: 'Save',
+    // dynamic JS text
+    trial_expired: 'Your free trial has ended. Subscribe to keep going.',
+    weekly_limit: 'Weekly limit reached.',
+    weekly_limit_mushroom: 'Weekly limit reached. Check back in a few days, or get unlimited identifications with the subscription.',
+    label_plant_suggestion: '🌿 Plant.id suggestion', label_mushroom_suggestion: '🍄 mushroom.id suggestion', label_disease: '🩺 Disease diagnosis',
+    loading_details: '🔍 Loading details …', loading_plant: '🔍 Plant.id is identifying the plant …', loading_plant_health: '🔍 Plant.id is checking plant health …',
+    loading_mushroom: '🔍 mushroom.id (test API) is identifying the mushroom …',
+    gps_locating: '📡 Determining location …', gps_address_loading: '📍 Loading address …',
+    auto_saved: '✅ Automatically saved to archive', match_pct: '% match',
+    no_disease_found: '✅ No disease detected',
+    no_disease_hint: 'If the plant still looks off, try a clearer photo of the affected area (underside of leaf, stem, root area).',
+    heal_label: '💊 Treatment', prevention_label: '🌱 Prevention & tips', growth_tips_label: '🌱 Tips for better growth',
+    more_about_disease: '📖 More about this disease', more_on_wikipedia: '📖 More on Wikipedia ↗',
+    plant_disclaimer: 'Diagnosis via Plant.id — does not replace expert advice (e.g. a plant protection office or nursery) for unclear or severe cases.',
+    mushroom_disclaimer: '⚠️ Identification probability only — not a food recommendation! High risk of confusion, consult a mushroom expert when in doubt.',
+    details_unavailable: 'Details not available.', reload_info: '🔄 Reload info',
+    ask_placeholder: 'e.g. Is it toxic to dogs?', answering: '🔍 Answering …',
+    confirm_delete_plant: 'Really delete this plant?', session_done: 'Session complete! 🎉',
+    no_dupes_found: '✓ No duplicates found.',
+    confirm_delete_archive: '⚠️ Delete the entire archive?\n\nAll ', confirm_delete_archive_suffix: ' captured plants will be permanently deleted. This cannot be undone.',
+    confirm_delete_archive2: 'Really delete ALL plants? There’s no going back!', archive_cleared: '✓ Archive cleared.',
+    searching_illus: '🔍 Searching for illustration …', no_illus_available: 'No historical illustration available',
+    searching_disease_photos: '🔍 Searching for photos/illustrations of the disease …', no_extra_photos: 'No additional photos/illustrations available',
+    image_unavailable: 'Image not available', invalid_format: 'Invalid format.',
+  }
+};
+let LANG = localStorage.getItem('planty_lang') || ((navigator.language || 'de').slice(0,2) === 'en' ? 'en' : 'de');
+if (LANG !== 'de' && LANG !== 'en') LANG = 'de';
+function t(key) { return (I18N[LANG] && I18N[LANG][key]) ?? I18N.de[key] ?? key; }
+function applyI18n() {
+  document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t(el.getAttribute('data-i18n')); });
+  document.querySelectorAll('[data-i18n-html]').forEach(el => { el.innerHTML = t(el.getAttribute('data-i18n-html')); });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => { el.placeholder = t(el.getAttribute('data-i18n-placeholder')); });
+  document.documentElement.lang = LANG;
+  document.getElementById('lang-btn-de')?.classList.toggle('active', LANG === 'de');
+  document.getElementById('lang-btn-en')?.classList.toggle('active', LANG === 'en');
+}
+function setLang(l) {
+  if (l !== 'de' && l !== 'en') return;
+  LANG = l;
+  localStorage.setItem('planty_lang', l);
+  applyI18n();
+  if (typeof _applyCaptureModeUI === 'function') _applyCaptureModeUI();
+  if (typeof _applyArchiveFilterUI === 'function') _applyArchiveFilterUI();
+}
+
 // ── IndexedDB ────────────────────────────────────────────────
 const DB_NAME = 'pflanzenlern', DB_VERSION = 1, STORE = 'plants';
 let db;
@@ -791,6 +941,7 @@ function _proxyHeaders() {
     'Content-Type': 'application/json',
     'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
     'x-device-id': getDeviceId(),
+    'x-lang': LANG,
   };
 }
 
@@ -800,6 +951,32 @@ async function aiChat(messages, max_tokens) {
     headers: _proxyHeaders(),
     body: JSON.stringify({ max_tokens, messages })
   });
+}
+
+// Sprachabhängige Prompts für die KI-Zusatzinfos (Bestimmungsmerkmale + Fun
+// Facts). Statt den riesigen Prompt zweimal fast identisch zu duplizieren
+// (Deutsch/Englisch), wird hier zentral je nach LANG der passende Text
+// gebaut.
+function _plantInfoPrompt(name, latin, strictBold) {
+  const subject = name + (latin ? ' (' + latin + ')' : '');
+  if (LANG === 'en') {
+    return 'Give me information about the plant "' + subject + '" in English.\n\n**Identification features:**\nList ONLY the applicable features as a table in the format "Point: Value" — one line per feature. Check the following points and only mention the ones relevant to this plant (e.g. milky sap only if present, otherwise omit):\nPlant family (common name, e.g. daisy family, mint family, mustard family, carrot family, buttercup family), flower color, flower shape, number of petals, leaf arrangement, leaf shape, leaf margin, hairiness, smell/taste, milky sap, habitat.\nShort and concise, no flowing prose.\n\n**Fun Facts:**\n3-4 short fun facts in English. Write them: modern, lively, credible and historically accurate. No dry lectures — surprising details that stick in memory. Short and punchy. Where it doesn’t force the sentence, avoid naming the plant itself inside the fun fact.\n\nIMPORTANT: Use **only** these two exact headings "**Identification features:**" and "**Fun Facts:**". Do not bold a single word' + (strictBold ? ', year, or term inside the content — not even for emphasis.' : ' inside the content.');
+  }
+  return 'Gib mir Informationen zur Pflanze "' + subject + '" auf Deutsch.\n\n**Bestimmungsmerkmale:**\nListe NUR die zutreffenden Merkmale tabellarisch im Format "Punkt: Wert" auf — eine Zeile pro Merkmal. Prüfe folgende Punkte und nenne nur die, die für diese Pflanze relevant sind (z.B. Milchsaft nur wenn vorhanden, sonst weglassen):\nPflanzenfamilie (deutscher Trivialname, z.B. Korbblütler, Lippenblütler, Kreuzblütler, Doldenblütler, Hahnenfußgewächse), Blütenfarbe, Blütenform, Anzahl der Kronblätter, Blattstellung, Blattform, Blattrand, Behaarung, Geruch/Geschmack, Milchsaft, Standort.\nKurz und stichwortartig, kein Fließtext.\n\n**Fun Facts:**\n3-4 kurze Fun Facts auf Deutsch. Schreibe: modern, lebendig, seriös und historisch korrekt. Keine trockenen Kunstgeschichte-Vorlesungen, sondern überraschende Details die im Gedächtnis bleiben. Kurz und prägnant. Wenn es leicht möglich ist, ohne den Satz zu verbiegen, vermeide den Namen der Pflanze im Fun Fact selbst zu nennen.\n\nWICHTIG: Verwende **ausschließlich** für die beiden Überschriften "**Bestimmungsmerkmale:**" und "**Fun Facts:**". Markiere innerhalb der Inhalte KEIN einziges Wort' + (strictBold ? ', keine Jahreszahl und keinen Begriff fett — auch nicht zur Betonung.' : ' fett.');
+}
+function _mushroomInfoPrompt(name, latin) {
+  const subject = name + (latin ? ' (' + latin + ')' : '');
+  if (LANG === 'en') {
+    return 'Give me information about the mushroom "' + subject + '" in English.\n\n**Identification features:**\nList ONLY the applicable features as a table in the format "Point: Value" — one line per feature. Check the following points and only mention the ones relevant to this mushroom (give either gills OR pores depending on the type, never both, unless only one applies):\nCap color, cap shape, cap surface (e.g. slimy, dry, scaly), gill color (for gilled mushrooms) or tube/pore color (for boletes), stem shape, stem surface (e.g. net-patterned, ring, bulb), flesh color, notable changes when cut/bruised (e.g. blueing, reddening, color change of flesh or tubes), smell, edibility/toxicity (general knowledge only, does NOT replace expert identification), habitat, season, typical look-alikes.\nShort and concise, no flowing prose.\n\n**Fun Facts:**\n3-4 short fun facts in English. Write them: modern, lively, credible and factually accurate. No dry encyclopedia sentences — surprising details that stick in memory. Short and punchy. Where it doesn’t force the sentence, avoid naming the mushroom itself inside the fun fact.\n\nIMPORTANT: Use **only** these two exact headings "**Identification features:**" and "**Fun Facts:**". Do not bold a single word inside the content. Do not give any food recommendation or encouragement to eat it.';
+  }
+  return 'Gib mir Informationen zum Pilz "' + subject + '" auf Deutsch.\n\n**Bestimmungsmerkmale:**\nListe NUR die zutreffenden Merkmale tabellarisch im Format "Punkt: Wert" auf — eine Zeile pro Merkmal. Prüfe folgende Punkte und nenne nur die, die für diesen Pilz relevant sind (gib je nach Pilztyp Lamellen ODER Röhren an, nie beide, falls nur eines zutrifft):\nHutfarbe, Hutform, Hutoberfläche (z.B. schleimig, trocken, schuppig), Lamellenfarbe (bei Lamellenpilzen) oder Röhren-/Porenfarbe (bei Röhrlingen), Stielform, Stieloberfläche (z.B. genattert, Ring, Knolle), Fleischfarbe, Besonderheiten bei Anschnitt/Verletzung (z.B. Blaufärbung, Rötung, Farbwechsel des Fleisches oder der Röhren), Geruch, Speisewert/Giftigkeit (allgemein bekannt, ersetzt KEINE Bestimmung durch Fachleute), Vorkommen/Standort, Jahreszeit, typische Verwechslungsarten.\nKurz und stichwortartig, kein Fließtext.\n\n**Fun Facts:**\n3-4 kurze Fun Facts auf Deutsch. Schreibe: modern, lebendig, seriös und sachlich korrekt. Keine trockenen Lexikon-Sätze, sondern überraschende Details die im Gedächtnis bleiben. Kurz und prägnant. Wenn es leicht möglich ist, ohne den Satz zu verbiegen, vermeide den Namen des Pilzes im Fun Fact selbst zu nennen.\n\nWICHTIG: Verwende **ausschließlich** für die beiden Überschriften "**Bestimmungsmerkmale:**" und "**Fun Facts:**". Markiere innerhalb der Inhalte KEIN einziges Wort fett. Gib KEINE eigene Essensempfehlung oder Aufforderung zum Verzehr.';
+}
+function _plantQaSystemPrompt(name, latin) {
+  const subject = name + (latin ? ' (' + latin + ')' : '');
+  if (LANG === 'en') {
+    return 'You are a botanical expert in a plant app. Answer ONLY questions that relate to the plant "' + subject + '" or that are directly related to botany/plant knowledge about this plant (e.g. care, toxicity, uses, features, origin). If the question does NOT belong to this topic area (e.g. general world knowledge, other topics like technology, history unrelated to the plant, math, programming, etc.), reply ONLY with a short, friendly note that you only answer questions about this plant, without answering the actual question.\n\nAnswer in English, short and precise (max. 4-5 sentences), if the question is allowed.\n\nQuestion: ';
+  }
+  return 'Du bist ein botanischer Experte in einer Pflanzen-App. Beantworte AUSSCHLIESSLICH Fragen, die sich auf die Pflanze "' + subject + '" beziehen oder direkt mit Botanik/Pflanzenkunde zu dieser Pflanze zusammenhängen (z.B. Pflege, Giftigkeit, Verwendung, Merkmale, Herkunft). Falls die Frage NICHT zu diesem Themenbereich gehört (z.B. allgemeines Weltwissen, andere Themen wie Technik, Geschichte fernab der Pflanze, Mathe, Programmieren etc.), antworte NUR mit einem kurzen, freundlichen Hinweis, dass du nur Fragen zu dieser Pflanze beantwortest, ohne die eigentliche Frage zu beantworten.\n\nAuf Deutsch, kurz und präzise antworten (max. 4-5 Sätze), falls die Frage zulässig ist.\n\nFrage: ';
 }
 
 // ── Abo-Verifizierung (Google Play Billing) ───────────────────
@@ -865,9 +1042,9 @@ function _applyCaptureModeUI() {
   if (disclaimer) disclaimer.style.display = captureMode === 'pilz' ? 'block' : 'none';
   const title = document.getElementById('add-screen-title');
   if (title) {
-    title.textContent = captureMode === 'pilz' ? 'Neuen Pilz erfassen'
-      : captureMode === 'krankheit' ? 'Kranke Pflanze erfassen'
-      : 'Neue Pflanze erfassen';
+    title.textContent = captureMode === 'pilz' ? t('add_title_mushroom')
+      : captureMode === 'krankheit' ? t('add_title_disease')
+      : t('add_title_plant');
   }
 }
 
@@ -884,7 +1061,7 @@ function _applyArchiveFilterUI() {
   document.getElementById('archive-filter-pilz')?.classList.toggle('active', archiveFilter === 'pilz');
   document.getElementById('archive-filter-krankheit')?.classList.toggle('active', archiveFilter === 'krankheit');
   const title = document.getElementById('archive-title');
-  if (title) title.textContent = archiveFilter === 'pilz' ? 'Alle Pilze' : archiveFilter === 'krankheit' ? 'Alle Krankheiten' : 'Alle Pflanzen';
+  if (title) title.textContent = archiveFilter === 'pilz' ? t('archive_all_mushrooms') : archiveFilter === 'krankheit' ? t('archive_all_diseases') : t('archive_all_plants');
 }
 
 // ── Profil rendern ────────────────────────────────────────────
@@ -1027,7 +1204,7 @@ document.getElementById('edit-photo-input').addEventListener('change', async e =
 
 function setPhotoArea(areaId, src) {
   const area = document.getElementById(areaId);
-  area.innerHTML = '<div class="overlay">Ändern</div>';
+  area.innerHTML = '<div class="overlay">' + t('change') + '</div>';
   const img = document.createElement('img');
   img.src = src;
   area.prepend(img);
@@ -1073,10 +1250,10 @@ async function _fetchGermanNameFallback(latinName) {
 async function _resolveGermanName(apiName, latinName) {
   if (apiName && apiName !== latinName && !_looksLikeLatinBinomial(apiName)) return apiName;
   const fromWiki = await _fetchGermanNameFallback(latinName);
-  return fromWiki || apiName || latinName || 'Unbekannt';
+  return fromWiki || apiName || latinName || (LANG === 'en' ? 'Unknown' : 'Unbekannt');
 }
 async function recognizePlant(plantId) {
-  if (!addPhotoData) { alert('Bitte zuerst ein Foto aufnehmen.'); return; }
+  if (!addPhotoData) { alert(LANG === 'en' ? 'Please take a photo first.' : 'Bitte zuerst ein Foto aufnehmen.'); return; }
 
   const spinner = document.getElementById('ai-spinner');
   const resultBox = document.getElementById('ai-result');
@@ -1085,7 +1262,7 @@ async function recognizePlant(plantId) {
 
   try {
     const base64 = _dataUrlToBase64(addPhotoData);
-    const url = PLANTID_PROXY_URL + '?details=common_names&language=de';
+    const url = PLANTID_PROXY_URL + '?details=common_names&language=' + LANG;
     const response = await fetch(url, {
       method: 'POST',
       headers: _proxyHeaders(),
@@ -1100,31 +1277,30 @@ async function recognizePlant(plantId) {
     try {
       data = JSON.parse(rawText);
     } catch (parseErr) {
-      throw new Error('Unerwartete Antwort vom Server (Status ' + response.status + '): ' + rawText.slice(0, 200));
+      throw new Error((LANG === 'en' ? 'Unexpected server response (status ' : 'Unerwartete Antwort vom Server (Status ') + response.status + '): ' + rawText.slice(0, 200));
     }
 
-    if (response.status === 402) throw new Error(data?.error?.message || 'Die kostenlose Testphase ist abgelaufen. Schließe ein Abo ab, um weiterzumachen.');
-    if (response.status === 429) throw new Error(data?.error?.message || 'Wöchentliches Limit erreicht.');
-    if (!response.ok) throw new Error(data.message || data.error?.message || data.error || 'Plant.id Fehler ' + response.status);
+    if (response.status === 402) throw new Error(data?.error?.message || t('trial_expired'));
+    if (response.status === 429) throw new Error(data?.error?.message || t('weekly_limit'));
+    if (!response.ok) throw new Error(data.message || data.error?.message || data.error || 'Plant.id ' + (LANG === 'en' ? 'error ' : 'Fehler ') + response.status);
     if (data.result?.is_plant && data.result.is_plant.probability < 0.3) {
-      throw new Error('Auf dem Foto wurde keine Pflanze erkannt. Versuche ein deutlicheres Foto.');
+      throw new Error(LANG === 'en' ? 'No plant was recognized in the photo. Try a clearer photo.' : 'Auf dem Foto wurde keine Pflanze erkannt. Versuche ein deutlicheres Foto.');
     }
 
     const suggestions = data.result?.classification?.suggestions || [];
-    if (!suggestions.length) throw new Error('Keine Pflanze erkannt. Versuche ein deutlicheres Foto.');
+    if (!suggestions.length) throw new Error(LANG === 'en' ? 'No plant recognized. Try a clearer photo.' : 'Keine Pflanze erkannt. Versuche ein deutlicheres Foto.');
 
     const best = suggestions[0];
     const latinName = best.name || '';
     const germanName = await _resolveGermanName(best.details?.common_names?.[0] || '', latinName);
     const pct = Math.round((best.probability || 0) * 100);
-    const info = `Plant.id: ${pct}% Übereinstimmung`;
+    const info = `Plant.id: ${pct}${t('match_pct')}`;
 
     lastAiName = germanName;
     lastAiLatin = latinName;
     lastAiInfoHtml = null;
     autoApplyAiName(germanName);
-    document.getElementById('ai-label-text').textContent = '🌿 Plant.id-Vorschlag';
-    // Deutscher Name immer groß/prominent, lateinischer Name klein dahinter
+    document.getElementById('ai-label-text').textContent = t('label_plant_suggestion');
     // (nie umgekehrt, auch wenn die API mal keinen deutschen Namen liefert).
     document.getElementById('ai-name-text').innerHTML =
       esc(germanName) + (latinName && latinName !== germanName ? ' <span style="font-size:.6em;font-weight:400;opacity:.75;font-style:italic">(' + esc(latinName) + ')</span>' : '');
@@ -1174,18 +1350,34 @@ async function _humanizeDiseaseInfo(diseaseGerman, hostPlantGerman, det) {
   if (!parts.length) return null;
 
   try {
-    const prompt = 'Du bist Gartenberater in einer Pflanzen-App. Hier sind rohe, sehr fachsprachliche Rohdaten einer Krankheitsdiagnose für "' + diseaseGerman + '"' + (hostPlantGerman ? ' an "' + hostPlantGerman + '"' : '') + ':\n\n' + parts.join('\n') +
-      '\n\nSchreibe daraus einen nutzerfreundlichen, praxisnahen Text für Hobbygärtner ohne Fachkenntnisse. Wichtig:\n' +
-      '- Möglichst wenig trockener Chemie-Fachjargon. Statt reiner Verbindungsnamen wie "Kaliumhydrogencarbonat" lieber die Alltags-Variante nennen (z.B. "Backpulver/Natron-Spritzung") oder den Wirkstoff kurz einklammern, falls er wichtig ist.\n' +
-      '- JEDES genannte Mittel/Präparat (egal ob chemisch, biologisch oder natürlich, z.B. auch "Neemöl"/"Neem-Präparate", Gesteinsmehl, Schachtelhalmextrakt etc.) MUSS kurz in einfachen Worten erklärt werden, was es überhaupt ist, UND wo man es normalerweise bekommt (z.B. "Gartencenter/Baumarkt", "Drogerie", "online"). Setze nichts als bekannt voraus. Beispiel: "Neemöl (ein Pflanzenöl aus den Samen des Neembaums, das Schädlinge und Pilze abwehrt – erhältlich in Gartencentern, Baumärkten oder online)".\n' +
-      '- Einfache Hausmittel und praktische Alltagstipps/Lifehacks VOR chemischen oder speziellen Bio-Präparaten bevorzugen, wo das sinnvoll möglich ist.\n' +
-      '- Konkrete, direkt umsetzbare Handlungsschritte statt allgemeiner Floskeln.\n' +
-      '- Kurz, übersichtlich, keine Wiederholungen, keine Markennamen.\n\n' +
-      'Struktur GENAU mit diesen drei Überschriften (fett mit **):\n' +
-      '**Was ist es?** (2-3 Sätze: Merkmale, Ursache, wie es entsteht/sich ausbreitet)\n' +
-      '**Heilung** (Aufzählungspunkte mit konkreten, nutzerfreundlichen Behandlungsschritten)\n' +
-      '**Vorbeugung** (Aufzählungspunkte mit Tipps, wie man es künftig vermeidet)\n\n' +
-      'Auf Deutsch, in der Du-Form, freundlich und motivierend.';
+    const wasHead = LANG === 'en' ? 'What is it?' : 'Was ist es?';
+    const healHead = LANG === 'en' ? 'Treatment' : 'Heilung';
+    const prevHead = LANG === 'en' ? 'Prevention' : 'Vorbeugung';
+    const prompt = LANG === 'en'
+      ? ('You are a garden advisor in a plant app. Here is raw, very technical data from a disease diagnosis for "' + diseaseGerman + '"' + (hostPlantGerman ? ' on "' + hostPlantGerman + '"' : '') + ':\n\n' + parts.join('\n') +
+        '\n\nTurn this into a user-friendly, practical text for hobby gardeners with no expert knowledge. Important:\n' +
+        '- As little dry chemistry jargon as possible. Instead of pure compound names like "potassium bicarbonate", prefer the everyday variant (e.g. "baking soda spray") or briefly note the active ingredient in brackets if it matters.\n' +
+        '- EVERY mentioned product/remedy (chemical, biological or natural, e.g. also "neem oil", rock dust, horsetail extract etc.) MUST be briefly explained in simple words — what it actually is, AND where it is usually available (e.g. "garden center/hardware store", "pharmacy", "online"). Assume no prior knowledge. Example: "Neem oil (a plant oil from neem tree seeds that repels pests and fungi — available at garden centers, hardware stores or online)".\n' +
+        '- Prefer simple home remedies and practical everyday tips/lifehacks over chemical or specialized bio-products where sensibly possible.\n' +
+        '- Concrete, directly actionable steps rather than general phrases.\n' +
+        '- Short, clear, no repetition, no brand names.\n\n' +
+        'Structure EXACTLY with these three headings (bold with **):\n' +
+        '**' + wasHead + '** (2-3 sentences: features, cause, how it develops/spreads)\n' +
+        '**' + healHead + '** (bullet points with concrete, user-friendly treatment steps)\n' +
+        '**' + prevHead + '** (bullet points with tips on avoiding it in future)\n\n' +
+        'In English, casual and friendly tone, encouraging.')
+      : ('Du bist Gartenberater in einer Pflanzen-App. Hier sind rohe, sehr fachsprachliche Rohdaten einer Krankheitsdiagnose für "' + diseaseGerman + '"' + (hostPlantGerman ? ' an "' + hostPlantGerman + '"' : '') + ':\n\n' + parts.join('\n') +
+        '\n\nSchreibe daraus einen nutzerfreundlichen, praxisnahen Text für Hobbygärtner ohne Fachkenntnisse. Wichtig:\n' +
+        '- Möglichst wenig trockener Chemie-Fachjargon. Statt reiner Verbindungsnamen wie "Kaliumhydrogencarbonat" lieber die Alltags-Variante nennen (z.B. "Backpulver/Natron-Spritzung") oder den Wirkstoff kurz einklammern, falls er wichtig ist.\n' +
+        '- JEDES genannte Mittel/Präparat (egal ob chemisch, biologisch oder natürlich, z.B. auch "Neemöl"/"Neem-Präparate", Gesteinsmehl, Schachtelhalmextrakt etc.) MUSS kurz in einfachen Worten erklärt werden, was es überhaupt ist, UND wo man es normalerweise bekommt (z.B. "Gartencenter/Baumarkt", "Drogerie", "online"). Setze nichts als bekannt voraus. Beispiel: "Neemöl (ein Pflanzenöl aus den Samen des Neembaums, das Schädlinge und Pilze abwehrt – erhältlich in Gartencentern, Baumärkten oder online)".\n' +
+        '- Einfache Hausmittel und praktische Alltagstipps/Lifehacks VOR chemischen oder speziellen Bio-Präparaten bevorzugen, wo das sinnvoll möglich ist.\n' +
+        '- Konkrete, direkt umsetzbare Handlungsschritte statt allgemeiner Floskeln.\n' +
+        '- Kurz, übersichtlich, keine Wiederholungen, keine Markennamen.\n\n' +
+        'Struktur GENAU mit diesen drei Überschriften (fett mit **):\n' +
+        '**' + wasHead + '** (2-3 Sätze: Merkmale, Ursache, wie es entsteht/sich ausbreitet)\n' +
+        '**' + healHead + '** (Aufzählungspunkte mit konkreten, nutzerfreundlichen Behandlungsschritten)\n' +
+        '**' + prevHead + '** (Aufzählungspunkte mit Tipps, wie man es künftig vermeidet)\n\n' +
+        'Auf Deutsch, in der Du-Form, freundlich und motivierend.');
 
     const res = await aiChat([{ role: 'user', content: prompt }], 900);
     const data = await res.json();
@@ -1194,9 +1386,10 @@ async function _humanizeDiseaseInfo(diseaseGerman, hostPlantGerman, det) {
     if (!text.trim()) return null;
 
     const stripBold = s => (s || '').replace(/\*\*/g, '').trim();
-    const wasMatch = text.match(/\*\*\s*Was ist es\?\s*\*\*([\s\S]*?)(?=\*\*\s*Heilung|$)/i);
-    const healMatch = text.match(/\*\*\s*Heilung\s*\*\*([\s\S]*?)(?=\*\*\s*Vorbeugung|$)/i);
-    const prevMatch = text.match(/\*\*\s*Vorbeugung\s*\*\*([\s\S]*)/i);
+    const escRe = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const wasMatch = text.match(new RegExp('\\*\\*\\s*' + escRe(wasHead) + '\\s*\\*\\*([\\s\\S]*?)(?=\\*\\*\\s*' + escRe(healHead) + '|$)', 'i'));
+    const healMatch = text.match(new RegExp('\\*\\*\\s*' + escRe(healHead) + '\\s*\\*\\*([\\s\\S]*?)(?=\\*\\*\\s*' + escRe(prevHead) + '|$)', 'i'));
+    const prevMatch = text.match(new RegExp('\\*\\*\\s*' + escRe(prevHead) + '\\s*\\*\\*([\\s\\S]*)', 'i'));
 
     const toList = s => {
       const lines = (s || '').split('\n').map(l => l.trim().replace(/^[-•*]\s*/, '')).filter(Boolean);
@@ -1207,11 +1400,12 @@ async function _humanizeDiseaseInfo(diseaseGerman, hostPlantGerman, det) {
     const prevBody = prevMatch ? stripBold(prevMatch[1]) : '';
     if (!healBody && !prevBody) return null;
 
+    const noDataText = LANG === 'en' ? 'No information.' : 'Keine Angabe.';
     let out = '';
     const wasBody = wasMatch ? stripBold(wasMatch[1]) : '';
-    if (wasBody) out += '<p style="font-size:.85rem;margin-bottom:14px"><strong>Was ist es?</strong> ' + esc(wasBody) + '</p>';
-    out += '<div class="disease-card disease-heal"><div class="disease-card-title">💊 Heilung</div>' + (toList(healBody) || '<p style="font-size:.82rem;color:var(--muted);margin:4px 0 0">Keine Angabe.</p>') + '</div>';
-    out += '<div class="disease-card disease-growth"><div class="disease-card-title">🌱 Vorbeugung &amp; Tipps</div>' + (toList(prevBody) || '<p style="font-size:.82rem;color:var(--muted);margin:4px 0 0">Keine Angabe.</p>') + '</div>';
+    if (wasBody) out += '<p style="font-size:.85rem;margin-bottom:14px"><strong>' + wasHead + '</strong> ' + esc(wasBody) + '</p>';
+    out += '<div class="disease-card disease-heal"><div class="disease-card-title">💊 ' + (LANG === 'en' ? 'Treatment' : 'Heilung') + '</div>' + (toList(healBody) || '<p style="font-size:.82rem;color:var(--muted);margin:4px 0 0">' + noDataText + '</p>') + '</div>';
+    out += '<div class="disease-card disease-growth"><div class="disease-card-title">🌱 ' + (LANG === 'en' ? 'Prevention &amp; Tips' : 'Vorbeugung &amp; Tipps') + '</div>' + (toList(prevBody) || '<p style="font-size:.82rem;color:var(--muted);margin:4px 0 0">' + noDataText + '</p>') + '</div>';
     return out;
   } catch (e) {
     console.warn('Konnte Krankheitsinfos nicht nutzerfreundlich aufbereiten:', e.message);
@@ -1227,17 +1421,16 @@ async function _humanizeDiseaseInfo(diseaseGerman, hostPlantGerman, det) {
 // weiteren Credit pro Anfrage). Keine eigene Archiv-Kategorie nötig —
 // das Ergebnis wird direkt beim Erfassen angezeigt.
 async function recognizePlantHealth(plantId) {
-  if (!addPhotoData) { alert('Bitte zuerst ein Foto aufnehmen.'); return; }
+  if (!addPhotoData) { alert(LANG === 'en' ? 'Please take a photo first.' : 'Bitte zuerst ein Foto aufnehmen.'); return; }
 
   const spinner = document.getElementById('ai-spinner');
   const resultBox = document.getElementById('ai-result');
-  spinner.textContent = '🔍 Plant.id prüft Pflanzengesundheit …';
-  spinner.style.display = 'block';
+  spinner.textContent = t('loading_plant_health');
   resultBox.style.display = 'none';
 
   try {
     const base64 = _dataUrlToBase64(addPhotoData);
-    const url = PLANTID_PROXY_URL + '?details=common_names,local_name,description,treatment,cause,url&language=de';
+    const url = PLANTID_PROXY_URL + '?details=common_names,local_name,description,treatment,cause,url&language=' + LANG;
     const response = await fetch(url, {
       method: 'POST',
       headers: _proxyHeaders(),
@@ -1248,11 +1441,11 @@ async function recognizePlantHealth(plantId) {
     try {
       data = JSON.parse(rawText);
     } catch (parseErr) {
-      throw new Error('Unerwartete Antwort vom Server (Status ' + response.status + '): ' + rawText.slice(0, 200));
+      throw new Error((LANG === 'en' ? 'Unexpected server response (status ' : 'Unerwartete Antwort vom Server (Status ') + response.status + '): ' + rawText.slice(0, 200));
     }
-    if (response.status === 402) throw new Error(data?.error?.message || 'Die kostenlose Testphase ist abgelaufen. Schließe ein Abo ab, um weiterzumachen.');
-    if (response.status === 429) throw new Error(data?.error?.message || 'Wöchentliches Limit erreicht.');
-    if (!response.ok) throw new Error(data.message || data.error?.message || data.error || 'Plant.id Fehler ' + response.status);
+    if (response.status === 402) throw new Error(data?.error?.message || t('trial_expired'));
+    if (response.status === 429) throw new Error(data?.error?.message || t('weekly_limit'));
+    if (!response.ok) throw new Error(data.message || data.error?.message || data.error || 'Plant.id ' + (LANG === 'en' ? 'error ' : 'Fehler ') + response.status);
 
     // Pflanzenart (als Zweitinfo — die Krankheit selbst steht im Fokus)
     const plantSuggestions = data.result?.classification?.suggestions || [];
@@ -1262,10 +1455,9 @@ async function recognizePlantHealth(plantId) {
     lastAiLatin = latinName;
     lastAiInfoHtml = null;
 
-    document.getElementById('ai-label-text').textContent = '🩺 Krankheitsdiagnose';
-    // Der Name der befallenen Pflanze soll direkt sichtbar sein — nicht nur
+    document.getElementById('ai-label-text').textContent = t('label_disease');
     // irgendwo im Beschreibungstext der Krankheit versteckt.
-    const subnameText = germanName ? 'Pflanzenname "' + germanName + '"' : '';
+    const subnameText = germanName ? (LANG === 'en' ? 'Plant name "' : 'Pflanzenname "') + germanName + '"' : '';
     document.getElementById('ai-subname-text').textContent = subnameText;
 
     // Gesundheitsstatus + Krankheits-Vorschläge
@@ -1275,12 +1467,12 @@ async function recognizePlantHealth(plantId) {
 
     let html = '';
     if (!diseaseSuggestions.length) {
-      lastAiName = germanName || 'Pflanze (ohne Befund)';
+      lastAiName = germanName || (LANG === 'en' ? 'Plant (no finding)' : 'Pflanze (ohne Befund)');
       autoApplyAiName(lastAiName);
-      document.getElementById('ai-name-text').textContent = '✅ Keine Erkrankung erkannt';
+      document.getElementById('ai-name-text').textContent = t('no_disease_found');
       document.getElementById('ai-info-text').textContent =
-        healthyPct !== null ? healthyPct + '% Gesundheits-Wahrscheinlichkeit' : '';
-      html = '<p style="color:var(--muted);font-size:.85rem">Falls die Pflanze trotzdem auffällig wirkt, versuche ein deutlicheres Foto der betroffenen Stelle (Blatt-Unterseite, Stängel, Wurzelbereich).</p>';
+        healthyPct !== null ? healthyPct + (LANG === 'en' ? '% health probability' : '% Gesundheits-Wahrscheinlichkeit') : '';
+      html = '<p style="color:var(--muted);font-size:.85rem">' + t('no_disease_hint') + '</p>';
     } else {
       // Die wahrscheinlichste Diagnose steht klar im Mittelpunkt, statt
       // mehrere konkurrierende Vorschläge gleichzeitig anzuzeigen.
@@ -1296,7 +1488,7 @@ async function recognizePlantHealth(plantId) {
       // Deutscher Name immer groß/prominent, lateinischer Name klein dahinter.
       document.getElementById('ai-name-text').innerHTML =
         esc(diseaseGerman) + (diseaseLatin && diseaseLatin !== diseaseGerman ? ' <span style="font-size:.6em;font-weight:400;opacity:.75;font-style:italic">(' + esc(diseaseLatin) + ')</span>' : '');
-      document.getElementById('ai-info-text').textContent = pct + '% Übereinstimmung';
+      document.getElementById('ai-info-text').textContent = pct + t('match_pct');
 
       // Plant.id liefert die Behandlungstipps roh und sehr fachsprachlich
       // (chemische Verbindungsnamen, Bakterienarten etc.) — die KI bereitet
@@ -1309,19 +1501,20 @@ async function recognizePlantHealth(plantId) {
       } else {
         if (det.description || det.cause) {
           html += '<p style="font-size:.85rem;margin-bottom:14px">';
-          if (det.description) html += '<strong>Was ist es?</strong> ' + esc(det.description);
-          if (det.cause) html += (det.description ? ' ' : '<strong>Ursache:</strong> ') + esc(det.cause);
+          if (det.description) html += '<strong>' + (LANG === 'en' ? 'What is it?' : 'Was ist es?') + '</strong> ' + esc(det.description);
+          if (det.cause) html += (det.description ? ' ' : '<strong>' + (LANG === 'en' ? 'Cause:' : 'Ursache:') + '</strong> ') + esc(det.cause);
           html += '</p>';
         }
 
         const t = det.treatment || {};
+        const noDataTxt = LANG === 'en' ? 'No information.' : 'Keine Angabe.';
         const renderItems = arr => (arr && arr.length)
           ? '<ul>' + arr.map(x => '<li>' + esc(x) + '</li>').join('') + '</ul>'
-          : '<p style="font-size:.82rem;color:var(--muted);margin:4px 0 0">Keine Angabe.</p>';
+          : '<p style="font-size:.82rem;color:var(--muted);margin:4px 0 0">' + noDataTxt + '</p>';
         const healArr = [...(t.chemical || []), ...(t.biological || [])];
 
-        html += '<div class="disease-card disease-heal"><div class="disease-card-title">💊 Heilung</div>' + renderItems(healArr) + '</div>';
-        html += '<div class="disease-card disease-growth"><div class="disease-card-title">🌱 Tipps für besseres Wachstum</div>' + renderItems(t.prevention) + '</div>';
+        html += '<div class="disease-card disease-heal"><div class="disease-card-title">💊 ' + (LANG === 'en' ? 'Treatment' : 'Heilung') + '</div>' + renderItems(healArr) + '</div>';
+        html += '<div class="disease-card disease-growth"><div class="disease-card-title">🌱 ' + (LANG === 'en' ? 'Tips for better growth' : 'Tipps für besseres Wachstum') + '</div>' + renderItems(t.prevention) + '</div>';
       }
 
       // Zusätzliche Infos & Bild von Wikipedia (z.B. Nahaufnahme des
@@ -1330,17 +1523,17 @@ async function recognizePlantHealth(plantId) {
       const wikiInfo = await _fetchWikiDiseaseInfo(d.name);
       if (wikiInfo && (wikiInfo.image || wikiInfo.extract)) {
         html += '<div class="disease-card" style="background:var(--surface2);border-color:var(--border)">';
-        html += '<div class="disease-card-title" style="color:var(--text)">📖 Mehr über diese Krankheit</div>';
+        html += '<div class="disease-card-title" style="color:var(--text)">' + t('more_about_disease') + '</div>';
         if (wikiInfo.image) {
           html += '<img src="' + wikiInfo.image + '" alt="" style="width:100%;border-radius:8px;margin:6px 0;max-height:220px;object-fit:cover">';
           html += '<div style="font-size:.68rem;color:var(--muted);text-align:right;margin-bottom:8px">© Wikipedia / Wikimedia Commons</div>';
         }
         if (wikiInfo.extract) html += '<p style="font-size:.85rem">' + esc(wikiInfo.extract) + '</p>';
-        html += '<a href="' + wikiInfo.pageUrl + '" target="_blank" style="display:inline-block;margin-top:8px;font-size:.8rem;color:var(--accent);text-decoration:none">📖 Mehr auf Wikipedia ↗</a>';
+        html += '<a href="' + wikiInfo.pageUrl + '" target="_blank" style="display:inline-block;margin-top:8px;font-size:.8rem;color:var(--accent);text-decoration:none">' + t('more_on_wikipedia') + '</a>';
         html += '</div>';
       }
     }
-    html += '<p style="color:var(--muted);font-size:.72rem;margin-top:4px">Diagnose via Plant.id — ersetzt keine fachkundige Beratung (z.B. Pflanzenschutzamt, Gärtnerei) bei unklaren oder schweren Fällen.</p>';
+    html += '<p style="color:var(--muted);font-size:.72rem;margin-top:4px">' + t('plant_disclaimer') + '</p>';
 
     document.getElementById('ai-enrichment').innerHTML = html;
     document.getElementById('ai-illustration').style.display = 'none';
@@ -1373,18 +1566,18 @@ async function recognizePlantHealth(plantId) {
 // Läuft über den serverseitigen mushroomid-proxy (CORS + Limit-Prüfung),
 // kein eigener Key nötig — siehe Backend-Proxys oben.
 async function recognizeMushroom(plantId) {
-  if (!addPhotoData) { alert('Bitte zuerst ein Foto aufnehmen.'); return; }
+  if (!addPhotoData) { alert(LANG === 'en' ? 'Please take a photo first.' : 'Bitte zuerst ein Foto aufnehmen.'); return; }
 
   const spinner = document.getElementById('ai-spinner');
   const resultBox = document.getElementById('ai-result');
-  spinner.textContent = '🔍 mushroom.id (Test-API) erkennt Pilz …';
+  spinner.textContent = t('loading_mushroom');
   spinner.style.display = 'block';
   resultBox.style.display = 'none';
 
   try {
     // Der Trial-Endpunkt erwartet das vollständige data:-URL (inkl.
     // "data:image/jpeg;base64,…"-Präfix), anders als Plant.id.
-    const url = MUSHROOMID_PROXY_URL + '?details=common_names,edibility&language=de';
+    const url = MUSHROOMID_PROXY_URL + '?details=common_names,edibility&language=' + LANG;
     const response = await fetch(url, {
       method: 'POST',
       headers: _proxyHeaders(),
@@ -1393,12 +1586,12 @@ async function recognizeMushroom(plantId) {
     const rawText = await response.text();
 
     if (response.status === 402) {
-      let subMsg = 'Die kostenlose Testphase ist abgelaufen. Schließe ein Abo ab, um weiterzumachen.';
+      let subMsg = t('trial_expired');
       try { const d = JSON.parse(rawText); if (d?.error?.message) subMsg = d.error.message; } catch {}
       throw new Error(subMsg);
     }
     if (response.status === 429) {
-      let limitMsg = 'Wöchentliches Limit erreicht. Schau in ein paar Tagen wieder vorbei, oder hol dir unbegrenzte Erkennungen mit dem Abo.';
+      let limitMsg = t('weekly_limit_mushroom');
       try { const d = JSON.parse(rawText); if (d?.error?.message) limitMsg = d.error.message; } catch {}
       throw new Error(limitMsg);
     }
@@ -1407,30 +1600,29 @@ async function recognizeMushroom(plantId) {
     try {
       data = JSON.parse(rawText);
     } catch (parseErr) {
-      throw new Error('Unerwartete Antwort vom Server (Status ' + response.status + '): ' + rawText.slice(0, 200));
+      throw new Error((LANG === 'en' ? 'Unexpected server response (status ' : 'Unerwartete Antwort vom Server (Status ') + response.status + '): ' + rawText.slice(0, 200));
     }
 
-    if (!response.ok) throw new Error(data.message || data.error || 'mushroom.id Fehler ' + response.status);
+    if (!response.ok) throw new Error(data.message || data.error || 'mushroom.id ' + (LANG === 'en' ? 'error ' : 'Fehler ') + response.status);
     if (data.result?.is_mushroom && data.result.is_mushroom.probability < 0.3) {
-      throw new Error('Auf dem Foto wurde kein Pilz erkannt. Versuche ein deutlicheres Foto.');
+      throw new Error(LANG === 'en' ? 'No mushroom was recognized in the photo. Try a clearer photo.' : 'Auf dem Foto wurde kein Pilz erkannt. Versuche ein deutlicheres Foto.');
     }
 
     const suggestions = data.result?.classification?.suggestions || [];
-    if (!suggestions.length) throw new Error('Kein Pilz erkannt. Versuche ein deutlicheres Foto.');
+    if (!suggestions.length) throw new Error(LANG === 'en' ? 'No mushroom recognized. Try a clearer photo.' : 'Kein Pilz erkannt. Versuche ein deutlicheres Foto.');
 
     const best = suggestions[0];
     const latinName = best.name || '';
     const germanName = await _resolveGermanName(best.details?.common_names?.[0] || '', latinName);
     const pct = Math.round((best.probability || 0) * 100);
     const edibility = best.details?.edibility || '';
-    const info = `mushroom.id (Test-API): ${pct}% Übereinstimmung` + (edibility ? ` · Einstufung: ${edibility}` : '');
+    const info = `mushroom.id (Test-API): ${pct}${t('match_pct')}` + (edibility ? (LANG === 'en' ? ` · Classification: ${edibility}` : ` · Einstufung: ${edibility}`) : '');
 
     lastAiName = germanName;
     lastAiLatin = latinName;
     lastAiInfoHtml = null;
     autoApplyAiName(germanName);
-    document.getElementById('ai-label-text').textContent = '🍄 mushroom.id-Vorschlag';
-    // Deutscher Name immer groß/prominent, lateinischer Name klein dahinter
+    document.getElementById('ai-label-text').textContent = t('label_mushroom_suggestion');
     // (nie umgekehrt, auch wenn die API mal keinen deutschen Namen liefert).
     document.getElementById('ai-name-text').innerHTML =
       esc(germanName) + (latinName && latinName !== germanName ? ' <span style="font-size:.6em;font-weight:400;opacity:.75;font-style:italic">(' + esc(latinName) + ')</span>' : '');
@@ -1469,16 +1661,16 @@ function autoApplyAiName(name) {
 async function getGPSAuto() {
   if (!navigator.geolocation) return;
   const hint = document.getElementById('gps-hint');
-  hint.textContent = '📡 Standort wird ermittelt …';
+  hint.textContent = t('gps_locating');
   navigator.geolocation.getCurrentPosition(
     async pos => {
       const lat = pos.coords.latitude;
       const lon = pos.coords.longitude;
       addGpsData = { lat: lat.toFixed(6), lon: lon.toFixed(6) };
-      hint.textContent = '📍 Adresse wird geladen …';
+      hint.textContent = t('gps_address_loading');
       try {
         const r = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&addressdetails=1`, {
-          headers: { 'Accept-Language': 'de', 'User-Agent': 'PflanzenLern/3.7' }
+          headers: { 'Accept-Language': LANG, 'User-Agent': 'PflanzenLern/3.7' }
         });
         const geo = await r.json();
         const a = geo.address || {};
@@ -1510,8 +1702,10 @@ async function getGPSAuto() {
 let currentAddPlantId = null;
 
 async function _autoSaveNewPlant() {
-  const defaultName = captureMode === 'pilz' ? 'Pilz ' : captureMode === 'krankheit' ? 'Kranke Pflanze ' : 'Pflanze ';
-  const name = lastAiName || (defaultName + new Date().toLocaleDateString('de-DE'));
+  const defaultName = LANG === 'en'
+    ? (captureMode === 'pilz' ? 'Mushroom ' : captureMode === 'krankheit' ? 'Sick plant ' : 'Plant ')
+    : (captureMode === 'pilz' ? 'Pilz ' : captureMode === 'krankheit' ? 'Kranke Pflanze ' : 'Pflanze ');
+  const name = lastAiName || (defaultName + new Date().toLocaleDateString(LANG === 'en' ? 'en-US' : 'de-DE'));
   const savedPhoto = addPhotoData;
   // Archiv unterscheidet nur Pflanzen/Pilze (siehe setArchiveFilter) — "Krankheit"
   // ist aktuell keine eigene Archiv-Kategorie, sondern landet mit bei den Pflanzen,
@@ -1532,7 +1726,7 @@ async function _autoSaveNewPlant() {
   currentAddPlantId = newId;
 
   const msg = document.getElementById('add-msg');
-  msg.textContent = '✅ Automatisch im Archiv gespeichert';
+  msg.textContent = t('auto_saved');
   msg.style.display = 'block';
   setTimeout(() => msg.style.display = 'none', 2500);
   updateDueBadge();
@@ -1581,9 +1775,9 @@ async function renderArchive() {
   if (!plants.length) {
     empty.style.display = 'block';
     const emptyText = document.getElementById('archive-empty-text');
-    if (emptyText) emptyText.textContent = archiveFilter === 'pilz' ? 'Noch keine Pilze erfasst.'
-      : archiveFilter === 'krankheit' ? 'Noch keine Krankheiten erfasst.'
-      : 'Noch keine Pflanzen erfasst.';
+    if (emptyText) emptyText.textContent = LANG === 'en'
+      ? (archiveFilter === 'pilz' ? 'No mushrooms captured yet.' : archiveFilter === 'krankheit' ? 'No diseases captured yet.' : 'No plants captured yet.')
+      : (archiveFilter === 'pilz' ? 'Noch keine Pilze erfasst.' : archiveFilter === 'krankheit' ? 'Noch keine Krankheiten erfasst.' : 'Noch keine Pflanzen erfasst.');
     return;
   }
   empty.style.display = 'none';
@@ -1623,7 +1817,7 @@ async function openDetail(id) {
   document.getElementById('modal-title').textContent = p.name;
   const hostEl = document.getElementById('modal-hostplant');
   if (p.krank && p.hostPlant) {
-    hostEl.textContent = 'Pflanzenname "' + p.hostPlant + '"';
+    hostEl.textContent = (LANG === 'en' ? 'Plant name "' : 'Pflanzenname "') + p.hostPlant + '"';
     hostEl.style.display = 'block';
   } else {
     hostEl.style.display = 'none';
@@ -1631,7 +1825,7 @@ async function openDetail(id) {
   document.getElementById('modal-notes').textContent = p.notes || '—';
   // GPS
   const locEl = document.getElementById('modal-location');
-  const dateStr = p.created ? new Date(p.created).toLocaleString('de-DE', {day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '';
+  const dateStr = p.created ? new Date(p.created).toLocaleString(LANG === 'en' ? 'en-US' : 'de-DE', {day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '';
   if (p.gps?.lat) {
     const url = `https://www.google.com/maps?q=${p.gps.lat},${p.gps.lon}`;
     const lbl = p.gps.label || `${p.gps.lat}, ${p.gps.lon}`;
@@ -1706,16 +1900,15 @@ async function _loadAiEnrichment(germanName, latinName, plantId) {
   // AI info (same prompt as generatePlantInfo, but with names directly)
   let infoHtml = null;
   try {
-    const res = await aiChat([{ role: 'user', content:
-      'Gib mir Informationen zur Pflanze "' + germanName + '"' + (latinName ? ' (' + latinName + ')' : '') +
-      ' auf Deutsch.\n\n**Bestimmungsmerkmale:**\nListe NUR die zutreffenden Merkmale tabellarisch im Format "Punkt: Wert" auf — eine Zeile pro Merkmal. Prüfe folgende Punkte und nenne nur die, die für diese Pflanze relevant sind (z.B. Milchsaft nur wenn vorhanden, sonst weglassen):\nPflanzenfamilie (deutscher Trivialname, z.B. Korbblütler, Lippenblütler, Kreuzblütler, Doldenblütler, Hahnenfußgewächse), Blütenfarbe, Blütenform, Anzahl der Kronblätter, Blattstellung, Blattform, Blattrand, Behaarung, Geruch/Geschmack, Milchsaft, Standort.\nKurz und stichwortartig, kein Fließtext.\n\n**Fun Facts:**\n3-4 kurze Fun Facts auf Deutsch. Schreibe: modern, lebendig, seriös und historisch korrekt. Keine trockenen Kunstgeschichte-Vorlesungen, sondern überraschende Details die im Gedächtnis bleiben. Kurz und prägnant. Wenn es leicht möglich ist, ohne den Satz zu verbiegen, vermeide den Namen der Pflanze im Fun Fact selbst zu nennen.\n\nWICHTIG: Verwende **ausschließlich** für die beiden Überschriften "**Bestimmungsmerkmale:**" und "**Fun Facts:**". Markiere innerhalb der Inhalte KEIN einziges Wort fett.'
+    const res = await aiChat([{ role: 'user', content: _plantInfoPrompt(germanName, latinName, false)
     }], 1536);
     const data = await res.json();
     if (!res.ok) throw new Error(data.error?.message);
     const text = data.choices?.[0]?.message?.content || '';
     if (!text.trim()) throw new Error('Leere Antwort');
     const stripBold = s => (s || '').replace(/\*\*/g, '').trim();
-    const merkmaleMatch = text.match(/\*\*\s*Bestimmungsmerkmale\s*:?\s*\*\*([\s\S]*?)(?=\*\*\s*Fun\s*Facts|$)/i);
+    const merkmaleHead = LANG === 'en' ? 'Identification features' : 'Bestimmungsmerkmale';
+    const merkmaleMatch = text.match(new RegExp('\\*\\*\\s*' + merkmaleHead + '\\s*:?\\s*\\*\\*([\\s\\S]*?)(?=\\*\\*\\s*Fun\\s*Facts|$)', 'i'));
     const funfactsMatch = text.match(/\*\*\s*Fun\s*Facts\s*:?\s*\*\*([\s\S]*)/i);
     let html = '';
     const merkmaleBody = merkmaleMatch ? stripBold(merkmaleMatch[1]) : '';
@@ -1727,7 +1920,7 @@ async function _loadAiEnrichment(germanName, latinName, plantId) {
       });
     }
     if (merkmaleBody) {
-      html += '<h3>Bestimmungsmerkmale</h3><table class="merkmale-table">';
+      html += '<h3>' + (LANG === 'en' ? 'Identification features' : 'Bestimmungsmerkmale') + '</h3><table class="merkmale-table">';
       merkmaleBody.split('\n').filter(l => l.trim() && l.includes(':')).forEach(row => {
         const [k, ...rest] = row.split(':');
         html += '<tr><td class="merkmal-key">' + k.trim().replace(/^[-•*]\s*/,'') + '</td><td class="merkmal-val">' + rest.join(':').trim() + '</td></tr>';
@@ -1739,7 +1932,7 @@ async function _loadAiEnrichment(germanName, latinName, plantId) {
 
   // Update enrichment div
   const enrichDiv = document.getElementById('ai-enrichment');
-  if (enrichDiv) enrichDiv.innerHTML = infoHtml || '<p style="color:var(--muted);font-size:.82rem">Details nicht verfügbar.</p>';
+  if (enrichDiv) enrichDiv.innerHTML = infoHtml || '<p style="color:var(--muted);font-size:.82rem">' + t('details_unavailable') + '</p>';
   if (infoHtml) {
     lastAiInfoHtml = infoHtml;
     // Fun Facts/Bestimmungsmerkmale auch in der bereits automatisch
@@ -1759,8 +1952,9 @@ async function _loadAiEnrichment(germanName, latinName, plantId) {
 
 // Fester Warnhinweis, der bei Pilz-Fun-Facts immer mit angezeigt wird
 // (unabhängig davon, ob das Laden der KI-Infos klappt oder fehlschlägt).
-const MUSHROOM_DISCLAIMER_HTML =
-  '<p style="color:var(--danger);font-weight:700;font-size:.8rem;margin-bottom:10px">⚠️ Nur Bestimmungswahrscheinlichkeit — keine Essensempfehlung! Große Verwechslungsgefahr, im Zweifel Pilzsachverständige konsultieren.</p>';
+function _mushroomDisclaimerHtml() {
+  return '<p style="color:var(--danger);font-weight:700;font-size:.8rem;margin-bottom:10px">' + t('mushroom_disclaimer') + '</p>';
+}
 
 // ── Fun Facts & Bestimmungsmerkmale für Pilze (eigener, pilzspezifischer
 //    Prompt statt der pflanzenspezifischen Merkmale wie Blütenfarbe etc.) ──
@@ -1769,16 +1963,15 @@ async function _loadMushroomEnrichment(germanName, latinName, plantId) {
 
   let infoHtml = null;
   try {
-    const res = await aiChat([{ role: 'user', content:
-      'Gib mir Informationen zum Pilz "' + germanName + '"' + (latinName ? ' (' + latinName + ')' : '') +
-      ' auf Deutsch.\n\n**Bestimmungsmerkmale:**\nListe NUR die zutreffenden Merkmale tabellarisch im Format "Punkt: Wert" auf — eine Zeile pro Merkmal. Prüfe folgende Punkte und nenne nur die, die für diesen Pilz relevant sind (gib je nach Pilztyp Lamellen ODER Röhren an, nie beide, falls nur eines zutrifft):\nHutfarbe, Hutform, Hutoberfläche (z.B. schleimig, trocken, schuppig), Lamellenfarbe (bei Lamellenpilzen) oder Röhren-/Porenfarbe (bei Röhrlingen), Stielform, Stieloberfläche (z.B. genattert, Ring, Knolle), Fleischfarbe, Besonderheiten bei Anschnitt/Verletzung (z.B. Blaufärbung, Rötung, Farbwechsel des Fleisches oder der Röhren), Geruch, Speisewert/Giftigkeit (allgemein bekannt, ersetzt KEINE Bestimmung durch Fachleute), Vorkommen/Standort, Jahreszeit, typische Verwechslungsarten.\nKurz und stichwortartig, kein Fließtext.\n\n**Fun Facts:**\n3-4 kurze Fun Facts auf Deutsch. Schreibe: modern, lebendig, seriös und sachlich korrekt. Keine trockenen Lexikon-Sätze, sondern überraschende Details die im Gedächtnis bleiben. Kurz und prägnant. Wenn es leicht möglich ist, ohne den Satz zu verbiegen, vermeide den Namen des Pilzes im Fun Fact selbst zu nennen.\n\nWICHTIG: Verwende **ausschließlich** für die beiden Überschriften "**Bestimmungsmerkmale:**" und "**Fun Facts:**". Markiere innerhalb der Inhalte KEIN einziges Wort fett. Gib KEINE eigene Essensempfehlung oder Aufforderung zum Verzehr.'
+    const res = await aiChat([{ role: 'user', content: _mushroomInfoPrompt(germanName, latinName)
     }], 1536);
     const data = await res.json();
     if (!res.ok) throw new Error(data.error?.message);
     const text = data.choices?.[0]?.message?.content || '';
     if (!text.trim()) throw new Error('Leere Antwort');
     const stripBold = s => (s || '').replace(/\*\*/g, '').trim();
-    const merkmaleMatch = text.match(/\*\*\s*Bestimmungsmerkmale\s*:?\s*\*\*([\s\S]*?)(?=\*\*\s*Fun\s*Facts|$)/i);
+    const merkmaleHead = LANG === 'en' ? 'Identification features' : 'Bestimmungsmerkmale';
+    const merkmaleMatch = text.match(new RegExp('\\*\\*\\s*' + merkmaleHead + '\\s*:?\\s*\\*\\*([\\s\\S]*?)(?=\\*\\*\\s*Fun\\s*Facts|$)', 'i'));
     const funfactsMatch = text.match(/\*\*\s*Fun\s*Facts\s*:?\s*\*\*([\s\S]*)/i);
     let html = '';
     const merkmaleBody = merkmaleMatch ? stripBold(merkmaleMatch[1]) : '';
@@ -1790,18 +1983,18 @@ async function _loadMushroomEnrichment(germanName, latinName, plantId) {
       });
     }
     if (merkmaleBody) {
-      html += '<h3>Bestimmungsmerkmale</h3><table class="merkmale-table">';
+      html += '<h3>' + (LANG === 'en' ? 'Identification features' : 'Bestimmungsmerkmale') + '</h3><table class="merkmale-table">';
       merkmaleBody.split('\n').filter(l => l.trim() && l.includes(':')).forEach(row => {
         const [k, ...rest] = row.split(':');
         html += '<tr><td class="merkmal-key">' + k.trim().replace(/^[-•*]\s*/,'') + '</td><td class="merkmal-val">' + rest.join(':').trim() + '</td></tr>';
       });
       html += '</table>';
     }
-    if (html) infoHtml = MUSHROOM_DISCLAIMER_HTML + html;
+    if (html) infoHtml = _mushroomDisclaimerHtml() + html;
   } catch(e) { console.warn('Mushroom enrichment error:', e.message); }
 
   const enrichDiv = document.getElementById('ai-enrichment');
-  if (enrichDiv) enrichDiv.innerHTML = infoHtml || (MUSHROOM_DISCLAIMER_HTML + '<p style="color:var(--muted);font-size:.82rem">Details nicht verfügbar.</p>');
+  if (enrichDiv) enrichDiv.innerHTML = infoHtml || (_mushroomDisclaimerHtml() + '<p style="color:var(--muted);font-size:.82rem">' + t('details_unavailable') + '</p>');
   if (infoHtml) {
     lastAiInfoHtml = infoHtml;
     if (plantId) _updateSavedPlant(plantId, { infoHtml });
@@ -1862,12 +2055,12 @@ async function generatePlantInfo(plantId) {
   }
 
   try {
-    const res = await aiChat([{ role: 'user', content: 'Gib mir Informationen zur Pflanze "' + p.name + '"' + (p.latin ? ' (' + p.latin + ')' : '') + ' auf Deutsch.\n\n**Bestimmungsmerkmale:**\nListe NUR die zutreffenden Merkmale tabellarisch im Format "Punkt: Wert" auf — eine Zeile pro Merkmal. Prüfe folgende Punkte und nenne nur die, die für diese Pflanze relevant sind (z.B. Milchsaft nur wenn vorhanden, sonst weglassen):\nPflanzenfamilie (deutscher Trivialname, z.B. Korbblütler, Lippenblütler, Kreuzblütler, Doldenblütler, Hahnenfußgewächse), Blütenfarbe, Blütenform, Anzahl der Kronblätter, Blattstellung, Blattform, Blattrand, Behaarung, Geruch/Geschmack, Milchsaft, Standort.\nKurz und stichwortartig, kein Fließtext.\n\n**Fun Facts:**\n3-4 kurze Fun Facts auf Deutsch. Schreibe: modern, lebendig, seriös und historisch korrekt. Keine trockenen Kunstgeschichte-Vorlesungen, sondern überraschende Details die im Gedächtnis bleiben. Kurz und prägnant. Wenn es leicht möglich ist, ohne den Satz zu verbiegen, vermeide den Namen der Pflanze im Fun Fact selbst zu nennen.\n\nWICHTIG: Verwende **ausschließlich** für die beiden Überschriften "**Bestimmungsmerkmale:**" und "**Fun Facts:**". Markiere innerhalb der Inhalte KEIN einziges Wort, keine Jahreszahl und keinen Begriff fett — auch nicht zur Betonung.' }], 1536);
+    const res = await aiChat([{ role: 'user', content: _plantInfoPrompt(p.name, p.latin, true) }], 1536);
     const data = await res.json();
     if (!res.ok) throw new Error(data.error?.message);
     const choice = data.choices?.[0];
     const text = choice?.message?.content || '';
-    if (!text.trim()) throw new Error('Leere Antwort von der KI erhalten.');
+    if (!text.trim()) throw new Error(LANG === 'en' ? 'Empty response received from the AI.' : 'Leere Antwort von der KI erhalten.');
 
     // Bestimmungsmerkmale als Tabelle, Fun Facts als Fließtext.
     // Wichtig: Die Abschnitte werden anhand der BEKANNTEN Überschriften
@@ -1878,7 +2071,8 @@ async function generatePlantInfo(plantId) {
     // Zuordnung und die Fun Facts fielen unter den Tisch. Zusätzlich wird
     // übrig gebliebenes "**" aus dem Fließtext entfernt, statt daran zu zerbrechen.
     const stripBold = s => (s || '').replace(/\*\*/g, '').trim();
-    const merkmaleMatch = text.match(/\*\*\s*Bestimmungsmerkmale\s*:?\s*\*\*([\s\S]*?)(?=\*\*\s*Fun\s*Facts|$)/i);
+    const merkmaleHead = LANG === 'en' ? 'Identification features' : 'Bestimmungsmerkmale';
+    const merkmaleMatch = text.match(new RegExp('\\*\\*\\s*' + merkmaleHead + '\\s*:?\\s*\\*\\*([\\s\\S]*?)(?=\\*\\*\\s*Fun\\s*Facts|$)', 'i'));
     const funfactsMatch = text.match(/\*\*\s*Fun\s*Facts\s*:?\s*\*\*([\s\S]*)/i);
 
     // Anzeige-Reihenfolge (auf Nutzerwunsch): zuerst Fun Facts, dann die
@@ -1891,7 +2085,7 @@ async function generatePlantInfo(plantId) {
       funfactsBody.split('\n').filter(l => l.trim()).forEach(l => { html += '<p>' + l.replace(/^[-•*\d.]+\s*/, '') + '</p>'; });
     }
     if (merkmaleBody) {
-      html += '<h3>Bestimmungsmerkmale</h3>';
+      html += '<h3>' + (LANG === 'en' ? 'Identification features' : 'Bestimmungsmerkmale') + '</h3>';
       const rows = merkmaleBody.split('\n').filter(l => l.trim() && l.includes(':'));
       html += '<table class="merkmale-table">';
       rows.forEach(row => {
@@ -1906,10 +2100,10 @@ async function generatePlantInfo(plantId) {
       // Fehler werfen statt stillschweigend leeres/kaputtes HTML zu speichern,
       // damit "Infos neu laden" dem Nutzer sichtbar mitteilt, dass es erneut
       // versucht werden sollte, statt scheinbar erfolgreich nichts zu tun.
-      throw new Error('Antwort konnte nicht ausgewertet werden (unerwartetes Format). Bitte erneut versuchen.');
+      throw new Error(LANG === 'en' ? 'Response could not be parsed (unexpected format). Please try again.' : 'Antwort konnte nicht ausgewertet werden (unerwartetes Format). Bitte erneut versuchen.');
     }
     if (choice?.finish_reason === 'length' && !funfactsBody) {
-      throw new Error('Antwort wurde abgeschnitten, bevor die Fun Facts kamen. Bitte erneut versuchen.');
+      throw new Error(LANG === 'en' ? 'Response was cut off before the fun facts arrived. Please try again.' : 'Antwort wurde abgeschnitten, bevor die Fun Facts kamen. Bitte erneut versuchen.');
     }
 
     const full = await dbGet(plantId);
@@ -1935,17 +2129,17 @@ async function loadModalInfo(forceReload = false) {
     return;
   }
 
-  box.innerHTML = '<div style="color:var(--muted);padding:12px 0">🔍 Lade Informationen …</div>';
+  box.innerHTML = '<div style="color:var(--muted);padding:12px 0">' + t('loading_info') + '</div>';
   const html = await generatePlantInfo(currentDetailId);
   if (html) {
     box.innerHTML = html + infoReloadBtnHtml();
   } else {
-    box.innerHTML = '<p style="color:var(--danger)">Fehler beim Laden der Informationen' + (lastInfoError ? ': ' + esc(lastInfoError) : '.') + '</p>' + infoReloadBtnHtml();
+    box.innerHTML = '<p style="color:var(--danger)">' + (LANG === 'en' ? 'Error loading information' : 'Fehler beim Laden der Informationen') + (lastInfoError ? ': ' + esc(lastInfoError) : '.') + '</p>' + infoReloadBtnHtml();
   }
 }
 
 function infoReloadBtnHtml() {
-  return '<button class="btn btn-secondary" style="margin-top:14px;width:100%;font-size:.85rem" onclick="loadModalInfo(true)">🔄 Infos neu laden</button>'
+  return '<button class="btn btn-secondary" style="margin-top:14px;width:100%;font-size:.85rem" onclick="loadModalInfo(true)">' + t('reload_info') + '</button>'
     + askQuestionBlockHtml('modal', currentDetailId);
 }
 
@@ -1953,11 +2147,11 @@ function infoReloadBtnHtml() {
 function askQuestionBlockHtml(context, plantId) {
   return `
     <div style="margin-top:18px;border-top:1px solid var(--border);padding-top:14px">
-      <div style="font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:8px">💬 Frage zur Pflanze</div>
+      <div style="font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:8px">💬 ${LANG === 'en' ? 'Ask about this plant' : 'Frage zur Pflanze'}</div>
       <div id="${context}-ask-chat" style="font-size:.85rem;margin-bottom:8px"></div>
       <div style="display:flex;gap:8px">
-        <input type="text" id="${context}-ask-input" placeholder="z.B. Ist sie giftig für Hunde?" style="flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:9px 12px;border-radius:6px;font-size:.85rem;outline:none">
-        <button class="btn btn-primary btn-sm" id="${context}-ask-btn" onclick="askPlantQuestion('${context}', ${plantId})">Fragen</button>
+        <input type="text" id="${context}-ask-input" placeholder="${t('ask_placeholder')}" style="flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:9px 12px;border-radius:6px;font-size:.85rem;outline:none">
+        <button class="btn btn-primary btn-sm" id="${context}-ask-btn" onclick="askPlantQuestion('${context}', ${plantId})">${LANG === 'en' ? 'Ask' : 'Fragen'}</button>
       </div>
     </div>`;
 }
@@ -1985,29 +2179,29 @@ async function askPlantQuestion(context, plantId) {
 
   const answerEl = document.createElement('div');
   answerEl.style.cssText = 'background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;line-height:1.5;margin-bottom:8px;color:var(--muted)';
-  answerEl.textContent = '🔍 Wird beantwortet …';
+  answerEl.textContent = t('answering');
   chat.appendChild(answerEl);
 
   try {
     const res = await aiChat([{
           role: 'user',
-          content: 'Du bist ein botanischer Experte in einer Pflanzen-App. Beantworte AUSSCHLIESSLICH Fragen, die sich auf die Pflanze "' + p.name + '"' + (p.latin ? ' (' + p.latin + ')' : '') + ' beziehen oder direkt mit Botanik/Pflanzenkunde zu dieser Pflanze zusammenhängen (z.B. Pflege, Giftigkeit, Verwendung, Merkmale, Herkunft). Falls die Frage NICHT zu diesem Themenbereich gehört (z.B. allgemeines Weltwissen, andere Themen wie Technik, Geschichte fernab der Pflanze, Mathe, Programmieren etc.), antworte NUR mit einem kurzen, freundlichen Hinweis, dass du nur Fragen zu dieser Pflanze beantwortest, ohne die eigentliche Frage zu beantworten.\n\nAuf Deutsch, kurz und präzise antworten (max. 4-5 Sätze), falls die Frage zulässig ist.\n\nFrage: ' + question
+          content: _plantQaSystemPrompt(p.name, p.latin) + question
         }], 400);
     const data = await res.json();
-    if (!res.ok) throw new Error(data.error?.message || 'Fehler ' + res.status);
-    const answer = data.choices?.[0]?.message?.content || 'Keine Antwort erhalten.';
+    if (!res.ok) throw new Error(data.error?.message || (LANG === 'en' ? 'Error ' : 'Fehler ') + res.status);
+    const answer = data.choices?.[0]?.message?.content || (LANG === 'en' ? 'No answer received.' : 'Keine Antwort erhalten.');
     answerEl.style.color = '';
     answerEl.innerHTML = answer.replace(/\n/g, '<br>');
   } catch(err) {
     answerEl.style.color = 'var(--danger)';
-    answerEl.textContent = 'Fehler: ' + err.message;
+    answerEl.textContent = (LANG === 'en' ? 'Error: ' : 'Fehler: ') + err.message;
   } finally {
     if (btn) btn.disabled = false;
     input.focus();
   }
 }
 async function deletePlant(id) {
-  if (!confirm('Diese Pflanze wirklich löschen?')) return;
+  if (!confirm(t('confirm_delete_plant'))) return;
   await dbDelete(id);
   // ── Pflanzenzähler im localStorage aktualisieren ──
   try { dbGetAll().then(a => localStorage.setItem('pflanz_plant_count', String(a.length))); } catch(e) {}
@@ -2025,9 +2219,9 @@ async function openEdit(id) {
   document.getElementById('edit-notes').value = p.notes || '';
   const area = document.getElementById('edit-photo-area');
   if (p.photo) {
-    area.innerHTML = `<img src="${p.photo}" alt=""><div class="overlay">Ändern</div>`;
+    area.innerHTML = `<img src="${p.photo}" alt=""><div class="overlay">${t('change')}</div>`;
   } else {
-    area.innerHTML = '<span class="big-icon">📷</span><span>Tippen um Foto zu ändern</span><div class="overlay">Ändern</div>';
+    area.innerHTML = '<span class="big-icon">📷</span><span>' + t('photo_tap_change') + '</span><div class="overlay">' + t('change') + '</div>';
   }
   closeModal();
   document.getElementById('edit-modal-overlay').classList.add('open');
@@ -2038,7 +2232,7 @@ function closeEditModal(e) {
 }
 async function saveEdit() {
   const name = document.getElementById('edit-name').value.trim();
-  if (!name) { alert('Bitte einen Pflanzennamen eingeben.'); return; }
+  if (!name) { alert(LANG === 'en' ? 'Please enter a plant name.' : 'Bitte einen Pflanzennamen eingeben.'); return; }
   const p = await dbGet(editId);
   p.name = name;
   p.latin = document.getElementById('edit-latin').value.trim();
@@ -2071,11 +2265,11 @@ function showLearnCard() {
   if (learnIndex >= learnQueue.length) {
     document.getElementById('learn-card').style.display = 'none';
     document.getElementById('learn-empty').style.display = 'block';
-    document.getElementById('learn-empty').querySelector('h2').textContent = 'Session abgeschlossen! 🎉';
+    document.getElementById('learn-empty').querySelector('h2').textContent = t('session_done');
     return;
   }
   const p = learnQueue[learnIndex];
-  document.getElementById('learn-progress').textContent = `${learnIndex+1} / ${learnQueue.length} fällig`;
+  document.getElementById('learn-progress').textContent = `${learnIndex+1} / ${learnQueue.length}` + (LANG === 'en' ? ' due' : ' fällig');
   document.getElementById('learn-img').src = p.photo || '';
   document.getElementById('learn-img-wrap').style.display = p.photo ? 'block' : 'none';
   document.getElementById('learn-name-revealed').style.display = 'none';
@@ -2137,7 +2331,7 @@ async function showInfoModal() {
   // GPS/Ort anzeigen
   const fullP = await dbGet(p.id);
   const locEl = document.getElementById('info-modal-location');
-  const dateStr2 = fullP?.created ? new Date(fullP.created).toLocaleString('de-DE', {day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '';
+  const dateStr2 = fullP?.created ? new Date(fullP.created).toLocaleString(LANG === 'en' ? 'en-US' : 'de-DE', {day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '';
   if (fullP?.gps?.lat) {
     const url = `https://www.google.com/maps?q=${fullP.gps.lat},${fullP.gps.lon}`;
     const lbl = fullP.gps.label || `${fullP.gps.lat}, ${fullP.gps.lon}`;
@@ -2163,31 +2357,31 @@ async function showInfoModal() {
     return;
   }
 
-  document.getElementById('info-modal-content').innerHTML = '<div id="info-loading">🔍 Lade Informationen …</div>';
+  document.getElementById('info-modal-content').innerHTML = '<div id="info-loading">' + t('loading_info') + '</div>';
   const html = await generatePlantInfo(p.id);
   if (html) {
     infoCache[p.id] = html;
     document.getElementById('info-modal-content').innerHTML = html + infoReloadBtnHtml2(p.id);
   } else {
-    document.getElementById('info-modal-content').innerHTML = '<p style="color:var(--danger)">Fehler beim Laden der Informationen' + (lastInfoError ? ': ' + esc(lastInfoError) : '.') + '</p>' + infoReloadBtnHtml2(p.id);
+    document.getElementById('info-modal-content').innerHTML = '<p style="color:var(--danger)">' + (LANG === 'en' ? 'Error loading information' : 'Fehler beim Laden der Informationen') + (lastInfoError ? ': ' + esc(lastInfoError) : '.') + '</p>' + infoReloadBtnHtml2(p.id);
   }
 }
 
 function infoReloadBtnHtml2(plantId) {
-  return '<button class="btn btn-secondary" style="margin-top:14px;width:100%;font-size:.85rem" onclick="reloadInfoModal(&quot;' + plantId + '&quot;)">🔄 Infos neu laden</button>'
+  return '<button class="btn btn-secondary" style="margin-top:14px;width:100%;font-size:.85rem" onclick="reloadInfoModal(&quot;' + plantId + '&quot;)">' + t('reload_info') + '</button>'
     + askQuestionBlockHtml('info', Number(plantId));
 }
 
 async function reloadInfoModal(plantId) {
   plantId = Number(plantId);
   delete infoCache[plantId];
-  document.getElementById('info-modal-content').innerHTML = '<div id="info-loading">🔍 Lade Informationen …</div>';
+  document.getElementById('info-modal-content').innerHTML = '<div id="info-loading">' + t('loading_info') + '</div>';
   const html = await generatePlantInfo(plantId);
   if (html) {
     infoCache[plantId] = html;
     document.getElementById('info-modal-content').innerHTML = html + infoReloadBtnHtml2(plantId);
   } else {
-    document.getElementById('info-modal-content').innerHTML = '<p style="color:var(--danger)">Fehler beim Laden der Informationen' + (lastInfoError ? ': ' + esc(lastInfoError) : '.') + '</p>' + infoReloadBtnHtml2(plantId);
+    document.getElementById('info-modal-content').innerHTML = '<p style="color:var(--danger)">' + (LANG === 'en' ? 'Error loading information' : 'Fehler beim Laden der Informationen') + (lastInfoError ? ': ' + esc(lastInfoError) : '.') + '</p>' + infoReloadBtnHtml2(plantId);
   }
 }
 
@@ -2196,7 +2390,7 @@ function closeInfoModal() {
 }
 function deleteLearnCard() {
   const p = learnQueue[learnIndex];
-  document.getElementById('delete-confirm-name').textContent = p.name || 'Diese Pflanze';
+  document.getElementById('delete-confirm-name').textContent = p.name || (LANG === 'en' ? 'This plant' : 'Diese Pflanze');
   document.getElementById('delete-row').style.display = 'none';
   document.getElementById('delete-confirm').style.display = 'block';
 }
@@ -2232,7 +2426,7 @@ async function gradeCard(knew) {
 async function removeDuplicates() {
   const status = document.getElementById('dedup-status');
   status.style.color = 'var(--muted)';
-  status.textContent = 'Suche Duplikate …';
+  status.textContent = LANG === 'en' ? 'Searching for duplicates …' : 'Suche Duplikate …';
   const all = await dbGetAll();
   const seen = new Map();
   const toDelete = [];
@@ -2247,16 +2441,16 @@ async function removeDuplicates() {
   }
   if (!toDelete.length) {
     status.style.color = 'var(--accent)';
-    status.textContent = '✓ Keine Duplikate gefunden.';
+    status.textContent = t('no_dupes_found');
     return;
   }
-  if (!confirm(`${toDelete.length} Duplikat(e) gefunden. Jetzt löschen?`)) {
-    status.textContent = 'Abgebrochen.';
+  if (!confirm(LANG === 'en' ? `${toDelete.length} duplicate(s) found. Delete now?` : `${toDelete.length} Duplikat(e) gefunden. Jetzt löschen?`)) {
+    status.textContent = LANG === 'en' ? 'Cancelled.' : 'Abgebrochen.';
     return;
   }
   for (const id of toDelete) await dbDelete(id);
   status.style.color = 'var(--accent)';
-  status.textContent = `✓ ${toDelete.length} Duplikat(e) gelöscht.`;
+  status.textContent = LANG === 'en' ? `✓ ${toDelete.length} duplicate(s) deleted.` : `✓ ${toDelete.length} Duplikat(e) gelöscht.`;
   updateDueBadge();
   renderArchive();
 }
@@ -2265,9 +2459,9 @@ async function removeDuplicates() {
 // ── Komplettes Archiv löschen ────────────────────────────────
 async function confirmDeleteArchive() {
   const all = await dbGetAll();
-  if (!all.length) { alert('Dein Archiv ist bereits leer.'); return; }
-  if (!confirm('⚠️ Komplettes Archiv löschen?\n\nAlle ' + all.length + ' erfassten Pflanzen werden unwiderruflich gelöscht. Dieser Vorgang kann nicht rückgängig gemacht werden.')) return;
-  if (!confirm('Wirklich ALLE Pflanzen löschen? Es gibt kein Zurück!')) return;
+  if (!all.length) { alert(LANG === 'en' ? 'Your archive is already empty.' : 'Dein Archiv ist bereits leer.'); return; }
+  if (!confirm(t('confirm_delete_archive') + all.length + t('confirm_delete_archive_suffix'))) return;
+  if (!confirm(t('confirm_delete_archive2'))) return;
   const status = document.getElementById('delete-archive-status');
   try {
     await dbClear();
@@ -2275,9 +2469,9 @@ async function confirmDeleteArchive() {
     updateDueBadge();
     renderArchive();
     try { renderProfile(); } catch(e) {}
-    if (status) { status.style.color = 'var(--accent)'; status.textContent = '✓ Archiv wurde geleert.'; }
+    if (status) { status.style.color = 'var(--accent)'; status.textContent = t('archive_cleared'); }
   } catch (err) {
-    if (status) { status.style.color = 'var(--danger)'; status.textContent = 'Fehler: ' + err.message; }
+    if (status) { status.style.color = 'var(--danger)'; status.textContent = (LANG === 'en' ? 'Error: ' : 'Fehler: ') + err.message; }
   }
 }
 
@@ -2285,7 +2479,7 @@ async function confirmDeleteArchive() {
 // ── Fleißige Biene: 15 zufällige Pflanzen ────────────────────
 async function startBee() {
   const all = (await dbGetAll()).filter(p => !p.krank);
-  if (all.length === 0) { alert('Noch keine Pflanzen vorhanden.'); return; }
+  if (all.length === 0) { alert(LANG === 'en' ? 'No plants yet.' : 'Noch keine Pflanzen vorhanden.'); return; }
   // Shuffle
   const shuffled = all.sort(() => Math.random() - 0.5);
   learnQueue = shuffled.slice(0, 15);
@@ -2318,13 +2512,13 @@ async function loadIllustration(context, latin, plantId) {
   const p = await dbGet(plantId);
   if (p?.illustrationUrl) {
     state.customUrl = p.illustrationUrl;
-    showIllusImage(context, p.illustrationUrl, 'Eigenes Bild');
+    showIllusImage(context, p.illustrationUrl, LANG === 'en' ? 'Own image' : 'Eigenes Bild');
     return;
   }
   state.customUrl = null;
 
   wrapEl.style.display = 'block';
-  boxEl.innerHTML = '<div class="illus-loading">🔍 Suche Illustration …</div>';
+  boxEl.innerHTML = '<div class="illus-loading">' + t('searching_illus') + '</div>';
   srcEl.textContent = '';
 
   try {
@@ -2335,13 +2529,13 @@ async function loadIllustration(context, latin, plantId) {
     state.files = (data?.query?.categorymembers || []).map(m => m.title);
 
     if (!state.files.length) {
-      boxEl.innerHTML = '<div class="illus-loading" style="color:var(--muted)">Keine historische Illustration verfügbar</div>';
+      boxEl.innerHTML = '<div class="illus-loading" style="color:var(--muted)">' + t('no_illus_available') + '</div>';
       return;
     }
 
     await showIllusIndex(context, 0);
   } catch(err) {
-    boxEl.innerHTML = '<div class="illus-loading" style="color:#e88">Fehler beim Laden</div>';
+    boxEl.innerHTML = '<div class="illus-loading" style="color:#e88">' + (LANG === 'en' ? 'Error loading' : 'Fehler beim Laden') + '</div>';
   }
 }
 
@@ -2366,13 +2560,13 @@ async function loadDiseaseIllustration(context, name, altName, plantId) {
   const p = await dbGet(plantId);
   if (p?.illustrationUrl) {
     state.customUrl = p.illustrationUrl;
-    showIllusImage(context, p.illustrationUrl, 'Eigenes Bild');
+    showIllusImage(context, p.illustrationUrl, LANG === 'en' ? 'Own image' : 'Eigenes Bild');
     return;
   }
   state.customUrl = null;
 
   wrapEl.style.display = 'block';
-  boxEl.innerHTML = '<div class="illus-loading">🔍 Suche Fotos/Illustrationen zur Krankheit …</div>';
+  boxEl.innerHTML = '<div class="illus-loading">' + t('searching_disease_photos') + '</div>';
   srcEl.textContent = '';
 
   try {
@@ -2387,12 +2581,12 @@ async function loadDiseaseIllustration(context, name, altName, plantId) {
 
     state.files = files;
     if (!state.files.length) {
-      boxEl.innerHTML = '<div class="illus-loading" style="color:var(--muted)">Keine zusätzlichen Fotos/Illustrationen verfügbar</div>';
+      boxEl.innerHTML = '<div class="illus-loading" style="color:var(--muted)">' + t('no_extra_photos') + '</div>';
       return;
     }
     await showIllusIndex(context, 0);
   } catch(err) {
-    boxEl.innerHTML = '<div class="illus-loading" style="color:#e88">Fehler beim Laden</div>';
+    boxEl.innerHTML = '<div class="illus-loading" style="color:#e88">' + (LANG === 'en' ? 'Error loading' : 'Fehler beim Laden') + '</div>';
   }
 }
 
@@ -2423,7 +2617,7 @@ async function showIllusIndex(context, idx) {
 
   const boxEl = document.getElementById(context + '-illus-box');
   const srcEl = document.getElementById(context + '-illus-source');
-  boxEl.innerHTML = '<div class="illus-loading">⏳ Lade Bild …</div>';
+  boxEl.innerHTML = '<div class="illus-loading">' + (LANG === 'en' ? '⏳ Loading image …' : '⏳ Lade Bild …') + '</div>';
 
   const fileName = state.files[idx];
   const imgApi = `https://commons.wikimedia.org/w/api.php?action=query&titles=${encodeURIComponent(fileName)}&prop=imageinfo&iiprop=url&iiurlwidth=600&format=json&origin=*`;
@@ -2436,7 +2630,7 @@ async function showIllusIndex(context, idx) {
 
   if (thumbUrl) {
     showIllusImage(context, thumbUrl, `Wikimedia Commons (${idx+1}/${state.files.length})`);
-    srcEl.innerHTML = `<a href="${descUrl}" target="_blank" style="color:var(--accent)">Quelle ansehen ↗</a>`;
+    srcEl.innerHTML = `<a href="${descUrl}" target="_blank" style="color:var(--accent)">` + (LANG === 'en' ? 'View source ↗' : 'Quelle ansehen ↗') + `</a>`;
     // Cachen in DB
     const p = await dbGet(state.plantId);
     if (p && !p.illustrationUrl) {
@@ -2444,7 +2638,7 @@ async function showIllusIndex(context, idx) {
       await dbPut(p);
     }
   } else {
-    boxEl.innerHTML = '<div class="illus-loading">Bild nicht verfügbar</div>';
+    boxEl.innerHTML = '<div class="illus-loading">' + t('image_unavailable') + '</div>';
   }
 }
 
@@ -2455,10 +2649,10 @@ function showIllusImage(context, url, label) {
   wrapEl.style.display = 'block';
   const img = document.createElement('img');
   img.src = url;
-  img.alt = 'Botanische Illustration';
+  img.alt = LANG === 'en' ? 'Botanical illustration' : 'Botanische Illustration';
   img.style.cursor = 'zoom-in';
   img.onclick = () => openZoom(url, context);
-  img.onerror = () => { boxEl.innerHTML = '<div class="illus-loading">Bild konnte nicht geladen werden</div>'; };
+  img.onerror = () => { boxEl.innerHTML = '<div class="illus-loading">' + (LANG === 'en' ? 'Image could not be loaded' : 'Bild konnte nicht geladen werden') + '</div>'; };
   boxEl.innerHTML = '';
   boxEl.appendChild(img);
   if (label && !srcEl.innerHTML) srcEl.textContent = label;
@@ -2493,15 +2687,15 @@ async function handleIllusUpload(input) {
     // In DB speichern
     const p = await dbGet(state.plantId);
     if (p) { p.illustrationUrl = url; await dbPut(p); }
-    showIllusImage(context, url, 'Eigenes Bild');
-    document.getElementById(context + '-illus-source').textContent = 'Eigenes Bild';
+    showIllusImage(context, url, LANG === 'en' ? 'Own image' : 'Eigenes Bild');
+    document.getElementById(context + '-illus-source').textContent = LANG === 'en' ? 'Own image' : 'Eigenes Bild';
   };
   reader.readAsDataURL(file);
   input.value = '';
 }
 
 async function illusDelete(context) {
-  if (!confirm('Illustration entfernen?')) return;
+  if (!confirm(LANG === 'en' ? 'Remove illustration?' : 'Illustration entfernen?')) return;
   const state = illusState[context];
   state.customUrl = null;
   const p = await dbGet(state.plantId);
@@ -2513,7 +2707,7 @@ async function illusDelete(context) {
     state.index = 0;
     await showIllusIndex(context, 0);
   } else {
-    document.getElementById(context + '-illus-box').innerHTML = '<div class="illus-loading">Keine Illustration vorhanden</div>';
+    document.getElementById(context + '-illus-box').innerHTML = '<div class="illus-loading">' + (LANG === 'en' ? 'No illustration available' : 'Keine Illustration vorhanden') + '</div>';
   }
 }
 
@@ -2586,6 +2780,8 @@ document.addEventListener('keydown', e => {
 
 // Zoom Touch/Click Events — nach DOM-Laden
 document.addEventListener('DOMContentLoaded', () => {
+
+applyI18n();
 
 // Overlay: Tap auf Hintergrund schließt
 document.getElementById('zoom-overlay').addEventListener('click', e => {
@@ -2666,7 +2862,7 @@ async function updateDueBadge() {
 // ── Export ────────────────────────────────────────────────────
 async function exportData() {
   const plants = await dbGetAll();
-  if (!plants.length) { alert('Keine Pflanzen zum Exportieren vorhanden.'); return; }
+  if (!plants.length) { alert(LANG === 'en' ? 'No plants to export.' : 'Keine Pflanzen zum Exportieren vorhanden.'); return; }
   const json = JSON.stringify({ version: 1, exported: Date.now(), plants }, null, 2);
   const blob = new Blob([json], { type: 'application/json' });
   const url  = URL.createObjectURL(blob);
@@ -2685,11 +2881,11 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!file) return;
     const status = document.getElementById('import-status');
     status.style.color = 'var(--muted)';
-    status.textContent = 'Lese Datei …';
+    status.textContent = LANG === 'en' ? 'Reading file …' : 'Lese Datei …';
     try {
       const text = await file.text();
       const data = JSON.parse(text);
-      if (!data.plants || !Array.isArray(data.plants)) throw new Error('Ungültiges Format.');
+      if (!data.plants || !Array.isArray(data.plants)) throw new Error(t('invalid_format'));
       let count = 0;
       for (const p of data.plants) {
         // Remove old id so IndexedDB assigns a new one (avoids conflicts)
@@ -2698,11 +2894,11 @@ document.addEventListener('DOMContentLoaded', () => {
         count++;
       }
       status.style.color = 'var(--accent)';
-      status.textContent = `✓ ${count} Pflanze(n) importiert!`;
+      status.textContent = LANG === 'en' ? `✓ ${count} plant(s) imported!` : `✓ ${count} Pflanze(n) importiert!`;
       updateDueBadge();
     } catch(err) {
       status.style.color = 'var(--danger)';
-      status.textContent = 'Fehler: ' + err.message;
+      status.textContent = (LANG === 'en' ? 'Error: ' : 'Fehler: ') + err.message;
     }
     e.target.value = '';
   });
@@ -2720,14 +2916,14 @@ const GITHUB_BRANCH = 'main';
 function getGithubToken() { return localStorage.getItem('github_pat') || ''; }
 function saveGithubToken() {
   const v = document.getElementById('github-token-input').value.trim();
-  if (!v) { alert('Bitte Token eingeben.'); return; }
+  if (!v) { alert(LANG === 'en' ? 'Please enter a token.' : 'Bitte Token eingeben.'); return; }
   localStorage.setItem('github_pat', v);
   document.getElementById('github-token-input').value = '';
   updateGithubTokenStatus();
-  alert('✓ GitHub Token gespeichert!');
+  alert(LANG === 'en' ? '✓ GitHub token saved!' : '✓ GitHub Token gespeichert!');
 }
 function deleteGithubToken() {
-  if (!confirm('GitHub Token wirklich löschen?')) return;
+  if (!confirm(LANG === 'en' ? 'Really delete GitHub token?' : 'GitHub Token wirklich löschen?')) return;
   localStorage.removeItem('github_pat');
   updateGithubTokenStatus();
 }
@@ -2735,10 +2931,10 @@ function updateGithubTokenStatus() {
   const el = document.getElementById('github-token-status');
   if (!el) return;
   if (getGithubToken()) {
-    el.textContent = '✓ GitHub Token gespeichert';
+    el.textContent = LANG === 'en' ? '✓ GitHub token saved' : '✓ GitHub Token gespeichert';
     el.className = 'key-ok';
   } else {
-    el.textContent = 'Kein GitHub Token gespeichert';
+    el.textContent = LANG === 'en' ? 'No GitHub token saved' : 'Kein GitHub Token gespeichert';
     el.className = 'key-none';
   }
 }
@@ -2780,7 +2976,7 @@ openDB().then(async () => {
   _applyCaptureModeUI();
   _applyArchiveFilterUI();
   try { renderProfile(); } catch(e) {}
-}).catch(err => alert('IndexedDB Fehler: ' + err));
+}).catch(err => alert((LANG === 'en' ? 'IndexedDB error: ' : 'IndexedDB Fehler: ') + err));
 
 // ── iOS-Installationshinweis ─────────────────────────────────
 // iOS/Safari kennt kein automatisches "Installieren"-Popup wie Android.
