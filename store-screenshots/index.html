@@ -125,6 +125,32 @@
     display:flex; align-items:center; gap:14px; font-size:30px; font-weight:800; color:#1a3b22;
   }
   .flagchip .flag{font-size:34px;}
+
+  /* feature graphic 1024x500 */
+  .fg-slide{
+    width:1024px;height:500px;position:relative;overflow:hidden;
+    background:var(--green);
+  }
+  .fg-scrim{position:absolute;inset:0;background:linear-gradient(to right, rgba(9,26,14,.95) 0%, rgba(9,26,14,.80) 40%, rgba(9,26,14,.25) 72%, rgba(9,26,14,0) 100%);}
+  .fg-brand{position:absolute; top:34px; left:48px; display:flex; align-items:center; gap:12px; z-index:5;}
+  .fg-brand .logo{
+    width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,#3fae63,#1f7a3f);
+    display:flex;align-items:center;justify-content:center;font-size:26px;
+    box-shadow:0 6px 16px rgba(0,0,0,.35);
+  }
+  .fg-brand .name{color:#fff;font-size:26px;font-weight:800;letter-spacing:.5px;text-shadow:0 2px 8px rgba(0,0,0,.4);}
+  .fg-text{position:absolute; left:48px; right:420px; top:50%; transform:translateY(-50%); z-index:5;}
+  .fg-headline{
+    color:#fff; font-size:54px; line-height:1.08; font-weight:800; letter-spacing:-.5px;
+    text-shadow:0 3px 14px rgba(0,0,0,.45);
+  }
+  .fg-headline .hl{color:var(--accent);}
+  .fg-sub{margin-top:16px; color:rgba(255,255,255,.92); font-size:24px; font-weight:600; text-shadow:0 2px 8px rgba(0,0,0,.4);}
+  .fg-pillrow{display:flex; gap:10px; margin-top:20px; flex-wrap:wrap;}
+  .fg-pill{
+    background:rgba(255,255,255,.16); border:2px solid rgba(255,255,255,.55);
+    color:#fff; font-size:19px; font-weight:700; padding:8px 18px; border-radius:30px;
+  }
 </style>
 </head>
 <body>
@@ -160,6 +186,25 @@
 </div>
 
 <!-- SLIDE 1 EN — HERO -->
+<!-- FEATURE GRAPHIC 1024x500 -->
+<div class="fg-slide" id="feature-graphic">
+  <img class="bg-photo" src="assets/leaves-rock.jpg" style="object-position:center 35%;">
+  <div class="fg-scrim"></div>
+  <div class="fg-brand">
+    <div class="logo">🌿</div>
+    <div class="name">Planty</div>
+  </div>
+  <div class="fg-text">
+    <div class="fg-headline">The <span class="hl">Plantspotter's</span> App</div>
+    <div class="fg-sub">Snap it. Name it. Know it.</div>
+    <div class="fg-pillrow">
+      <div class="fg-pill">📷 Photo ID</div>
+      <div class="fg-pill">🤖 AI Analysis</div>
+      <div class="fg-pill">🌱 Learn &amp; Track</div>
+    </div>
+  </div>
+</div>
+
 <div class="slide" id="s1-en" style="background:#163c22;">
   <img class="bg-photo" src="assets/leaves-rock.jpg" style="object-position:center 30%;">
   <div class="scrim scrim-top"></div>
