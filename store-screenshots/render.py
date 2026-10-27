@@ -7,8 +7,7 @@ OUT = os.path.join(BASE, "out")
 os.makedirs(OUT, exist_ok=True)
 
 slides = [
-    ("s1-de", "01-hero-de.png"),
-    ("s1-en", "01-hero-en.png"),
+    ("s3", "03-ai-funfacts.png"),
 ]
 
 with sync_playwright() as p:
