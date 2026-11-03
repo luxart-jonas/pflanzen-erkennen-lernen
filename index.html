@@ -1341,22 +1341,7 @@ async function _identifyPlantViaPlantId(base64) {
 // dasselbe {latinName, germanName, info}-Shape wie _identifyPlantViaPlantId,
 // damit der Rest von recognizePlant() unverändert weiterläuft.
 async function _identifyPlantViaDeepSeek(base64) {
-  const response = await fetch(DEEPSEEK_IDENTIFY_PROXY_URL, {
-    method: 'POST',
-    headers: _proxyHeaders(),
-    body: JSON.stringify({ image: base64 })
-  });
-  const rawText = await response.text();
-  let data;
-  try {
-    data = JSON.parse(rawText);
-  } catch (parseErr) {
-    throw new Error((LANG === 'en' ? 'Unexpected server response (status ' : 'Unerwartete Antwort vom Server (Status ') + response.status + '): ' + rawText.slice(0, 200));
-  }
-
-  if (response.status === 402) throw new Error(data?.error?.message || t('trial_expired'));
-  if (response.status === 429) throw new Error(data?.error?.message || t('weekly_limit'));
-  if (!response.ok) throw new Error(data.message || data.error?.message || data.error || 'DeepSeek ' + (LANG === 'en' ? 'error ' : 'Fehler ') + response.status);
+  const data = await _deepSeekIdentifyCall({ image: base64, mode: 'plant' });
   if (!data.name_latin) {
     throw new Error(LANG === 'en' ? 'No plant recognized. Try a clearer photo.' : 'Keine Pflanze erkannt. Versuche ein deutlicheres Foto.');
   }
@@ -1365,6 +1350,28 @@ async function _identifyPlantViaDeepSeek(base64) {
   const germanName = await _resolveGermanName(data.name_de || '', latinName);
   const pct = Math.round(data.confidence || 0);
   return { latinName, germanName, info: `DeepSeek: ${pct}${t('match_pct')}` };
+}
+
+// Gemeinsamer Aufruf von deepseek-identify-proxy für alle drei Modi
+// ('plant', 'mushroom', 'health') — Fehlerbehandlung (Trial/Limit/HTTP) nur
+// einmal statt dreimal fast identisch.
+async function _deepSeekIdentifyCall(body) {
+  const response = await fetch(DEEPSEEK_IDENTIFY_PROXY_URL, {
+    method: 'POST',
+    headers: _proxyHeaders(),
+    body: JSON.stringify(body)
+  });
+  const rawText = await response.text();
+  let data;
+  try {
+    data = JSON.parse(rawText);
+  } catch (parseErr) {
+    throw new Error((LANG === 'en' ? 'Unexpected server response (status ' : 'Unerwartete Antwort vom Server (Status ') + response.status + '): ' + rawText.slice(0, 200));
+  }
+  if (response.status === 402) throw new Error(data?.error?.message || t('trial_expired'));
+  if (response.status === 429) throw new Error(data?.error?.message || t('weekly_limit'));
+  if (!response.ok) throw new Error(data.message || data.error?.message || data.error || 'DeepSeek ' + (LANG === 'en' ? 'error ' : 'Fehler ') + response.status);
+  return data;
 }
 
 async function recognizePlant(plantId) {
@@ -1509,53 +1516,97 @@ async function _humanizeDiseaseInfo(diseaseGerman, hostPlantGerman, det) {
 // Behandlungsempfehlung liefert (verbraucht laut Kindwise einen
 // weiteren Credit pro Anfrage). Keine eigene Archiv-Kategorie nötig —
 // das Ergebnis wird direkt beim Erfassen angezeigt.
+// Krankheitsdiagnose via Plant.id (health=all) — gibt ein einheitliches
+// Shape zurück: {latinName, germanName, healthyPct, hasDisease, diseaseLatin,
+// diseaseGerman, pct, det: {description, cause, treatment:{chemical,
+// biological, prevention}}}, damit der Rest der Funktion unabhängig von der
+// Engine läuft.
+async function _identifyHealthViaPlantId(base64) {
+  const url = PLANTID_PROXY_URL + '?details=common_names,local_name,description,treatment,cause,url&language=' + LANG;
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: _proxyHeaders(),
+    body: JSON.stringify({ images: [base64], health: 'all' })
+  });
+  const rawText = await response.text();
+  let data;
+  try {
+    data = JSON.parse(rawText);
+  } catch (parseErr) {
+    throw new Error((LANG === 'en' ? 'Unexpected server response (status ' : 'Unerwartete Antwort vom Server (Status ') + response.status + '): ' + rawText.slice(0, 200));
+  }
+  if (response.status === 402) throw new Error(data?.error?.message || t('trial_expired'));
+  if (response.status === 429) throw new Error(data?.error?.message || t('weekly_limit'));
+  if (!response.ok) throw new Error(data.message || data.error?.message || data.error || 'Plant.id ' + (LANG === 'en' ? 'error ' : 'Fehler ') + response.status);
+
+  const plantSuggestions = data.result?.classification?.suggestions || [];
+  const best = plantSuggestions[0];
+  const latinName = best?.name || '';
+  const germanName = latinName ? await _resolveGermanName(best?.details?.common_names?.[0] || '', latinName) : '';
+
+  const isHealthy = data.result?.is_healthy;
+  const healthyPct = isHealthy ? Math.round((isHealthy.probability || 0) * 100) : null;
+  const diseaseSuggestions = data.result?.disease?.suggestions || [];
+  if (!diseaseSuggestions.length) {
+    return { latinName, germanName, healthyPct, hasDisease: false };
+  }
+  const d = diseaseSuggestions[0];
+  const pct = Math.round((d.probability || 0) * 100);
+  const det = d.details || {};
+  const diseaseLatin = d.name || '';
+  const diseaseGerman = await _resolveGermanName(det.local_name || '', diseaseLatin);
+  return {
+    latinName, germanName, healthyPct, hasDisease: true, diseaseLatin, diseaseGerman, pct,
+    det: { description: det.description || '', cause: det.cause || '', treatment: det.treatment || {} },
+  };
+}
+
+// Krankheitsdiagnose via DeepSeek-Vision — gleiches Shape wie oben.
+async function _identifyHealthViaDeepSeek(base64) {
+  const data = await _deepSeekIdentifyCall({ image: base64, mode: 'health' });
+  const latinName = data.plant_name_latin || '';
+  const germanName = latinName ? await _resolveGermanName(data.plant_name_de || '', latinName) : '';
+  const healthyPct = Math.round(data.healthy_confidence || 0);
+  if (data.healthy !== false || !data.disease_name_latin) {
+    return { latinName, germanName, healthyPct, hasDisease: false };
+  }
+  const diseaseLatin = data.disease_name_latin || '';
+  const diseaseGerman = await _resolveGermanName(data.disease_name_de || '', diseaseLatin);
+  const pct = Math.round(data.confidence || 0);
+  return {
+    latinName, germanName, healthyPct, hasDisease: true, diseaseLatin, diseaseGerman, pct,
+    det: {
+      description: data.description || '', cause: data.cause || '',
+      treatment: { chemical: data.treatment_chemical || [], biological: data.treatment_biological || [], prevention: data.prevention || [] },
+    },
+  };
+}
+
 async function recognizePlantHealth(plantId) {
   if (!addPhotoData) { alert(LANG === 'en' ? 'Please take a photo first.' : 'Bitte zuerst ein Foto aufnehmen.'); return; }
 
   const spinner = document.getElementById('ai-spinner');
   const resultBox = document.getElementById('ai-result');
-  spinner.textContent = t('loading_plant_health');
+  const engine = getRecognitionEngine();
+  spinner.textContent = engine === 'deepseek' ? t('loading_plant_deepseek') : t('loading_plant_health');
   resultBox.style.display = 'none';
 
   try {
     const base64 = _dataUrlToBase64(addPhotoData);
-    const url = PLANTID_PROXY_URL + '?details=common_names,local_name,description,treatment,cause,url&language=' + LANG;
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: _proxyHeaders(),
-      body: JSON.stringify({ images: [base64], health: 'all' })
-    });
-    const rawText = await response.text();
-    let data;
-    try {
-      data = JSON.parse(rawText);
-    } catch (parseErr) {
-      throw new Error((LANG === 'en' ? 'Unexpected server response (status ' : 'Unerwartete Antwort vom Server (Status ') + response.status + '): ' + rawText.slice(0, 200));
-    }
-    if (response.status === 402) throw new Error(data?.error?.message || t('trial_expired'));
-    if (response.status === 429) throw new Error(data?.error?.message || t('weekly_limit'));
-    if (!response.ok) throw new Error(data.message || data.error?.message || data.error || 'Plant.id ' + (LANG === 'en' ? 'error ' : 'Fehler ') + response.status);
-
-    // Pflanzenart (als Zweitinfo — die Krankheit selbst steht im Fokus)
-    const plantSuggestions = data.result?.classification?.suggestions || [];
-    const best = plantSuggestions[0];
-    const latinName = best?.name || '';
-    const germanName = latinName ? await _resolveGermanName(best?.details?.common_names?.[0] || '', latinName) : '';
+    const healthResult = engine === 'deepseek' ? await _identifyHealthViaDeepSeek(base64) : await _identifyHealthViaPlantId(base64);
+    const { latinName, germanName, healthyPct, hasDisease } = healthResult;
     lastAiLatin = latinName;
     lastAiInfoHtml = null;
 
-    document.getElementById('ai-label-text').textContent = t('label_disease');
+    document.getElementById('ai-label-text').textContent = engine === 'deepseek'
+      ? (LANG === 'en' ? '🤖 DeepSeek suggestion' : '🤖 DeepSeek-Vorschlag')
+      : t('label_disease');
     // irgendwo im Beschreibungstext der Krankheit versteckt.
     const subnameText = germanName ? (LANG === 'en' ? 'Plant name "' : 'Pflanzenname "') + germanName + '"' : '';
     document.getElementById('ai-subname-text').textContent = subnameText;
 
-    // Gesundheitsstatus + Krankheits-Vorschläge
-    const isHealthy = data.result?.is_healthy;
-    const healthyPct = isHealthy ? Math.round((isHealthy.probability || 0) * 100) : null;
-    const diseaseSuggestions = data.result?.disease?.suggestions || [];
-
     let html = '';
-    if (!diseaseSuggestions.length) {
+    if (!hasDisease) {
       lastAiName = germanName || (LANG === 'en' ? 'Plant (no finding)' : 'Pflanze (ohne Befund)');
       autoApplyAiName(lastAiName);
       document.getElementById('ai-name-text').textContent = t('no_disease_found');
@@ -1565,13 +1616,7 @@ async function recognizePlantHealth(plantId) {
     } else {
       // Die wahrscheinlichste Diagnose steht klar im Mittelpunkt, statt
       // mehrere konkurrierende Vorschläge gleichzeitig anzuzeigen.
-      const d = diseaseSuggestions[0];
-      const pct = Math.round((d.probability || 0) * 100);
-      const det = d.details || {};
-      // Sowohl deutscher als auch lateinischer/wissenschaftlicher Name der
-      // Krankheit anzeigen, nicht nur einen davon.
-      const diseaseLatin = d.name || '';
-      const diseaseGerman = await _resolveGermanName(det.local_name || '', diseaseLatin);
+      const { diseaseLatin, diseaseGerman, pct, det } = healthResult;
       lastAiName = diseaseGerman;
       autoApplyAiName(diseaseGerman);
       // Deutscher Name immer groß/prominent, lateinischer Name klein dahinter.
@@ -1609,7 +1654,7 @@ async function recognizePlantHealth(plantId) {
       // Zusätzliche Infos & Bild von Wikipedia (z.B. Nahaufnahme des
       // Schadbilds/Erregers) — nutzt den wissenschaftlichen Namen, da
       // Plant.id selbst meist keine eigenen Bilder zur Krankheit liefert.
-      const wikiInfo = await _fetchWikiDiseaseInfo(d.name);
+      const wikiInfo = await _fetchWikiDiseaseInfo(diseaseLatin);
       if (wikiInfo && (wikiInfo.image || wikiInfo.extract)) {
         html += '<div class="disease-card" style="background:var(--surface2);border-color:var(--border)">';
         html += '<div class="disease-card-title" style="color:var(--text)">' + t('more_about_disease') + '</div>';
@@ -1634,7 +1679,7 @@ async function recognizePlantHealth(plantId) {
     // sie im Archiv sichtbar bleibt statt im Namen verschmolzen zu werden.
     if (plantId) await _updateSavedPlant(plantId, {
       name: lastAiName,
-      latin: diseaseSuggestions.length ? (diseaseSuggestions[0].name || '') : latinName,
+      latin: hasDisease ? (healthResult.diseaseLatin || '') : latinName,
       hostPlant: germanName || '',
       hostPlantLatin: latinName || '',
       infoHtml: html
@@ -1654,64 +1699,90 @@ async function recognizePlantHealth(plantId) {
 // ── mushroom.id Pilz-Erkennung ─────────────────────────────────
 // Läuft über den serverseitigen mushroomid-proxy (CORS + Limit-Prüfung),
 // kein eigener Key nötig — siehe Backend-Proxys oben.
+// Pilzerkennung via mushroom.id — gibt {latinName, germanName, info}.
+async function _identifyMushroomViaMushroomId() {
+  // Der Trial-Endpunkt erwartet das vollständige data:-URL (inkl.
+  // "data:image/jpeg;base64,…"-Präfix), anders als Plant.id.
+  const url = MUSHROOMID_PROXY_URL + '?details=common_names,edibility&language=' + LANG;
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: _proxyHeaders(),
+    body: JSON.stringify({ images: [addPhotoData] })
+  });
+  const rawText = await response.text();
+
+  if (response.status === 402) {
+    let subMsg = t('trial_expired');
+    try { const d = JSON.parse(rawText); if (d?.error?.message) subMsg = d.error.message; } catch {}
+    throw new Error(subMsg);
+  }
+  if (response.status === 429) {
+    let limitMsg = t('weekly_limit_mushroom');
+    try { const d = JSON.parse(rawText); if (d?.error?.message) limitMsg = d.error.message; } catch {}
+    throw new Error(limitMsg);
+  }
+
+  let data;
+  try {
+    data = JSON.parse(rawText);
+  } catch (parseErr) {
+    throw new Error((LANG === 'en' ? 'Unexpected server response (status ' : 'Unerwartete Antwort vom Server (Status ') + response.status + '): ' + rawText.slice(0, 200));
+  }
+
+  if (!response.ok) throw new Error(data.message || data.error || 'mushroom.id ' + (LANG === 'en' ? 'error ' : 'Fehler ') + response.status);
+  if (data.result?.is_mushroom && data.result.is_mushroom.probability < 0.3) {
+    throw new Error(LANG === 'en' ? 'No mushroom was recognized in the photo. Try a clearer photo.' : 'Auf dem Foto wurde kein Pilz erkannt. Versuche ein deutlicheres Foto.');
+  }
+
+  const suggestions = data.result?.classification?.suggestions || [];
+  if (!suggestions.length) throw new Error(LANG === 'en' ? 'No mushroom recognized. Try a clearer photo.' : 'Kein Pilz erkannt. Versuche ein deutlicheres Foto.');
+
+  const best = suggestions[0];
+  const latinName = best.name || '';
+  const germanName = await _resolveGermanName(best.details?.common_names?.[0] || '', latinName);
+  const pct = Math.round((best.probability || 0) * 100);
+  const edibility = best.details?.edibility || '';
+  const info = `mushroom.id (Test-API): ${pct}${t('match_pct')}` + (edibility ? (LANG === 'en' ? ` · Classification: ${edibility}` : ` · Einstufung: ${edibility}`) : '');
+  return { latinName, germanName, info };
+}
+
+// Pilzerkennung via DeepSeek-Vision — gleiches Shape wie oben.
+async function _identifyMushroomViaDeepSeek(base64) {
+  const data = await _deepSeekIdentifyCall({ image: base64, mode: 'mushroom' });
+  if (!data.name_latin) {
+    throw new Error(LANG === 'en' ? 'No mushroom recognized. Try a clearer photo.' : 'Kein Pilz erkannt. Versuche ein deutlicheres Foto.');
+  }
+  const latinName = data.name_latin || '';
+  const germanName = await _resolveGermanName(data.name_de || '', latinName);
+  const pct = Math.round(data.confidence || 0);
+  const edibility = data.edibility || '';
+  const info = `DeepSeek: ${pct}${t('match_pct')}` + (edibility ? (LANG === 'en' ? ` · Classification: ${edibility}` : ` · Einstufung: ${edibility}`) : '');
+  return { latinName, germanName, info };
+}
+
 async function recognizeMushroom(plantId) {
   if (!addPhotoData) { alert(LANG === 'en' ? 'Please take a photo first.' : 'Bitte zuerst ein Foto aufnehmen.'); return; }
 
   const spinner = document.getElementById('ai-spinner');
   const resultBox = document.getElementById('ai-result');
-  spinner.textContent = t('loading_mushroom');
+  const engine = getRecognitionEngine();
+  spinner.textContent = engine === 'deepseek' ? t('loading_plant_deepseek') : t('loading_mushroom');
   spinner.style.display = 'block';
   resultBox.style.display = 'none';
 
   try {
-    // Der Trial-Endpunkt erwartet das vollständige data:-URL (inkl.
-    // "data:image/jpeg;base64,…"-Präfix), anders als Plant.id.
-    const url = MUSHROOMID_PROXY_URL + '?details=common_names,edibility&language=' + LANG;
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: _proxyHeaders(),
-      body: JSON.stringify({ images: [addPhotoData] })
-    });
-    const rawText = await response.text();
-
-    if (response.status === 402) {
-      let subMsg = t('trial_expired');
-      try { const d = JSON.parse(rawText); if (d?.error?.message) subMsg = d.error.message; } catch {}
-      throw new Error(subMsg);
-    }
-    if (response.status === 429) {
-      let limitMsg = t('weekly_limit_mushroom');
-      try { const d = JSON.parse(rawText); if (d?.error?.message) limitMsg = d.error.message; } catch {}
-      throw new Error(limitMsg);
-    }
-
-    let data;
-    try {
-      data = JSON.parse(rawText);
-    } catch (parseErr) {
-      throw new Error((LANG === 'en' ? 'Unexpected server response (status ' : 'Unerwartete Antwort vom Server (Status ') + response.status + '): ' + rawText.slice(0, 200));
-    }
-
-    if (!response.ok) throw new Error(data.message || data.error || 'mushroom.id ' + (LANG === 'en' ? 'error ' : 'Fehler ') + response.status);
-    if (data.result?.is_mushroom && data.result.is_mushroom.probability < 0.3) {
-      throw new Error(LANG === 'en' ? 'No mushroom was recognized in the photo. Try a clearer photo.' : 'Auf dem Foto wurde kein Pilz erkannt. Versuche ein deutlicheres Foto.');
-    }
-
-    const suggestions = data.result?.classification?.suggestions || [];
-    if (!suggestions.length) throw new Error(LANG === 'en' ? 'No mushroom recognized. Try a clearer photo.' : 'Kein Pilz erkannt. Versuche ein deutlicheres Foto.');
-
-    const best = suggestions[0];
-    const latinName = best.name || '';
-    const germanName = await _resolveGermanName(best.details?.common_names?.[0] || '', latinName);
-    const pct = Math.round((best.probability || 0) * 100);
-    const edibility = best.details?.edibility || '';
-    const info = `mushroom.id (Test-API): ${pct}${t('match_pct')}` + (edibility ? (LANG === 'en' ? ` · Classification: ${edibility}` : ` · Einstufung: ${edibility}`) : '');
+    const base64 = _dataUrlToBase64(addPhotoData);
+    const { latinName, germanName, info } = engine === 'deepseek'
+      ? await _identifyMushroomViaDeepSeek(base64)
+      : await _identifyMushroomViaMushroomId();
 
     lastAiName = germanName;
     lastAiLatin = latinName;
     lastAiInfoHtml = null;
     autoApplyAiName(germanName);
-    document.getElementById('ai-label-text').textContent = t('label_mushroom_suggestion');
+    document.getElementById('ai-label-text').textContent = engine === 'deepseek'
+      ? (LANG === 'en' ? '🤖 DeepSeek suggestion' : '🤖 DeepSeek-Vorschlag')
+      : t('label_mushroom_suggestion');
     // (nie umgekehrt, auch wenn die API mal keinen deutschen Namen liefert).
     document.getElementById('ai-name-text').innerHTML =
       esc(germanName) + (latinName && latinName !== germanName ? ' <span style="font-size:.6em;font-weight:400;opacity:.75;font-style:italic">(' + esc(latinName) + ')</span>' : '');
