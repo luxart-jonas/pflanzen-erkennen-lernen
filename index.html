@@ -617,7 +617,22 @@
     <!-- SETTINGS -->
     <div class="screen" id="settings-screen">
       <h2 data-i18n="settings">⚙️ Einstellungen</h2>
-      <p style="color:var(--muted);font-size:.8rem;margin-bottom:12px;">Version 3.85 — Plant.id + DeepSeek</p>
+      <p style="color:var(--muted);font-size:.8rem;margin-bottom:12px;">Version 3.86 — Plant.id + DeepSeek</p>
+
+      <h2 style="margin-bottom:6px" data-i18n="engine_title">🔍 Erkennungs-Engine</h2>
+      <p class="settings-note" data-i18n="engine_note">Mit welchem Dienst Pflanzen bestimmt werden. Pilze und Krankheitsdiagnose laufen weiterhin über Plant.id/mushroom.id.</p>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:10px">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+          <input type="radio" name="recognition-engine" value="plantid" onchange="setRecognitionEngine('plantid')">
+          <span data-i18n="engine_plantid_label">🌿 Plant.id</span>
+        </label>
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+          <input type="radio" name="recognition-engine" value="deepseek" onchange="setRecognitionEngine('deepseek')">
+          <span data-i18n="engine_deepseek_label">🤖 DeepSeek</span>
+        </label>
+      </div>
+
+      <hr style="border:none;border-top:1px solid var(--border);margin:24px 0">
 
       <h2 style="margin-bottom:6px" data-i18n="remove_dupes_title">🧹 Duplikate entfernen</h2>
       <p class="settings-note" data-i18n="remove_dupes_note">Erkennt doppelte Einträge anhand von Name und Foto und löscht die Kopien.</p>
@@ -741,6 +756,9 @@ const I18N = {
     prev: '← Vorherige', next: 'Nächste →', own_upload: '📤 Eigenes', delete_short: '🗑 Löschen',
     loading_info: '🔍 Lade Informationen …', back: '← Zurück',
     settings: '⚙️ Einstellungen',
+    engine_title: '🔍 Erkennungs-Engine', engine_note: 'Mit welchem Dienst Pflanzen bestimmt werden. Pilze und Krankheitsdiagnose laufen weiterhin über Plant.id/mushroom.id.',
+    engine_plantid_label: '🌿 Plant.id', engine_deepseek_label: '🤖 DeepSeek',
+    loading_plant_deepseek: '🔍 DeepSeek erkennt Pflanze …',
     remove_dupes_title: '🧹 Duplikate entfernen', remove_dupes_note: 'Erkennt doppelte Einträge anhand von Name und Foto und löscht die Kopien.', remove_dupes_btn: 'Duplikate suchen & löschen',
     delete_archive_title: '🗑 Archiv löschen', delete_archive_note: 'Löscht alle erfassten Pflanzen unwiderruflich. Für einen kompletten Neustart.', delete_archive_btn: 'Archiv komplett löschen',
     backup_title: '📦 Daten sichern', backup_note: 'Exportiere alle Pflanzen als Datei – z. B. zum Umzug auf ein neues Gerät oder nach Netlify.',
@@ -800,6 +818,9 @@ const I18N = {
     prev: '← Previous', next: 'Next →', own_upload: '📤 Own photo', delete_short: '🗑 Delete',
     loading_info: '🔍 Loading information …', back: '← Back',
     settings: '⚙️ Settings',
+    engine_title: '🔍 Recognition engine', engine_note: 'Which service identifies plants. Mushrooms and disease diagnosis still use Plant.id/mushroom.id.',
+    engine_plantid_label: '🌿 Plant.id', engine_deepseek_label: '🤖 DeepSeek',
+    loading_plant_deepseek: '🔍 DeepSeek is identifying the plant …',
     remove_dupes_title: '🧹 Remove duplicates', remove_dupes_note: 'Finds duplicate entries by name and photo and deletes the copies.', remove_dupes_btn: 'Find & remove duplicates',
     delete_archive_title: '🗑 Delete archive', delete_archive_note: 'Permanently deletes all captured plants. For a complete reset.', delete_archive_btn: 'Delete entire archive',
     backup_title: '📦 Back up data', backup_note: 'Export all plants as a file — e.g. to move to a new device or to Netlify.',
@@ -933,6 +954,24 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const PLANTID_PROXY_URL = 'https://ormpszktwwiahjooukjk.supabase.co/functions/v1/plantid-proxy';
 const MUSHROOMID_PROXY_URL = 'https://ormpszktwwiahjooukjk.supabase.co/functions/v1/mushroomid-proxy';
 const DEEPSEEK_PROXY_URL = 'https://ormpszktwwiahjooukjk.supabase.co/functions/v1/deepseek-proxy';
+const DEEPSEEK_IDENTIFY_PROXY_URL = 'https://ormpszktwwiahjooukjk.supabase.co/functions/v1/deepseek-identify-proxy';
+
+// ── Erkennungs-Engine (Pflanzenbestimmung) ────────────────────
+// Umschaltbar in den Einstellungen: 'plantid' (Standard) oder 'deepseek'.
+// Teilt sich Trial/Limit mit Plant.id (siehe deepseek-identify-proxy) --
+// es handelt sich nur um eine andere Quelle fuer dieselbe Funktion.
+function getRecognitionEngine() {
+  return localStorage.getItem('planty_engine') === 'deepseek' ? 'deepseek' : 'plantid';
+}
+function setRecognitionEngine(engine) {
+  localStorage.setItem('planty_engine', engine === 'deepseek' ? 'deepseek' : 'plantid');
+  _reflectRecognitionEngineUi();
+}
+function _reflectRecognitionEngineUi() {
+  const engine = getRecognitionEngine();
+  const radio = document.querySelector('input[name="recognition-engine"][value="' + engine + '"]');
+  if (radio) radio.checked = true;
+}
 
 function getDeviceId() {
   let id = localStorage.getItem('pflanz_device_id');
@@ -1261,55 +1300,96 @@ async function _resolveGermanName(apiName, latinName) {
   const fromWiki = await _fetchGermanNameFallback(latinName);
   return fromWiki || apiName || latinName || (LANG === 'en' ? 'Unknown' : 'Unbekannt');
 }
+// Pflanzenerkennung via Plant.id (API v3) — gibt {latinName, germanName, info}.
+async function _identifyPlantViaPlantId(base64) {
+  const url = PLANTID_PROXY_URL + '?details=common_names&language=' + LANG;
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: _proxyHeaders(),
+    body: JSON.stringify({ images: [base64] })
+  });
+  // Erst als Text lesen statt direkt .json() — wenn der Server (oder ein
+  // vorgelagertes Gateway) mal kein JSON liefert (z.B. ein Fehlertext oder
+  // eine HTML-Fehlerseite), bekommen wir so trotzdem eine lesbare
+  // Fehlermeldung statt eines kryptischen "Unexpected token"-Absturzes.
+  const rawText = await response.text();
+  let data;
+  try {
+    data = JSON.parse(rawText);
+  } catch (parseErr) {
+    throw new Error((LANG === 'en' ? 'Unexpected server response (status ' : 'Unerwartete Antwort vom Server (Status ') + response.status + '): ' + rawText.slice(0, 200));
+  }
+
+  if (response.status === 402) throw new Error(data?.error?.message || t('trial_expired'));
+  if (response.status === 429) throw new Error(data?.error?.message || t('weekly_limit'));
+  if (!response.ok) throw new Error(data.message || data.error?.message || data.error || 'Plant.id ' + (LANG === 'en' ? 'error ' : 'Fehler ') + response.status);
+  if (data.result?.is_plant && data.result.is_plant.probability < 0.3) {
+    throw new Error(LANG === 'en' ? 'No plant was recognized in the photo. Try a clearer photo.' : 'Auf dem Foto wurde keine Pflanze erkannt. Versuche ein deutlicheres Foto.');
+  }
+
+  const suggestions = data.result?.classification?.suggestions || [];
+  if (!suggestions.length) throw new Error(LANG === 'en' ? 'No plant recognized. Try a clearer photo.' : 'Keine Pflanze erkannt. Versuche ein deutlicheres Foto.');
+
+  const best = suggestions[0];
+  const latinName = best.name || '';
+  const germanName = await _resolveGermanName(best.details?.common_names?.[0] || '', latinName);
+  const pct = Math.round((best.probability || 0) * 100);
+  return { latinName, germanName, info: `Plant.id: ${pct}${t('match_pct')}` };
+}
+
+// Pflanzenerkennung via DeepSeek-Vision (deepseek-identify-proxy) — gibt
+// dasselbe {latinName, germanName, info}-Shape wie _identifyPlantViaPlantId,
+// damit der Rest von recognizePlant() unverändert weiterläuft.
+async function _identifyPlantViaDeepSeek(base64) {
+  const response = await fetch(DEEPSEEK_IDENTIFY_PROXY_URL, {
+    method: 'POST',
+    headers: _proxyHeaders(),
+    body: JSON.stringify({ image: base64 })
+  });
+  const rawText = await response.text();
+  let data;
+  try {
+    data = JSON.parse(rawText);
+  } catch (parseErr) {
+    throw new Error((LANG === 'en' ? 'Unexpected server response (status ' : 'Unerwartete Antwort vom Server (Status ') + response.status + '): ' + rawText.slice(0, 200));
+  }
+
+  if (response.status === 402) throw new Error(data?.error?.message || t('trial_expired'));
+  if (response.status === 429) throw new Error(data?.error?.message || t('weekly_limit'));
+  if (!response.ok) throw new Error(data.message || data.error?.message || data.error || 'DeepSeek ' + (LANG === 'en' ? 'error ' : 'Fehler ') + response.status);
+  if (!data.name_latin) {
+    throw new Error(LANG === 'en' ? 'No plant recognized. Try a clearer photo.' : 'Keine Pflanze erkannt. Versuche ein deutlicheres Foto.');
+  }
+
+  const latinName = data.name_latin || '';
+  const germanName = await _resolveGermanName(data.name_de || '', latinName);
+  const pct = Math.round(data.confidence || 0);
+  return { latinName, germanName, info: `DeepSeek: ${pct}${t('match_pct')}` };
+}
+
 async function recognizePlant(plantId) {
   if (!addPhotoData) { alert(LANG === 'en' ? 'Please take a photo first.' : 'Bitte zuerst ein Foto aufnehmen.'); return; }
 
   const spinner = document.getElementById('ai-spinner');
   const resultBox = document.getElementById('ai-result');
+  const engine = getRecognitionEngine();
+  spinner.textContent = engine === 'deepseek' ? t('loading_plant_deepseek') : t('loading_plant');
   spinner.style.display = 'block';
   resultBox.style.display = 'none';
 
   try {
     const base64 = _dataUrlToBase64(addPhotoData);
-    const url = PLANTID_PROXY_URL + '?details=common_names&language=' + LANG;
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: _proxyHeaders(),
-      body: JSON.stringify({ images: [base64] })
-    });
-    // Erst als Text lesen statt direkt .json() — wenn der Server (oder ein
-    // vorgelagertes Gateway) mal kein JSON liefert (z.B. ein Fehlertext oder
-    // eine HTML-Fehlerseite), bekommen wir so trotzdem eine lesbare
-    // Fehlermeldung statt eines kryptischen "Unexpected token"-Absturzes.
-    const rawText = await response.text();
-    let data;
-    try {
-      data = JSON.parse(rawText);
-    } catch (parseErr) {
-      throw new Error((LANG === 'en' ? 'Unexpected server response (status ' : 'Unerwartete Antwort vom Server (Status ') + response.status + '): ' + rawText.slice(0, 200));
-    }
-
-    if (response.status === 402) throw new Error(data?.error?.message || t('trial_expired'));
-    if (response.status === 429) throw new Error(data?.error?.message || t('weekly_limit'));
-    if (!response.ok) throw new Error(data.message || data.error?.message || data.error || 'Plant.id ' + (LANG === 'en' ? 'error ' : 'Fehler ') + response.status);
-    if (data.result?.is_plant && data.result.is_plant.probability < 0.3) {
-      throw new Error(LANG === 'en' ? 'No plant was recognized in the photo. Try a clearer photo.' : 'Auf dem Foto wurde keine Pflanze erkannt. Versuche ein deutlicheres Foto.');
-    }
-
-    const suggestions = data.result?.classification?.suggestions || [];
-    if (!suggestions.length) throw new Error(LANG === 'en' ? 'No plant recognized. Try a clearer photo.' : 'Keine Pflanze erkannt. Versuche ein deutlicheres Foto.');
-
-    const best = suggestions[0];
-    const latinName = best.name || '';
-    const germanName = await _resolveGermanName(best.details?.common_names?.[0] || '', latinName);
-    const pct = Math.round((best.probability || 0) * 100);
-    const info = `Plant.id: ${pct}${t('match_pct')}`;
+    const { latinName, germanName, info } = engine === 'deepseek'
+      ? await _identifyPlantViaDeepSeek(base64)
+      : await _identifyPlantViaPlantId(base64);
 
     lastAiName = germanName;
     lastAiLatin = latinName;
     lastAiInfoHtml = null;
     autoApplyAiName(germanName);
-    document.getElementById('ai-label-text').textContent = t('label_plant_suggestion');
+    document.getElementById('ai-label-text').textContent = engine === 'deepseek'
+      ? (LANG === 'en' ? '🤖 DeepSeek suggestion' : '🤖 DeepSeek-Vorschlag')
+      : t('label_plant_suggestion');
     // (nie umgekehrt, auch wenn die API mal keinen deutschen Namen liefert).
     document.getElementById('ai-name-text').innerHTML =
       esc(germanName) + (latinName && latinName !== germanName ? ' <span style="font-size:.6em;font-weight:400;opacity:.75;font-style:italic">(' + esc(latinName) + ')</span>' : '');
@@ -2817,6 +2897,7 @@ document.addEventListener('keydown', e => {
 document.addEventListener('DOMContentLoaded', () => {
 
 applyI18n();
+_reflectRecognitionEngineUi();
 
 // Overlay: Tap auf Hintergrund schließt
 document.getElementById('zoom-overlay').addEventListener('click', e => {
