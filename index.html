@@ -371,7 +371,7 @@
     <span id="due-badge" class="badge" style="display:none"></span>
     <div style="flex:1"></div>
     <button onclick="toggleHeaderLang()" id="header-lang-btn" title="Language / Sprache" style="background:none;border:none;font-size:1.3rem;cursor:pointer;padding:4px 6px;color:var(--accent2);flex-shrink:0;position:relative">🌐<span id="header-lang-code" style="font-size:.55rem;color:var(--muted);vertical-align:super;margin-left:1px;font-weight:700;letter-spacing:.01em">DE</span></button>
-    <button onclick="switchTab('settings')" id="tab-settings-btn" title="Einstellungen v3.86" style="background:none;border:none;font-size:1.5rem;cursor:pointer;padding:4px 6px;color:var(--accent2);flex-shrink:0">⚙️<span style="font-size:.45rem;color:var(--muted);vertical-align:super;margin-left:1px;font-weight:600;letter-spacing:.01em">3.86</span></button>
+    <button onclick="switchTab('settings')" id="tab-settings-btn" title="Einstellungen v3.87" style="background:none;border:none;font-size:1.5rem;cursor:pointer;padding:4px 6px;color:var(--accent2);flex-shrink:0">⚙️<span style="font-size:.45rem;color:var(--muted);vertical-align:super;margin-left:1px;font-weight:600;letter-spacing:.01em">3.87</span></button>
   </div>
 
   <nav id="nav">
@@ -617,7 +617,7 @@
     <!-- SETTINGS -->
     <div class="screen" id="settings-screen">
       <h2 data-i18n="settings">⚙️ Einstellungen</h2>
-      <p style="color:var(--muted);font-size:.8rem;margin-bottom:12px;">Version 3.86 — Plant.id + DeepSeek</p>
+      <p style="color:var(--muted);font-size:.8rem;margin-bottom:12px;">Version 3.87 — Plant.id + DeepSeek</p>
 
       <h2 style="margin-bottom:6px" data-i18n="engine_title">🔍 Erkennungs-Engine</h2>
       <p class="settings-note" data-i18n="engine_note">Mit welchem Dienst Pflanzen bestimmt werden. Pilze und Krankheitsdiagnose laufen weiterhin über Plant.id/mushroom.id.</p>
@@ -1368,10 +1368,37 @@ async function _deepSeekIdentifyCall(body) {
   } catch (parseErr) {
     throw new Error((LANG === 'en' ? 'Unexpected server response (status ' : 'Unerwartete Antwort vom Server (Status ') + response.status + '): ' + rawText.slice(0, 200));
   }
-  if (response.status === 402) throw new Error(data?.error?.message || t('trial_expired'));
-  if (response.status === 429) throw new Error(data?.error?.message || t('weekly_limit'));
+  // Trial/Limit-Fehler gelten für beide Engines gleich (gemeinsamer Zähler)
+  // -- hier NICHT auf Plant.id ausweichen, das würde nur denselben Fehler
+  // nochmal produzieren. Markierung via .noFallback, siehe _withDeepSeekFallback.
+  if (response.status === 402) { const e = new Error(data?.error?.message || t('trial_expired')); e.noFallback = true; throw e; }
+  if (response.status === 429) { const e = new Error(data?.error?.message || t('weekly_limit')); e.noFallback = true; throw e; }
   if (!response.ok) throw new Error(data.message || data.error?.message || data.error || 'DeepSeek ' + (LANG === 'en' ? 'error ' : 'Fehler ') + response.status);
   return data;
+}
+
+// Führt die DeepSeek-Erkennung aus; schlägt sie fehl (Server-/Parse-Fehler,
+// oder DeepSeek erkennt nichts), wird automatisch und SICHTBAR (Spinner-Text)
+// auf die bisherige Engine (Plant.id/mushroom.id) umgeschaltet. Bei Trial-/
+// Limit-Sperren (.noFallback) wird NICHT umgeschaltet, da das Limit geteilt
+// ist. Gibt zusätzlich usedEngine zurück ('deepseek' | 'fallback' | 'primary'),
+// damit die UI anzeigen kann, was tatsächlich verwendet wurde.
+async function _withDeepSeekFallback(engine, spinner, deepSeekFn, fallbackFn, fallbackLabel) {
+  if (engine !== 'deepseek') {
+    return { ...(await fallbackFn()), usedEngine: 'primary' };
+  }
+  try {
+    const r = await deepSeekFn();
+    return { ...r, usedEngine: 'deepseek' };
+  } catch (err) {
+    if (err.noFallback) throw err;
+    console.warn('DeepSeek-Erkennung fehlgeschlagen, Fallback auf ' + fallbackLabel + ':', err.message);
+    spinner.textContent = LANG === 'en'
+      ? ('⚠️ DeepSeek unavailable — switching to ' + fallbackLabel + ' …')
+      : ('⚠️ DeepSeek nicht erreichbar — wechsle zu ' + fallbackLabel + ' …');
+    const r = await fallbackFn();
+    return { ...r, usedEngine: 'fallback' };
+  }
 }
 
 async function recognizePlant(plantId) {
@@ -1386,17 +1413,22 @@ async function recognizePlant(plantId) {
 
   try {
     const base64 = _dataUrlToBase64(addPhotoData);
-    const { latinName, germanName, info } = engine === 'deepseek'
-      ? await _identifyPlantViaDeepSeek(base64)
-      : await _identifyPlantViaPlantId(base64);
+    const { latinName, germanName, info, usedEngine } = await _withDeepSeekFallback(
+      engine, spinner,
+      () => _identifyPlantViaDeepSeek(base64),
+      () => _identifyPlantViaPlantId(base64),
+      'Plant.id'
+    );
 
     lastAiName = germanName;
     lastAiLatin = latinName;
     lastAiInfoHtml = null;
     autoApplyAiName(germanName);
-    document.getElementById('ai-label-text').textContent = engine === 'deepseek'
+    document.getElementById('ai-label-text').textContent = usedEngine === 'deepseek'
       ? (LANG === 'en' ? '🤖 DeepSeek suggestion' : '🤖 DeepSeek-Vorschlag')
-      : t('label_plant_suggestion');
+      : usedEngine === 'fallback'
+        ? (LANG === 'en' ? '🌿 Plant.id suggestion (DeepSeek fallback)' : '🌿 Plant.id-Vorschlag (DeepSeek-Fallback)')
+        : t('label_plant_suggestion');
     // (nie umgekehrt, auch wenn die API mal keinen deutschen Namen liefert).
     document.getElementById('ai-name-text').innerHTML =
       esc(germanName) + (latinName && latinName !== germanName ? ' <span style="font-size:.6em;font-weight:400;opacity:.75;font-style:italic">(' + esc(latinName) + ')</span>' : '');
@@ -1593,14 +1625,21 @@ async function recognizePlantHealth(plantId) {
 
   try {
     const base64 = _dataUrlToBase64(addPhotoData);
-    const healthResult = engine === 'deepseek' ? await _identifyHealthViaDeepSeek(base64) : await _identifyHealthViaPlantId(base64);
-    const { latinName, germanName, healthyPct, hasDisease } = healthResult;
+    const healthResult = await _withDeepSeekFallback(
+      engine, spinner,
+      () => _identifyHealthViaDeepSeek(base64),
+      () => _identifyHealthViaPlantId(base64),
+      'Plant.id'
+    );
+    const { latinName, germanName, healthyPct, hasDisease, usedEngine } = healthResult;
     lastAiLatin = latinName;
     lastAiInfoHtml = null;
 
-    document.getElementById('ai-label-text').textContent = engine === 'deepseek'
+    document.getElementById('ai-label-text').textContent = usedEngine === 'deepseek'
       ? (LANG === 'en' ? '🤖 DeepSeek suggestion' : '🤖 DeepSeek-Vorschlag')
-      : t('label_disease');
+      : usedEngine === 'fallback'
+        ? (LANG === 'en' ? '🩺 Disease diagnosis (DeepSeek fallback)' : '🩺 Krankheitsdiagnose (DeepSeek-Fallback)')
+        : t('label_disease');
     // irgendwo im Beschreibungstext der Krankheit versteckt.
     const subnameText = germanName ? (LANG === 'en' ? 'Plant name "' : 'Pflanzenname "') + germanName + '"' : '';
     document.getElementById('ai-subname-text').textContent = subnameText;
@@ -1772,17 +1811,22 @@ async function recognizeMushroom(plantId) {
 
   try {
     const base64 = _dataUrlToBase64(addPhotoData);
-    const { latinName, germanName, info } = engine === 'deepseek'
-      ? await _identifyMushroomViaDeepSeek(base64)
-      : await _identifyMushroomViaMushroomId();
+    const { latinName, germanName, info, usedEngine } = await _withDeepSeekFallback(
+      engine, spinner,
+      () => _identifyMushroomViaDeepSeek(base64),
+      () => _identifyMushroomViaMushroomId(),
+      'mushroom.id'
+    );
 
     lastAiName = germanName;
     lastAiLatin = latinName;
     lastAiInfoHtml = null;
     autoApplyAiName(germanName);
-    document.getElementById('ai-label-text').textContent = engine === 'deepseek'
+    document.getElementById('ai-label-text').textContent = usedEngine === 'deepseek'
       ? (LANG === 'en' ? '🤖 DeepSeek suggestion' : '🤖 DeepSeek-Vorschlag')
-      : t('label_mushroom_suggestion');
+      : usedEngine === 'fallback'
+        ? (LANG === 'en' ? '🍄 mushroom.id suggestion (DeepSeek fallback)' : '🍄 mushroom.id-Vorschlag (DeepSeek-Fallback)')
+        : t('label_mushroom_suggestion');
     // (nie umgekehrt, auch wenn die API mal keinen deutschen Namen liefert).
     document.getElementById('ai-name-text').innerHTML =
       esc(germanName) + (latinName && latinName !== germanName ? ' <span style="font-size:.6em;font-weight:400;opacity:.75;font-style:italic">(' + esc(latinName) + ')</span>' : '');
